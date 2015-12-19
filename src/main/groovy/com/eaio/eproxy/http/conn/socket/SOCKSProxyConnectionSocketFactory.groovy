@@ -1,28 +1,26 @@
-package com.eaio.webproxy.http.conn.socket
+package com.eaio.eproxy.http.conn.socket
 
 import groovy.transform.TupleConstructor
 
-import java.io.IOException
 import java.net.InetSocketAddress
-import java.net.Socket
 import java.net.Proxy
+import java.net.Socket
 
 import org.apache.http.HttpHost
 import org.apache.http.conn.socket.ConnectionSocketFactory
-import org.apache.http.conn.socket.LayeredConnectionSocketFactory
 import org.apache.http.protocol.HttpContext
 
 /**
- * {@link LayeredConnectionSocketFactory} that tunnels through a SOCKS proxy.
+ * {@link ConnectionSocketFactory} that tunnels through a SOCKS proxy.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
 @TupleConstructor
-class SOCKSProxyLayeredConnectionSocketFactory {
+class SOCKSProxyConnectionSocketFactory {
 
     @Delegate
-    LayeredConnectionSocketFactory delegate
+    ConnectionSocketFactory delegate
 
     Proxy proxy
 
@@ -31,14 +29,6 @@ class SOCKSProxyLayeredConnectionSocketFactory {
      */
     Socket createSocket(HttpContext context) throws IOException {
         new Socket(proxy)
-    }
-
-    Socket createLayeredSocket(
-            Socket socket,
-            String target,
-            int port,
-            HttpContext context) {
-        throw new UnsupportedOperationException()
     }
 
     Socket connectSocket(

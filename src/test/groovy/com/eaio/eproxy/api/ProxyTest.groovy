@@ -1,4 +1,4 @@
-package com.eaio.web
+package com.eaio.eproxy.api
 
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
@@ -7,6 +7,8 @@ import junitparams.Parameters
 
 import org.junit.Test
 import org.junit.runner.RunWith
+
+import com.eaio.eproxy.api.Proxy;
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>

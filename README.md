@@ -1,8 +1,6 @@
 # Eproxy
 
-Even since coming across [mirrorr](https://github.com/bslatkin/mirrorrr) I've wanted to have a content-rewriting proxy that could also double as a cheap CDN.
-
-In other words, a proxy that
+Even since coming across [mirrorr](https://github.com/bslatkin/mirrorrr) I've wanted to have a content-rewriting proxy that could also double as a cheap CDN, a proxy that
 
 * rewrites HTML, CSS and JavaScript so you'll always stay on the proxy
 * supports cookies

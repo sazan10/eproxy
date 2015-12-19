@@ -4,14 +4,9 @@ import groovy.util.logging.Slf4j
 
 import java.util.concurrent.TimeUnit
 
-import javax.annotation.PreDestroy
-
-import org.apache.http.HttpRequest
 import org.apache.http.HttpRequestInterceptor
-import org.apache.http.HttpResponse
 import org.apache.http.HttpResponseInterceptor
 import org.apache.http.client.HttpClient
-import org.apache.http.client.RedirectStrategy
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.config.Registry
 import org.apache.http.config.RegistryBuilder
@@ -22,28 +17,25 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler
 import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.client.cache.CacheConfig
 import org.apache.http.impl.client.cache.CachingHttpClients
 import org.apache.http.impl.conn.*
-import org.apache.http.protocol.HttpContext
 import org.apache.http.ssl.SSLContexts
-import org.springframework.beans.factory.BeanCreationNotAllowedException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter
 import org.springframework.context.annotation.*
 import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 
+import com.eaio.eproxy.http.conn.socket.SOCKSProxyConnectionSocketFactory
+import com.eaio.eproxy.http.conn.socket.SOCKSProxyLayeredConnectionSocketFactory
 import com.eaio.net.httpclient.*
 import com.eaio.util.googleappengine.NotOnGoogleAppEngineOrDevserver
 import com.eaio.util.googleappengine.OnGoogleAppEngineOrDevserver
-import com.eaio.webproxy.http.conn.socket.SOCKSProxyConnectionSocketFactory
-import com.eaio.webproxy.http.conn.socket.SOCKSProxyLayeredConnectionSocketFactory
 import com.google.appengine.api.memcache.MemcacheService
 import com.google.appengine.api.memcache.MemcacheServiceFactory
 
