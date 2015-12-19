@@ -9,8 +9,8 @@ In other words, a proxy that
 * supports all HTTP methods 
 * supports HTTPS
 * caches content
-* whose socket and HTTP setup can be customized
-* uses real parser for HTML, CSS and JavaScript
+* lets you customize the socket and HTTP setup
+* uses a real parser for HTML, CSS and JavaScript
 * attempts to be as secure as possible 
 
 In other words, something you can use in a company network to look at questionable sites without needing to install anything. Or a cheap accelerator for your static content.
@@ -23,3 +23,12 @@ I have nothing against mirrorr but there are some problems with it:
 * Only GET requests are supported.
 * It (probably) doesn't support HTTPS.
 * It only runs on Google App Engine, using Memcache as the cache.
+
+## Security status
+
+There isn't any code yet lol.
+
+## Installation
+
+### On Google App Engine
+

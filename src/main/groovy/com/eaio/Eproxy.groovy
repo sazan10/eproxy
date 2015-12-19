@@ -48,7 +48,7 @@ import com.google.appengine.api.memcache.MemcacheService
 import com.google.appengine.api.memcache.MemcacheServiceFactory
 
 /**
- * WebProxy configuration.
+ * Eproxy configuration.
  *
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: EaioWeb.groovy 7254 2015-05-19 10:15:33Z johann $
@@ -58,15 +58,9 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory
 @EnableAutoConfiguration
 @EnableWebMvc
 @Slf4j
-class WebProxy extends WebMvcAutoConfigurationAdapter {
+class Eproxy extends WebMvcAutoConfigurationAdapter {
 
     // HttpClient
-
-    @Value('${proxy.socks.host}')
-    String proxySOCKSHost
-
-    @Value('${proxy.socks.port}')
-    Integer proxySOCKSPort // Character not supported
 
     @Value('${http.clientConnectionTimeout}')
     Long clientConnectionTimeout
@@ -94,6 +88,22 @@ class WebProxy extends WebMvcAutoConfigurationAdapter {
 
     @Value('${http.userAgent}')
     String userAgent
+    
+    // SOCKS proxy
+    
+    @Value('${proxy.socks.host}')
+    String proxySOCKSHost
+    
+    @Value('${proxy.socks.port}')
+    Integer proxySOCKSPort // Character not supported
+    
+    // Cache
+    
+    @Value('${cache.maxCacheEntries}')
+    Integer maxEntries
+    
+    @Value('${cache.maxObjectSize}')
+    Integer maxObjectSize
 
     /**
      * Not necessary, hence stubbed out.
@@ -104,12 +114,11 @@ class WebProxy extends WebMvcAutoConfigurationAdapter {
     }
 
     @Lazy
-    @Bean
+    @Bean(destroyMethod = 'close')
     HttpClient httpClient() {
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register('http', PlainConnectionSocketFactory.socketFactory)
-                .register('https',
-                validateSSL == Boolean.FALSE ? new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(), NoopHostnameVerifier.INSTANCE) : SSLConnectionSocketFactory.systemSocketFactory)
+                .register('https', validateSSL ? new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(), NoopHostnameVerifier.INSTANCE) : SSLConnectionSocketFactory.systemSocketFactory) // TODO?
                 .build()
 
         if (!OnGoogleAppEngineOrDevserver.CONDITION) {
@@ -123,9 +132,10 @@ class WebProxy extends WebMvcAutoConfigurationAdapter {
                         .build()
             }
         }
-
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry, null, DefaultSchemePortResolver.INSTANCE,
-                new TimingDnsResolver(SystemDefaultDnsResolver.INSTANCE), clientConnectionTimeout ?: 60000L, TimeUnit.MILLISECONDS)
+        
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry,
+            ManagedHttpClientConnectionFactory.INSTANCE, DefaultSchemePortResolver.INSTANCE,
+            new TimingDnsResolver(SystemDefaultDnsResolver.INSTANCE), clientConnectionTimeout ?: 60000L, TimeUnit.MILLISECONDS)
         connectionManager.with {
             maxTotal = maxTotalSockets ?: 32I
             defaultMaxPerRoute = maxSocketsPerRoute ?: 6I
@@ -140,6 +150,8 @@ class WebProxy extends WebMvcAutoConfigurationAdapter {
                 .setSocketTimeout(readTimeout ?: 10000I)
                 .setMaxRedirects(maxRedirects ?: 10I)
                 .build()
+                
+        log.info('RequestConfig: {}', requestConfig)
 
         // Timing
 
@@ -148,15 +160,17 @@ class WebProxy extends WebMvcAutoConfigurationAdapter {
         // Caching
         
         CacheConfig cacheConfig = CacheConfig.custom()
-            .setMaxCacheEntries(1000I)
-            .setMaxObjectSize(1I << 20I)
+            .setMaxCacheEntries(maxEntries ?: 1000I)
+            .setMaxObjectSize(maxObjectSize ?: 1I << 20I)
             .setSharedCache(true)
             .build()
 
+        log.info('CacheConfig: {}', cacheConfig)
+        
         HttpClientBuilder builder = CachingHttpClients.custom()
+                .setCacheConfig(cacheConfig)
                 //.disableAuthCaching()
                 .disableCookieManagement()
-                .setCacheConfig(cacheConfig)
                 .setConnectionManager(connectionManager)
                 // Retries
                 .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true))
@@ -174,7 +188,7 @@ class WebProxy extends WebMvcAutoConfigurationAdapter {
         if (retryCount == 0I) {
             builder.disableAutomaticRetries()
         }
-
+        
         CloseableHttpClient client = builder.build()
 
         // No standard interceptors
@@ -216,7 +230,7 @@ class WebProxy extends WebMvcAutoConfigurationAdapter {
     }
 
     static main(args) {
-        SpringApplication.run(WebProxy, args)
+        SpringApplication.run(Eproxy, args)
     }
 
 }

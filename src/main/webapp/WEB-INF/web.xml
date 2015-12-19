@@ -5,7 +5,7 @@
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>com.eaio.WebProxy</param-value>
+        <param-value>com.eaio.Eproxy</param-value>
     </context-param>
 
     <listener>

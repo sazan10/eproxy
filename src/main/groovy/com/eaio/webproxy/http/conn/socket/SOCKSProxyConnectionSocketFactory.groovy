@@ -21,7 +21,7 @@ class SOCKSProxyConnectionSocketFactory {
 
     @Delegate
     ConnectionSocketFactory delegate
-    
+
     Proxy proxy
 
     /**
@@ -30,14 +30,14 @@ class SOCKSProxyConnectionSocketFactory {
     Socket createSocket(HttpContext context) throws IOException {
         new Socket(proxy)
     }
-    
+
     Socket connectSocket(
-        int connectTimeout,
+            int connectTimeout,
             Socket socket,
-        HttpHost host,
-        InetSocketAddress remoteAddress,
-        InetSocketAddress localAddress,
-        HttpContext context) throws IOException {
+            HttpHost host,
+            InetSocketAddress remoteAddress,
+            InetSocketAddress localAddress,
+            HttpContext context) throws IOException {
         try {
             delegate.connectSocket(connectTimeout, socket, host, remoteAddress, localAddress, context)
         }
