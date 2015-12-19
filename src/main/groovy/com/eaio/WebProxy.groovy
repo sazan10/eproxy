@@ -6,12 +6,12 @@ import java.util.concurrent.TimeUnit
 
 import javax.annotation.PreDestroy
 
-import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequest
 import org.apache.http.HttpRequestInterceptor
-import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponse
 import org.apache.http.HttpResponseInterceptor
 import org.apache.http.client.HttpClient
-import org.apache.http.client.RedirectStrategy;
+import org.apache.http.client.RedirectStrategy
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.config.Registry
 import org.apache.http.config.RegistryBuilder
@@ -21,12 +21,12 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.client.HttpClients
-import org.apache.http.impl.client.cache.CacheConfig;
-import org.apache.http.impl.client.cache.CachingHttpClients;
+import org.apache.http.impl.client.cache.CacheConfig
+import org.apache.http.impl.client.cache.CachingHttpClients
 import org.apache.http.impl.conn.*
-import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpContext
 import org.apache.http.ssl.SSLContexts
 import org.springframework.beans.factory.BeanCreationNotAllowedException
 import org.springframework.beans.factory.annotation.Value
