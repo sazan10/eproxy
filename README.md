@@ -28,5 +28,10 @@ There isn't any code yet lol.
 
 ## Installation
 
+* Java 7 or greater
+* Maven
+
 ### On Google App Engine
 
+
+[![Coverage Status](https://coveralls.io/repos/johannburkard/eproxy/badge.svg?branch=master&service=github)](https://coveralls.io/github/johannburkard/eproxy?branch=master)

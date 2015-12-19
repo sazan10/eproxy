@@ -167,7 +167,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
                 .disableCookieManagement()
                 .setConnectionManager(connectionManager)
                 // Retries
-                .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true))
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true)) // Maybe worth removing InterruptedIOException from list
                 // Fix insufficient handling of not encoded redirect URLs
                 .setRedirectStrategy(new ReEncodingRedirectStrategy())
                 .setDefaultRequestConfig(requestConfig)
