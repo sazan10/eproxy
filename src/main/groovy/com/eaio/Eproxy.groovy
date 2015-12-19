@@ -164,6 +164,8 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
             .setMaxObjectSize(maxObjectSize ?: 1I << 20I)
             .setSharedCache(true)
             .build()
+            
+        // TODO: CachingExec - Via-Header-Erzeugung :(
 
         log.info('CacheConfig: {}', cacheConfig)
         
@@ -179,7 +181,6 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
                 .setDefaultRequestConfig(requestConfig)
                 .setUserAgent(userAgent)
                 .addInterceptorFirst((HttpRequestInterceptor) timingInterceptor)
-                .addInterceptorLast(new RedirectHttpResponseInterceptor())
                 .addInterceptorLast((HttpResponseInterceptor) timingInterceptor)
 
         if (maxRedirects == 0I) {
@@ -192,6 +193,8 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         CloseableHttpClient client = builder.build()
 
         // No standard interceptors
+        
+        // RequestDefaultHeaders, RequestContent, RequestTargetHost, RequestClientConnControl, RequestUserAgent, RequestExpectContinue
 
         //        [ RequestExpectContinue, RequestClientConnControl, RequestAuthCache, RequestTargetAuthentication, RequestProxyAuthentication ].each {
         //            client.removeRequestInterceptorByClass(it)

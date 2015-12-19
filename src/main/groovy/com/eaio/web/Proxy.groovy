@@ -50,8 +50,10 @@ class Proxy {
             httpResponse.headerIterator().each { Header header ->
                 response.setHeader(header.name, header.value)
             }
-            
-            IOUtils.copyLarge(httpResponse.entity.content, response.outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+
+            if (httpResponse.entity) {
+                IOUtils.copyLarge(httpResponse.entity.content, response.outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+            }            
             
             TimingInterceptor.log(context, log)
         }
@@ -81,6 +83,7 @@ class Proxy {
         }
     }
     
+    // TODO: Use ReEncodingRedirectStrategy
     URI buildRequestURI(String scheme, String requestURI, String queryString) {
         String host, path
         host = StringUtils.substringAfter(StringUtils.substringAfter(requestURI, '/'), '/')
