@@ -24,12 +24,12 @@ class ProxyTest {
      * Test method for {@link com.eaio.web.Proxy#buildRequestURI(java.lang.String, java.lang.String, java.lang.String)}.
      */
     @Test
-    @Parameters(method = 'parameters')
+    @Parameters(method = 'buildRequestURIParameters')
     void 'buildRequestURI should match expectation'(String scheme, String uri, String queryString, URI expectation) {
         assertThat(proxy.buildRequestURI(scheme, uri, queryString), is(expectation))
     }
     
-    Collection<Object[]> parameters() {
+    Collection<Object[]> buildRequestURIParameters() {
         [
             [ 'http', '/http/www.google-analytics.com/ga.js', null, 'http://www.google-analytics.com/ga.js'.toURI() ],
             [ 'http', '/http/www.google-analytics.com/ga.js', '', 'http://www.google-analytics.com/ga.js'.toURI() ],
@@ -39,5 +39,18 @@ class ProxyTest {
         ].collect { it as Object[] }
     }
     
+    @Test
+    @Parameters(method = 'stripContextPathFromRequestURIParameters')
+    void 'stripContextPathFromRequestURIParameters should match expectation'(String contextPath, String requestURI, String expectation) {
+        assertThat(proxy.stripContextPathFromRequestURI(contextPath, requestURI), is(expectation))
+    }
+    
+    Collection<Object[]> stripContextPathFromRequestURIParameters() {
+        [
+            [ null, '/fnuh', '/fnuh' ],
+            [ '', '/fnuh', '/fnuh' ],
+            [ '/pruh', '/pruh/fnuh', '/fnuh' ],
+        ].collect { it as Object[] }
+    }
 
 }

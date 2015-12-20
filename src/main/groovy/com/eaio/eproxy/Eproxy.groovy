@@ -1,4 +1,4 @@
-package com.eaio
+package com.eaio.eproxy
 
 import groovy.util.logging.Slf4j
 

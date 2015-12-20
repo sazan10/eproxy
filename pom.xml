@@ -78,22 +78,6 @@
                 <configuration>
                     <fullScanSeconds>-1</fullScanSeconds>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>start devserver</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>devserver_start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>stop devserver</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>devserver_stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

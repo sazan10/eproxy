@@ -36,9 +36,9 @@ class Proxy {
     @Autowired
     TimingLogger timingLogger
 
-    @RequestMapping(value = '/{scheme}/**')
-    void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
-        URI requestURI = buildRequestURI(scheme, request.contextPath ? StringUtils.substringAfter(request.requestURI, request.contextPath) : request.requestURI, request.queryString)
+    @RequestMapping(value = [ '/{scheme:https?}/**', '/{rewriteconfig}-{scheme:https?}/**' ])
+    void proxy(@PathVariable String scheme, @PathVariable String rewriteConfig, HttpServletRequest request, HttpServletResponse response) {
+        URI requestURI = buildRequestURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
 
         HttpCacheContext context = HttpCacheContext.create()
         HttpResponse httpResponse
@@ -98,6 +98,10 @@ class Proxy {
         path = StringUtils.substringAfter(host, '/') ?: '/'
         
         UriComponentsBuilder.newInstance().scheme(scheme).host(StringUtils.substringBefore(host, '/')).path(path).query(queryString).build().toUri() // TODO: Support for Ports
+    }
+    
+    String stripContextPathFromRequestURI(String contextPath, String requestURI) {
+        contextPath ? StringUtils.substringAfter(requestURI, contextPath) : requestURI
     }
 
 }
