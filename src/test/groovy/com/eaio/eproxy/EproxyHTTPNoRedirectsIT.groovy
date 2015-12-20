@@ -68,7 +68,7 @@ class EproxyHTTPNoRedirectsIT {
             getContextPath: { '' },
             getQueryString: { null },
             getMethod: { 'GET' },
-            getProtocol: { 'http' },
+            getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
         ] as HttpServletRequest

@@ -60,8 +60,8 @@ class ProxyTest {
     
     Collection<Object[]> rewriteLocationValueParameters() {
         [
-            [ 'http://www.n-tv.de', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/' ],
-            [ 'http://www.n-tv.de#rah', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/#rah' ],
+            [ 'http://www.n-tv.de/', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/' ],
+            [ 'http://www.n-tv.de/#rah', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/#rah' ],
             [ 'http://www.n-tv.de/?ah=ha#rah', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/?ah=ha#rah' ],
         ].collect { it as Object[] }
     }
