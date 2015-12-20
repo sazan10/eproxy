@@ -14,13 +14,13 @@ import org.apache.http.client.cache.HttpCacheContext
 import org.apache.http.client.methods.*
 import org.apache.http.util.EntityUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriComponentsBuilder
 
 import com.eaio.eproxy.http.TimingLogger
-import com.eaio.net.httpclient.TimingInterceptor
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -30,15 +30,27 @@ import com.eaio.net.httpclient.TimingInterceptor
 @Slf4j
 class Proxy {
     
+    @Value('${proxy.hostName}')
+    String hostName
+    
     @Autowired
     HttpClient httpClient
     
     @Autowired
     TimingLogger timingLogger
 
-    @RequestMapping(value = [ '/{scheme:https?}/**', '/{rewriteconfig}-{scheme:https?}/**' ])
-    void proxy(@PathVariable String scheme, @PathVariable String rewriteConfig, HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping('/{scheme:https?}/**')
+    void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
+        proxy(scheme, null, request, response)
+    }
+    
+    @RequestMapping('/{rewriteConfig}-{scheme:https?}/**')
+    void proxy(@PathVariable('scheme') String scheme, @PathVariable('rewriteConfig') String rewriteConfig, HttpServletRequest request, HttpServletResponse response) {
         URI requestURI = buildRequestURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
+        if (!requestURI.host) {
+            response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE)
+            return
+        }
 
         HttpCacheContext context = HttpCacheContext.create()
         HttpResponse httpResponse
@@ -50,21 +62,24 @@ class Proxy {
             response.setStatus(httpResponse.statusLine.statusCode, httpResponse.statusLine.reasonPhrase)
             
             httpResponse.headerIterator().each { Header header ->
-                response.setHeader(header.name, header.value)
+                if (header.name?.equalsIgnoreCase('Location')) {
+                    response.setHeader(header.name, rewriteLocationValue(header.value.toURI(), request.protocol, request.serverName, request.serverPort, request.contextPath) as String)                    
+                }
+                else {
+                    response.setHeader(header.name, header.value)
+                }
             }
 
             if (httpResponse.entity) {
-                IOUtils.copyLarge(httpResponse.entity.content, response.outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+                if (!rewriteConfig) {
+                    IOUtils.copyLarge(httpResponse.entity.content, response.outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+                }
             }            
-            
         }
         catch (SocketException ex) {
             if (ex.message?.startsWith('Permission denied')) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, ex.message)
             }
-//            else if (ex.message?.startsWith('Connection reset')) {
-//                Can be handled by enabling retries.
-//            }
             else {
                 throw ex
             }
@@ -96,12 +111,24 @@ class Proxy {
         String host, path
         host = StringUtils.substringAfter(requestURI[1..-1], '/')
         path = StringUtils.substringAfter(host, '/') ?: '/'
-        
         UriComponentsBuilder.newInstance().scheme(scheme).host(StringUtils.substringBefore(host, '/')).path(path).query(queryString).build().toUri() // TODO: Support for Ports
     }
     
     String stripContextPathFromRequestURI(String contextPath, String requestURI) {
         contextPath ? StringUtils.substringAfter(requestURI, contextPath) : requestURI
+    }
+    
+    URI rewriteLocationValue(URI locationValue, String requestScheme, String requestHost, int requestPort, String contextPath) {
+        int port = getPort(locationValue.scheme, locationValue.port)
+        String portString = port == -1I ? '' : ':'.concat(port as String)
+        UriComponentsBuilder.newInstance().scheme(requestScheme).host(requestHost).port(getPort(requestScheme, requestPort))
+            .path("${contextPath}/${locationValue.scheme}/${locationValue.host}${portString}/${locationValue.rawPath}")
+            .query(locationValue.rawQuery)
+            .fragment(locationValue.rawFragment).build().toUri()
+    }
+    
+    int getPort(String scheme, int port) {
+        port == -1 || (scheme.equalsIgnoreCase('http') && port == 80I) || (scheme.equalsIgnoreCase('https') && port == 443I) ? -1I : port
     }
 
 }

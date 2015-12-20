@@ -6,6 +6,10 @@ package com.eaio.eproxy.entities
  */
 class RewriteConfig {
 
-    boolean removeActiveContent, rewrite
+    boolean removeActiveContent, rewrite, cloakUserAgent
+    
+    boolean asBoolean() {
+        !removeActiveContent && !rewrite && !cloakUserAgent
+    }
 
 }

@@ -25,17 +25,17 @@ class ProxyTest {
      */
     @Test
     @Parameters(method = 'buildRequestURIParameters')
-    void 'buildRequestURI should match expectation'(String scheme, String uri, String queryString, URI expectation) {
-        assertThat(proxy.buildRequestURI(scheme, uri, queryString), is(expectation))
+    void 'buildRequestURI should match expectation'(String scheme, String uri, String queryString, String expectation) {
+        assertThat(proxy.buildRequestURI(scheme, uri, queryString), is(expectation.toURI()))
     }
     
     Collection<Object[]> buildRequestURIParameters() {
         [
-            [ 'http', '/http/www.google-analytics.com/ga.js', null, 'http://www.google-analytics.com/ga.js'.toURI() ],
-            [ 'http', '/http/www.google-analytics.com/ga.js', '', 'http://www.google-analytics.com/ga.js'.toURI() ],
-            [ 'http', '/http/www.google-analytics.com/ga.js', 'pruh=guh', 'http://www.google-analytics.com/ga.js?pruh=guh'.toURI() ],
-            [ 'http', '/http/www.google-analytics.com', null, 'http://www.google-analytics.com/'.toURI() ],
-            [ 'https', '/https/www.google-analytics.com/bla/ga.js', null, 'https://www.google-analytics.com/bla/ga.js'.toURI() ],
+            [ 'http', '/http/www.google-analytics.com/ga.js', null, 'http://www.google-analytics.com/ga.js' ],
+            [ 'http', '/http/www.google-analytics.com/ga.js', '', 'http://www.google-analytics.com/ga.js' ],
+            [ 'http', '/http/www.google-analytics.com/ga.js', 'pruh=guh', 'http://www.google-analytics.com/ga.js?pruh=guh' ],
+            [ 'http', '/http/www.google-analytics.com', null, 'http://www.google-analytics.com/' ],
+            [ 'https', '/https/www.google-analytics.com/bla/ga.js', null, 'https://www.google-analytics.com/bla/ga.js' ],
         ].collect { it as Object[] }
     }
     
@@ -47,9 +47,22 @@ class ProxyTest {
     
     Collection<Object[]> stripContextPathFromRequestURIParameters() {
         [
-            [ null, '/fnuh', '/fnuh' ],
             [ '', '/fnuh', '/fnuh' ],
             [ '/pruh', '/pruh/fnuh', '/fnuh' ],
+        ].collect { it as Object[] }
+    }
+    
+    @Test
+    @Parameters(method = 'rewriteLocationValueParameters')
+    void 'rewriteLocationValue should redirect URIs correctly'(String locationValue, String requestScheme, String requestHost, int requestPort, String contextPath, String expectation) {
+        assertThat(proxy.rewriteLocationValue(locationValue.toURI(), requestScheme, requestHost, requestPort, contextPath), is (expectation.toURI()))
+    }
+    
+    Collection<Object[]> rewriteLocationValueParameters() {
+        [
+            [ 'http://www.n-tv.de', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/' ],
+            [ 'http://www.n-tv.de#rah', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/#rah' ],
+            [ 'http://www.n-tv.de/?ah=ha#rah', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/?ah=ha#rah' ],
         ].collect { it as Object[] }
     }
 

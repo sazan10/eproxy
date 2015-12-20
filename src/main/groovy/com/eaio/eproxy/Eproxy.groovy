@@ -58,13 +58,16 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     Long clientConnectionTimeout
 
     @Value('${http.maxTotalSockets}')
-    Integer maxTotalSockets // Character not supported
+    Integer maxTotalSockets
 
     @Value('${http.maxSocketsPerRoute}')
-    Integer maxSocketsPerRoute // Character not supported
+    Integer maxSocketsPerRoute
 
     @Value('${http.connectionTimeout}')
     Integer connectionTimeout
+    
+    @Value('${http.connectionRequestTimeout}')
+    Integer connectionRequestTimeout
 
     @Value('${http.readTimeout}')
     Integer readTimeout
@@ -80,6 +83,9 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
 
     @Value('${http.userAgent}')
     String userAgent
+    
+    @Value('${http.validateAfterInactivity}')
+    Integer validateAfterInactivity
     
     // SOCKS proxy
     
@@ -131,14 +137,15 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         connectionManager.with {
             maxTotal = maxTotalSockets ?: 32I
             defaultMaxPerRoute = maxSocketsPerRoute ?: 6I
-            validateAfterInactivity = -1I
+            validateAfterInactivity = validateAfterInactivity ?: 10000I
         }
 
         // Timeouts and redirect counts
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setCircularRedirectsAllowed(false)
-                .setConnectionRequestTimeout(connectionTimeout ?: 10000I)
+                .setConnectTimeout(connectionTimeout ?: 10000I)
+                .setConnectionRequestTimeout(connectionRequestTimeout ?: -1I)
                 .setSocketTimeout(readTimeout ?: 10000I)
                 .setMaxRedirects(maxRedirects ?: 10I)
                 .build()
@@ -157,6 +164,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
             .setSharedCache(true)
             .build()
             
+        // TODO: CachingExec - remove AsynchronousValidator
         // TODO: CachingExec - Via-Header-Erzeugung :(
 
         log.info('CacheConfig: {}', cacheConfig)
