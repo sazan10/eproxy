@@ -63,7 +63,7 @@ class Proxy {
             
             httpResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) {
-                    response.setHeader(header.name, rewriteLocationValue(header.value.toURI(), request.protocol, request.serverName, request.serverPort, request.contextPath) as String)                    
+                    response.setHeader(header.name, rewriteLocationValue(header.value.toURI(), request.scheme, request.serverName, request.serverPort, request.contextPath) as String)                    
                 }
                 else {
                     response.setHeader(header.name, header.value)
@@ -75,6 +75,9 @@ class Proxy {
                     IOUtils.copyLarge(httpResponse.entity.content, response.outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
                 }
             }            
+        }
+        catch (UnknownHostException ex) {
+            // TODO: 404?
         }
         catch (SocketException ex) {
             if (ex.message?.startsWith('Permission denied')) {
@@ -122,13 +125,13 @@ class Proxy {
         int port = getPort(locationValue.scheme, locationValue.port)
         String portString = port == -1I ? '' : ':'.concat(port as String)
         UriComponentsBuilder.newInstance().scheme(requestScheme).host(requestHost).port(getPort(requestScheme, requestPort))
-            .path("${contextPath}/${locationValue.scheme}/${locationValue.host}${portString}/${locationValue.rawPath}")
+            .path("${contextPath}/${locationValue.scheme}/${locationValue.host}${portString}${locationValue.rawPath}")
             .query(locationValue.rawQuery)
             .fragment(locationValue.rawFragment).build().toUri()
     }
     
     int getPort(String scheme, int port) {
-        port == -1 || (scheme.equalsIgnoreCase('http') && port == 80I) || (scheme.equalsIgnoreCase('https') && port == 443I) ? -1I : port
+        port == -1I || (scheme.equalsIgnoreCase('http') && port == 80I) || (scheme.equalsIgnoreCase('https') && port == 443I) ? -1I : port
     }
 
 }
