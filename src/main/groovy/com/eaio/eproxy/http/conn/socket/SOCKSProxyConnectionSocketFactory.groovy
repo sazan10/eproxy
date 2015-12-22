@@ -2,9 +2,7 @@ package com.eaio.eproxy.http.conn.socket
 
 import groovy.transform.TupleConstructor
 
-import java.net.InetSocketAddress
 import java.net.Proxy
-import java.net.Socket
 
 import org.apache.http.HttpHost
 import org.apache.http.conn.socket.ConnectionSocketFactory
