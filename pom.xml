@@ -48,12 +48,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
         <build>${maven.build.timestamp}</build>
-        <groovy.version>2.3.6</groovy.version>
     </properties>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.2.5.RELEASE</version>
+        <version>1.2.8.RELEASE</version>
     </parent>
     <build>
         <plugins>
@@ -232,7 +231,6 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy</artifactId>
-            <version>${groovy.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -353,7 +351,7 @@
                 <configuration>
                     <sourceDirectory>src/main/groovy</sourceDirectory>
                     <codeNarcVersion>0.23</codeNarcVersion>
-                    <groovyVersion>${groovy.version}</groovyVersion>
+                    <groovyVersion>2.4.4</groovyVersion>
                 </configuration>
             </plugin>
         </plugins>
