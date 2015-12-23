@@ -1,6 +1,6 @@
 package com.eaio.eproxy.rewriting
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Component
 
 /**
  * @author <a href='mailto:johann@johannburkard.de'>Johann Burkard</a>
@@ -30,5 +30,14 @@ class SupportedMIMETypes {
 
     // TODO: Get rid of VBScript
 
+    Set<String> html = [
+        'text/html',
+        'text/x-server-parsed-html',
+        'application/xml+xhtml',
+    ] as Set
+
+    Set<String> css = [
+        'text/css',
+    ] as Set
 
 }

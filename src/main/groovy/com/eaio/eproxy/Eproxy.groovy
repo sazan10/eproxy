@@ -178,7 +178,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
                 // Retries
                 .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true)) // Maybe worth removing InterruptedIOException from list
                 // Fix insufficient handling of not encoded redirect URLs
-                .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy() : new ReEncodingRedirectStrategy())
+                .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy(reEncoding()) : new ReEncodingRedirectStrategy(reEncoding()))
                 .setDefaultRequestConfig(requestConfig)
                 .setUserAgent(userAgent)
                 .addInterceptorFirst((HttpRequestInterceptor) timingInterceptor)
@@ -209,6 +209,11 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     //                new SSLSocketFactory([ isTrusted: { X509Certificate[] chain, String authType -> true } ] as TrustStrategy, new NullX509HostnameVerifier())
     //                )
     //    }
+    
+    @Bean
+    ReEncoding reEncoding() {
+        new ReEncoding()
+    }
 
     /**
      * Only enabled in Spring Boot's server. Keep this in sync with web.xml
