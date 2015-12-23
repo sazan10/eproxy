@@ -10,7 +10,7 @@
 
     <static-files>
         <include path="/favicon.ico" expiration="365d" />
-        <include path="/index.html" />
+        <include path="/index.html" expiration="1h"/>
         <include path="/robots.txt" expiration="1d" />
     </static-files>
 
