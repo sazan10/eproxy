@@ -25,6 +25,8 @@ import org.springframework.web.util.UriComponentsBuilder
 import com.eaio.net.httpclient.TimingInterceptor
 
 /**
+ * Proxies and optionally rewrites content.
+ * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
@@ -56,7 +58,7 @@ class Proxy {
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
             if (uriRequest instanceof HttpEntityEnclosingRequest) {
-                uriRequest.entity = request.getHeader('Content-Length')?.integer ? new InputStreamEntity(request.inputStream, request.getHeader('Content-Length') as int) : new InputStreamEntity(request.inputStream)
+                setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
             }
             
             httpResponse = httpClient.execute(uriRequest, context)
@@ -73,14 +75,17 @@ class Proxy {
             }
 
             if (httpResponse.entity) {
-                if (!rewriteConfig) {
+                if (rewriteConfig) {
+                    
+                }
+                else {
                     IOUtils.copyLarge(httpResponse.entity.content, response.outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
                 }
             }            
         }
-        catch (UnknownHostException ex) {
-            // TODO: 404?
-        }
+//        catch (UnknownHostException ex) {
+//            // TODO: 404?
+//        }
         catch (SocketException ex) {
             if (ex.message?.startsWith('Permission denied')) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, ex.message)
@@ -96,7 +101,7 @@ class Proxy {
     }
     
     private HttpUriRequest newRequest(String method, URI uri) {
-        switch (method?.toUpperCase()) {
+        switch (method) {
             case 'GET': return new HttpGet(uri)
             case 'DELETE': return new HttpDelete(uri)
             case 'HEAD': return new HttpHead(uri)
@@ -120,21 +125,32 @@ class Proxy {
         UriComponentsBuilder.newInstance().scheme(scheme).host(StringUtils.substringBefore(host, '/')).path(path).query(queryString).build().toUri()
     }
     
+    /**
+     * Removes the context path prefix from <tt>requestURI</tt>.
+     */
     String stripContextPathFromRequestURI(String contextPath, String requestURI) {
         contextPath ? StringUtils.substringAfter(requestURI, contextPath) : requestURI
     }
     
     URI rewriteLocationValue(URI locationValue, String requestScheme, String requestHost, int requestPort, String contextPath) {
-        int port = getPort(locationValue.scheme, locationValue.port)
-        String portString = port == -1I ? '' : ':'.concat(port as String)
-        UriComponentsBuilder.newInstance().scheme(requestScheme).host(requestHost).port(getPort(requestScheme, requestPort))
-            .path("${contextPath}/${locationValue.scheme}/${locationValue.host}${portString}${locationValue.rawPath}")
-            .query(locationValue.rawQuery)
-            .fragment(locationValue.rawFragment).build().toUri()
+        UriComponentsBuilder builder = UriComponentsBuilder.newInstance()
+            .scheme(requestScheme)
+            .host(requestHost)
+            .port(getPort(requestScheme, requestPort))
+            .path(contextPath)
+            .pathSegment(locationValue.scheme, locationValue.authority)
+        if (locationValue.rawPath) {
+            builder.path(locationValue.rawPath)
+        }
+        builder.query(locationValue.rawQuery).fragment(locationValue.rawFragment).build().toUri()
     }
     
     int getPort(String scheme, int port) {
         port == -1I || (scheme?.equalsIgnoreCase('http') && port == 80I) || (scheme?.equalsIgnoreCase('https') && port == 443I) ? -1I : port
+    }
+    
+    void setRequestEntity(HttpEntityEnclosingRequest uriRequest, String contentLength, InputStream inputStream) {
+        uriRequest.entity = contentLength?.integer ? new InputStreamEntity(inputStream, contentLength as int) : new InputStreamEntity(inputStream)
     }
 
 }
