@@ -31,8 +31,6 @@ import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 
-import com.eaio.eproxy.http.conn.socket.SOCKSProxyConnectionSocketFactory
-import com.eaio.eproxy.http.conn.socket.SOCKSProxyLayeredConnectionSocketFactory
 import com.eaio.net.httpclient.*
 import com.eaio.util.googleappengine.NotOnGoogleAppEngineOrDevserver
 import com.eaio.util.googleappengine.OnGoogleAppEngineOrDevserver
@@ -74,6 +72,9 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
 
     @Value('${http.maxRedirects}')
     Integer maxRedirects
+    
+    @Value('${http.followPOSTAndDELETE}')
+    Boolean followPOSTAndDELETE
 
     @Value('${http.retryCount}')
     Integer retryCount
@@ -177,7 +178,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
                 // Retries
                 .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true)) // Maybe worth removing InterruptedIOException from list
                 // Fix insufficient handling of not encoded redirect URLs
-                .setRedirectStrategy(new ReEncodingRedirectStrategy())
+                .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy() : new ReEncodingRedirectStrategy())
                 .setDefaultRequestConfig(requestConfig)
                 .setUserAgent(userAgent)
                 .addInterceptorFirst((HttpRequestInterceptor) timingInterceptor)

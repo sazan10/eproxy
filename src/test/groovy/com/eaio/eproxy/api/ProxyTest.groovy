@@ -8,7 +8,7 @@ import junitparams.Parameters
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import com.eaio.eproxy.api.Proxy;
+import com.eaio.eproxy.api.Proxy
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -49,6 +49,7 @@ class ProxyTest {
         [
             [ '', '/fnuh', '/fnuh' ],
             [ '/pruh', '/pruh/fnuh', '/fnuh' ],
+            [ '/fnuh', '/fnuh/fnuh', '/fnuh' ],
         ].collect { it as Object[] }
     }
     

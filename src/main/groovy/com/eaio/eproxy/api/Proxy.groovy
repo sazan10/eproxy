@@ -8,10 +8,12 @@ import javax.servlet.http.HttpServletResponse
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.Header
+import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.cache.HttpCacheContext
 import org.apache.http.client.methods.*
+import org.apache.http.entity.InputStreamEntity
 import org.apache.http.util.EntityUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriComponentsBuilder
 
-import com.eaio.eproxy.http.TimingLogger
+import com.eaio.net.httpclient.TimingInterceptor
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -35,9 +37,6 @@ class Proxy {
     
     @Autowired
     HttpClient httpClient
-    
-    @Autowired
-    TimingLogger timingLogger
 
     @RequestMapping('/{scheme:https?}/**')
     void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
@@ -56,13 +55,16 @@ class Proxy {
         HttpResponse httpResponse
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
+            if (uriRequest instanceof HttpEntityEnclosingRequest) {
+                uriRequest.entity = request.getHeader('Content-Length')?.integer ? new InputStreamEntity(request.inputStream, request.getHeader('Content-Length') as int) : new InputStreamEntity(request.inputStream)
+            }
             
             httpResponse = httpClient.execute(uriRequest, context)
             
             response.setStatus(httpResponse.statusLine.statusCode, httpResponse.statusLine.reasonPhrase)
             
             httpResponse.headerIterator().each { Header header ->
-                if (header.name?.equalsIgnoreCase('Location')) {
+                if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link
                     response.setHeader(header.name, rewriteLocationValue(header.value.toURI(), request.scheme, request.serverName, request.serverPort, request.contextPath) as String)                    
                 }
                 else {
@@ -88,7 +90,7 @@ class Proxy {
             }
         }
         finally {
-            timingLogger.log(context, log)
+            TimingInterceptor.log(context, log)
             EntityUtils.consumeQuietly(httpResponse?.entity)
         }
     }
@@ -114,7 +116,8 @@ class Proxy {
         String host, path
         host = StringUtils.substringAfter(requestURI[1..-1], '/')
         path = StringUtils.substringAfter(host, '/') ?: '/'
-        UriComponentsBuilder.newInstance().scheme(scheme).host(StringUtils.substringBefore(host, '/')).path(path).query(queryString).build().toUri() // TODO: Support for Ports
+        // TODO: Support for Ports
+        UriComponentsBuilder.newInstance().scheme(scheme).host(StringUtils.substringBefore(host, '/')).path(path).query(queryString).build().toUri()
     }
     
     String stripContextPathFromRequestURI(String contextPath, String requestURI) {
@@ -131,7 +134,7 @@ class Proxy {
     }
     
     int getPort(String scheme, int port) {
-        port == -1I || (scheme.equalsIgnoreCase('http') && port == 80I) || (scheme.equalsIgnoreCase('https') && port == 443I) ? -1I : port
+        port == -1I || (scheme?.equalsIgnoreCase('http') && port == 80I) || (scheme?.equalsIgnoreCase('https') && port == 443I) ? -1I : port
     }
 
 }
