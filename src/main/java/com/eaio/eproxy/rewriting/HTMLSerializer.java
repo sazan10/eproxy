@@ -54,7 +54,7 @@ public class HTMLSerializer implements ContentHandler {
     @Override
     public void startPrefixMapping(String prefix, String uri) throws SAXException {
         try {
-            output.write("<!DOCTYPE ");
+            output.write("<!doctype ");
             output.write(prefix);
             output.write(">\n");
         }
@@ -84,12 +84,7 @@ public class HTMLSerializer implements ContentHandler {
                     output.write("\"");
                 }
             }
-            if (emptyElements.contains(name(localName, qName))) {
-                output.write('>');
-            }
-            else {
-                output.write("/>");
-            }
+            output.write('>');
         }
         catch (IOException ex) {
             throw new SAXException(ex);
@@ -100,18 +95,13 @@ public class HTMLSerializer implements ContentHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (!emptyElements.contains(name(localName, qName))) {
             try {
-                if (emptyElements.contains(name(localName, qName))) {
-                    output.write('\n');
+                try {
+                    stack.pop();
                 }
-                else {
-                    try {
-                        stack.pop();
-                    }
-                    catch (EmptyStackException ex) {}
-                    output.write("</");
-                    output.write(name(localName, qName));
-                    output.write(">\n");
-                }
+                catch (EmptyStackException ex) {}
+                output.write("</");
+                output.write(name(localName, qName));
+                output.write(">");
             }
             catch (IOException ex) {
                 throw new SAXException(ex);
@@ -131,6 +121,12 @@ public class HTMLSerializer implements ContentHandler {
 
     @Override
     public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
+        try {
+            output.write(ch, start, length);
+        }
+        catch (IOException ex) {
+            throw new SAXException(ex);
+        }
     }
 
     @Override
@@ -140,7 +136,7 @@ public class HTMLSerializer implements ContentHandler {
     @Override
     public void skippedEntity(String name) throws SAXException {
     }
-    
+
     // TODO: Refactor these:
 
     String name(String localName, String qName) {

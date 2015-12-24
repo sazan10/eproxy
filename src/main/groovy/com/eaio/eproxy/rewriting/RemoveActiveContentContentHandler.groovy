@@ -11,7 +11,7 @@ import org.xml.sax.SAXException
 /**
  * Transforms HTML as follows:
  * <ul>
- * <li>Any scripts are removed.
+ * <li>Any script elements are removed.
  * <li>Any on* handlers are removed.
  * </ul>
  *
@@ -19,10 +19,9 @@ import org.xml.sax.SAXException
  * @version $Id: TryEaioTransformer.java 7547 2015-07-01 20:02:47Z johann $
  */
 @InheritConstructors
-class RemoveActiveContentDelegatingContentHandler extends DelegatingContentHandler {
+class RemoveActiveContentContentHandler extends DelegatingContentHandler {
     
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-        // Skip scripts but add them to the stack.
         if (nameIs(localName, qName, 'script')) {
             stack.push(name(localName, qName))
         }

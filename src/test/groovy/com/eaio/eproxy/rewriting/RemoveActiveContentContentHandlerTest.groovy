@@ -13,7 +13,7 @@ import org.xml.sax.InputSource
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-class RemoveActiveContentDelegatingContentHandlerTest {
+class RemoveActiveContentContentHandlerTest {
     
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
@@ -22,9 +22,10 @@ class RemoveActiveContentDelegatingContentHandlerTest {
     void 'active content and on* handlers should be removed'() {
         StringWriter output = new StringWriter()
         Parser parser = new Parser()
-        parser.contentHandler = new RemoveActiveContentDelegatingContentHandler(new HTMLSerializer(output))
+        parser.contentHandler = new RemoveActiveContentContentHandler(new HTMLSerializer(output))
         parser.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/bla.html'))))
         errorCollector.checkThat(output as String, not(containsString('<script')))
+        errorCollector.checkThat(output as String, not(containsString('<noscript/>')))
         errorCollector.checkThat(output as String, containsString('<img src="fnuh.jpg">'))
         errorCollector.checkThat(output as String, containsString('<img width="1" height="1" src="dah.jpg">'))
     }
