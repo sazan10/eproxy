@@ -2,6 +2,8 @@ package com.eaio.eproxy.api
 
 import groovy.util.logging.Slf4j
 
+import java.nio.charset.Charset
+
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -13,15 +15,22 @@ import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.cache.HttpCacheContext
 import org.apache.http.client.methods.*
+import org.apache.http.entity.ContentType
 import org.apache.http.entity.InputStreamEntity
 import org.apache.http.util.EntityUtils
+import org.ccil.cowan.tagsoup.Parser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriComponentsBuilder
+import org.xml.sax.InputSource
 
+import com.eaio.eproxy.rewriting.HTMLSerializer
+import com.eaio.eproxy.rewriting.RemoveActiveContentContentHandler
+import com.eaio.eproxy.rewriting.RemoveNoScriptElementsContentHandler
+import com.eaio.eproxy.rewriting.SupportedMIMETypes
 import com.eaio.net.httpclient.TimingInterceptor
 
 /**
@@ -39,14 +48,17 @@ class Proxy {
     
     @Autowired
     HttpClient httpClient
+    
+    @Autowired
+    SupportedMIMETypes supportedMIMETypes
 
     @RequestMapping('/{scheme:https?}/**')
     void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
-        proxy(scheme, null, request, response)
+        proxy(null, scheme, request, response)
     }
     
     @RequestMapping('/{rewriteConfig}-{scheme:https?}/**')
-    void proxy(@PathVariable('scheme') String scheme, @PathVariable('rewriteConfig') String rewriteConfig, HttpServletRequest request, HttpServletResponse response) {
+    void proxy(@PathVariable('rewriteConfig') String rewriteConfig, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
         URI requestURI = buildRequestURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
         if (!requestURI.host) {
             response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE)
@@ -75,8 +87,12 @@ class Proxy {
             }
 
             if (httpResponse.entity) {
-                if (rewriteConfig) {
-                    
+                ContentType contentType = ContentType.getLenient(httpResponse.entity)
+                Charset charset = contentType.charset ?: Charset.forName('UTF-8')
+                if (rewriteConfig && supportedMIMETypes.html.contains(contentType.mimeType)) {
+                    Parser parser = new Parser()
+                    parser.contentHandler = new RemoveActiveContentContentHandler(new RemoveNoScriptElementsContentHandler(new HTMLSerializer(new OutputStreamWriter(response.outputStream, charset))))
+                    parser.parse(new InputSource(new InputStreamReader(httpResponse.entity.content, charset)))
                 }
                 else {
                     IOUtils.copyLarge(httpResponse.entity.content, response.outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.

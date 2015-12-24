@@ -28,6 +28,7 @@ class RemoveActiveContentContentHandlerTest {
         errorCollector.checkThat(output as String, not(containsString('<noscript/>')))
         errorCollector.checkThat(output as String, containsString('<img src="fnuh.jpg">'))
         errorCollector.checkThat(output as String, containsString('<img width="1" height="1" src="dah.jpg">'))
+        errorCollector.checkThat(output as String, not(containsString('<rah ')))
     }
 
 }
