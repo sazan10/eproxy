@@ -89,7 +89,7 @@ class Proxy {
             if (httpResponse.entity) {
                 ContentType contentType = ContentType.getLenient(httpResponse.entity)
                 Charset charset = contentType.charset ?: Charset.forName('UTF-8')
-                if (rewriteConfig && supportedMIMETypes.html.contains(contentType.mimeType)) {
+                if (rewriteConfig && contentType && supportedMIMETypes.html.contains(contentType.mimeType ?: '')) {
                     Parser parser = new Parser()
                     parser.contentHandler = new RemoveActiveContentContentHandler(new RemoveNoScriptElementsContentHandler(new HTMLSerializer(new OutputStreamWriter(response.outputStream, charset))))
                     parser.parse(new InputSource(new InputStreamReader(httpResponse.entity.content, charset)))
