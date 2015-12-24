@@ -26,7 +26,7 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
             stack.push(name(localName, qName))
         }
         else {
-            for (int i = 0; i < atts.getLength(); ++i) {
+            atts?.length?.times { int i ->
                 if (startsWithIgnoreCase(name(atts.getLocalName(i), atts.getQName(i)), 'on')) {
                     ((AttributesImpl) atts).removeAttribute(i)
                 }

@@ -89,9 +89,17 @@ class Proxy {
                 Charset charset = contentType.charset ?: Charset.forName('UTF-8')
                 URIAwareContentHandler ch = new URIAwareContentHandler(baseURI: baseURI, requestURI: requestURI)
                 if (rewriteConfig && contentType && supportedMIMETypes.html.contains(contentType.mimeType ?: '')) {
+                    Writer outputWriter = new OutputStreamWriter(response.outputStream, charset)
                     Parser parser = new Parser()
-                    parser.contentHandler = new RemoveActiveContentContentHandler(new RemoveNoScriptElementsContentHandler(new HTMLSerializer(new OutputStreamWriter(response.outputStream, charset))))
+                    parser.contentHandler = new URIRewritingContentHandler(
+                        new RemoveActiveContentContentHandler(
+                            new RemoveNoScriptElementsContentHandler(
+                                new HTMLSerializer(outputWriter)
+                                )
+                            )
+                        )
                     parser.parse(new InputSource(new InputStreamReader(httpResponse.entity.content, charset)))
+                    outputWriter.flush()
                 }
                 else {
                     IOUtils.copyLarge(httpResponse.entity.content, response.outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
