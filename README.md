@@ -37,3 +37,7 @@ Totally untested. Don't use this.
 ### On Google App Engine
 
 * App Engine SDK
+
+## History
+
+Some of the code came from [media.io](http://media.io) to a project called Delivrr (sadly gone), then over to [eaio](http://eaio.com). Most of the rewriting code comes straight from [eaio](http://eaio.com). 
