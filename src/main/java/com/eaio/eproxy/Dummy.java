@@ -6,8 +6,8 @@ package com.eaio.eproxy;
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-final class Dummy {
+public class Dummy {
 
-    private Dummy() {}
+    public Dummy() {}
 
 }

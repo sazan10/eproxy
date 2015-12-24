@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/johannburkard/eproxy/badge.svg?branch=master&service=github)](https://coveralls.io/github/johannburkard/eproxy?branch=master)
+
 # Eproxy
 
 Even since coming across [mirrorr](https://github.com/bslatkin/mirrorrr) I've wanted to have a content-rewriting proxy that could also double as a cheap CDN, a proxy that
@@ -24,14 +26,14 @@ I have nothing against mirrorr but there are some problems with it:
 
 ## Security status
 
-There isn't any code yet lol.
+Totally untested. Don't use this.
 
 ## Installation
 
 * Java 7 or greater
 * Maven
+* Tomcat or Jetty
 
 ### On Google App Engine
 
-
-[![Coverage Status](https://coveralls.io/repos/johannburkard/eproxy/badge.svg?branch=master&service=github)](https://coveralls.io/github/johannburkard/eproxy?branch=master)
+* App Engine SDK

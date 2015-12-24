@@ -11,7 +11,8 @@ import org.junit.Test;
 public class DummyTest {
 
     @Test
-    public void notReallyATestLOL() {
+    public void hardlyATestLOL() {
+        new Dummy();
     }
 
 }

@@ -68,5 +68,20 @@ class ProxyTest {
             [ 'http://www.n-tv.de/?ah=ha#rah', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/?ah=ha#rah' ],
         ].collect { it as Object[] }
     }
+    
+    @Test
+    @Parameters(method = 'getPortParameters')
+    void 'getPort should skip port 80 and 443'(String scheme, int port, int expectation) {
+        assertThat(proxy.getPort(scheme, port), is(expectation))
+    }
+    
+    Collection<Object[]> getPortParameters() {
+        [
+            [ 'https', 443I, -1I ],
+            [ 'http', 80I, -1I ],
+            [ 'http', 8080I, 8080I ],
+            [ 'https', 1234I, 1234I ],
+        ].collect { it as Object[] }
+    }
 
 }
