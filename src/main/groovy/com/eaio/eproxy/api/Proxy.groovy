@@ -27,10 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriComponentsBuilder
 import org.xml.sax.InputSource
 
-import com.eaio.eproxy.rewriting.HTMLSerializer
-import com.eaio.eproxy.rewriting.RemoveActiveContentContentHandler
-import com.eaio.eproxy.rewriting.RemoveNoScriptElementsContentHandler
-import com.eaio.eproxy.rewriting.SupportedMIMETypes
+import com.eaio.eproxy.rewriting.*
 import com.eaio.net.httpclient.TimingInterceptor
 
 /**
@@ -59,6 +56,7 @@ class Proxy {
     
     @RequestMapping('/{rewriteConfig}-{scheme:https?}/**')
     void proxy(@PathVariable('rewriteConfig') String rewriteConfig, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
+        URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
         URI requestURI = buildRequestURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
         if (!requestURI.host) {
             response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE)
@@ -79,7 +77,7 @@ class Proxy {
             
             httpResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link
-                    response.setHeader(header.name, rewriteLocationValue(header.value.toURI(), request.scheme, request.serverName, request.serverPort, request.contextPath) as String)                    
+                    response.setHeader(header.name, rewriteLocationValue(header.value.toURI(), baseURI) as String)                    
                 }
                 else {
                     response.setHeader(header.name, header.value)
@@ -89,6 +87,7 @@ class Proxy {
             if (httpResponse.entity) {
                 ContentType contentType = ContentType.getLenient(httpResponse.entity)
                 Charset charset = contentType.charset ?: Charset.forName('UTF-8')
+                URIAwareContentHandler ch = new URIAwareContentHandler(baseURI: baseURI, requestURI: requestURI)
                 if (rewriteConfig && contentType && supportedMIMETypes.html.contains(contentType.mimeType ?: '')) {
                     Parser parser = new Parser()
                     parser.contentHandler = new RemoveActiveContentContentHandler(new RemoveNoScriptElementsContentHandler(new HTMLSerializer(new OutputStreamWriter(response.outputStream, charset))))
@@ -129,6 +128,10 @@ class Proxy {
         }
     }
     
+    URI buildBaseURI(String scheme, String host, int port, String contextPath) {
+        UriComponentsBuilder.newInstance().scheme(scheme).host(host).port(getPort(scheme, port)).path(contextPath).build().toUri()
+    }
+    
     /**
      * Make sure to remove the context path before calling this method.
      */
@@ -148,13 +151,8 @@ class Proxy {
         contextPath ? StringUtils.substringAfter(requestURI, contextPath) : requestURI
     }
     
-    URI rewriteLocationValue(URI locationValue, String requestScheme, String requestHost, int requestPort, String contextPath) {
-        UriComponentsBuilder builder = UriComponentsBuilder.newInstance()
-            .scheme(requestScheme)
-            .host(requestHost)
-            .port(getPort(requestScheme, requestPort))
-            .path(contextPath)
-            .pathSegment(locationValue.scheme, locationValue.authority)
+    URI rewriteLocationValue(URI locationValue, URI baseURI) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment(locationValue.scheme, locationValue.authority)
         if (locationValue.rawPath) {
             builder.path(locationValue.rawPath)
         }

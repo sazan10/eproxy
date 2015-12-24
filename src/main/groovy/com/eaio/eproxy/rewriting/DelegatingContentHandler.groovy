@@ -24,7 +24,7 @@ class DelegatingContentHandler {
     ContentHandler delegate
 
     @Override
-    public void setDocumentLocator(Locator documentLocator) {
+    void setDocumentLocator(Locator documentLocator) {
         this.documentLocator = documentLocator
         delegate?.setDocumentLocator(documentLocator)
     }
