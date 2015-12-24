@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.InheritConstructors
 
 import org.ccil.cowan.tagsoup.AttributesImpl
-import org.springframework.stereotype.Component
 import org.xml.sax.Attributes
 import org.xml.sax.ContentHandler
 import org.xml.sax.SAXException
@@ -19,11 +18,9 @@ import org.xml.sax.SAXException
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: TryEaioTransformer.java 7547 2015-07-01 20:02:47Z johann $
  */
-@Component
 @InheritConstructors
 class RemoveActiveContentDelegatingContentHandler extends DelegatingContentHandler {
     
-    @Override
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         // Skip scripts but add them to the stack.
         if (nameIs(localName, qName, 'script')) {
@@ -39,7 +36,6 @@ class RemoveActiveContentDelegatingContentHandler extends DelegatingContentHandl
         }
     }
 
-    @Override
     void endElement(String uri, String localName, String qName) throws SAXException {
         if (nameIs(localName, qName, 'script')) {
             try {
@@ -56,7 +52,6 @@ class RemoveActiveContentDelegatingContentHandler extends DelegatingContentHandl
      * Skips <tt>&lt;script&gt;</tt> contents.
      * @see com.eaio.try_eaio.HTMLSerializer#characters(char[], int, int)
      */
-    @Override
     void characters(char[] ch, int start, int length) throws SAXException {
         String tag = ''
         try {

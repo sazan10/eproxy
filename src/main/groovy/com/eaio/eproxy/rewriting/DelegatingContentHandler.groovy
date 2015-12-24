@@ -14,7 +14,7 @@ import org.xml.sax.Locator
  * @version $Id: HTMLSerializer.java 7637 2015-08-12 10:55:33Z johann $
  */
 @TupleConstructor(includes = 'delegate')
-class DelegatingContentHandler implements ContentHandler {
+class DelegatingContentHandler {
     
     final Stack<String> stack = new Stack<String>()
 
@@ -26,7 +26,7 @@ class DelegatingContentHandler implements ContentHandler {
     @Override
     public void setDocumentLocator(Locator documentLocator) {
         this.documentLocator = documentLocator
-        delegate.setDocumentLocator(documentLocator)
+        delegate?.setDocumentLocator(documentLocator)
     }
     
     String name(String localName, String qName) {
