@@ -16,7 +16,7 @@ class RemoveNoScriptElementsContentHandler extends DelegatingContentHandler {
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'noscript')) {
-            stack.push(name(localName, qName))
+            stack.push('noscript')
         }
         else if (!stack.contains('noscript')) {
             delegate.startElement(uri, localName, qName, atts)
