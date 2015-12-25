@@ -3,6 +3,8 @@ package com.eaio.eproxy.rewriting;
 import static org.apache.commons.lang3.StringUtils.*;
 import static org.apache.commons.lang3.StringEscapeUtils.*;
 
+import static com.eaio.eproxy.rewriting.DelegatingContentHandler.*;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
@@ -135,16 +137,6 @@ public class HTMLSerializer implements ContentHandler {
 
     @Override
     public void skippedEntity(String name) throws SAXException {
-    }
-
-    // TODO: Refactor these:
-
-    String name(String localName, String qName) {
-        return lowerCase(defaultString(localName, defaultString(qName)));
-    }
-
-    boolean nameIs(String localName, String qName, String expected) {
-        return equalsIgnoreCase(name(localName, qName), expected);
     }
 
 }

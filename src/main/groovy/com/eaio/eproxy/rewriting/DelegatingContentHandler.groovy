@@ -28,11 +28,11 @@ class DelegatingContentHandler {
         delegate?.setDocumentLocator(documentLocator)
     }
     
-    String name(String localName, String qName) {
+    static String name(String localName, String qName) {
         lowerCase(defaultString(localName, defaultString(qName)))
     }
 
-    boolean nameIs(String localName, String qName, String expected) {
+    static boolean nameIs(String localName, String qName, String expected) {
         equalsIgnoreCase(name(localName, qName), expected)
     }
 
