@@ -24,9 +24,12 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
             stack.push(name(localName, qName))
         }
         else {
-            atts?.length?.times { int i ->
+            for (int i = 0I; i < atts?.length; ) {
                 if (startsWithIgnoreCase(name(atts.getLocalName(i), atts.getQName(i)), 'on')) {
                     ((AttributesImpl) atts).removeAttribute(i)
+                }
+                else {
+                    ++i
                 }
             }
             delegate.startElement(uri, localName, qName, atts)

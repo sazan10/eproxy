@@ -121,4 +121,50 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), containsString('action="http://fnuh.com/ah-http/www.google.com/search"'))
     }
     
+    @Test
+    void 'all on* handlers should be removed'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-https/www.google.de/url' },
+            getContextPath: { '' },
+            getQueryString: { 'q=http://fnuh.com' },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'http', request, response)
+        assertThat(bOut.toString(0I), not(containsString('onmouse')))
+    }
+    
+    /*// Currently broken due to TagSoup. Investigating...
+    @Test
+    void '<noscript> contents should be removed'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-https/www.facebook.com/' },
+            getContextPath: { '' },
+            getQueryString: { null },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'https', request, response)
+        assertThat(bOut.toString(0I), not(containsString('<meta http-equiv="refresh" content="0; URL=/?_fb_noscript=1')))
+    }
+    */
+    
 }
