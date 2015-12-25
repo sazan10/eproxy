@@ -19,7 +19,7 @@ document.getElementById('submit').onclick=function() {
             ga('send', 'pageview', '/proxy');
         }
         catch (e) {}
-        location.href = parseUri(location.href)['directory'] + uri['protocol'] + '/' + uri['authority'] + (uri['relative'] ? uri['relative'] : '/'); // Needs to be uri['relative'] because Closure Compiler will rename it.
+        location.href = parseUri(location.href)['directory'] + 'ah-' + uri['protocol'] + '/' + uri['authority'] + (uri['relative'] ? uri['relative'] : '/'); // Needs to be uri['relative'] because Closure Compiler will rename it.
     }
     return false;
 }
