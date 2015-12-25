@@ -11,7 +11,7 @@ import org.xml.sax.SAXException
 import com.eaio.eproxy.entities.RewriteConfig
 
 /**
- * Rewrites <tt>src</tt> and <tt>href</tt> attributes.
+ * Rewrites <tt>src</tt>, <tt>href</tt> and <tt>&lt;meta content</tt> attributes.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
@@ -23,11 +23,14 @@ class URIRewritingContentHandler extends URIAwareContentHandler {
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         atts?.length?.times { int i ->
-            String attributeName = name(atts.getLocalName(i), atts.getQName(i)), attributeValue = trimToEmpty(atts.getValue(i))
+            String attributeName = name(atts.getLocalName(i), atts.getQName(i)), attributeValue = trimToNull(atts.getValue(i))
             if ((equalsIgnoreCase(attributeName, 'href') || equalsIgnoreCase(attributeName, 'src')) &&
                 (attributeValue.startsWith('/') || startsWithIgnoreCase(attributeValue, 'http:') || startsWithIgnoreCase(attributeValue, 'https:'))) {
                 
-                ((AttributesImpl) atts).setValue(i, rewriteURI(baseURI, attributeValue.toURI()) as String)
+                def resolvedAttributeValue = resolve(requestURI, attributeValue)
+                
+                ((AttributesImpl) atts).setValue(i, resolvedAttributeValue instanceof URI ? rewriteURI(baseURI, resolvedAttributeValue) as String :
+                    rewriteURL(baseURI, resolvedAttributeValue))
             }
         }
         delegate.startElement(uri, localName, qName, atts)
@@ -40,6 +43,30 @@ class URIRewritingContentHandler extends URIAwareContentHandler {
             builder.path(target.rawPath)
         }
         builder.query(target.rawQuery).fragment(target.rawFragment).build().toUri()
+    }
+    
+    /**
+     * Alternative rewriting method for URIs that {@link URI} doesn't want to parse.
+     */
+    String rewriteURL(URI baseURI, URL target) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment(target.protocol, target.authority)
+        if (target.path) {
+            builder.path(target.path)
+        }
+        builder.query(target.query).fragment(target.ref).build().toUriString()
+    }
+    
+    /**
+     * @return either a {@link URI} or a {@link URL}
+     */
+    def resolve(URI requestURI, String attributeValue) {
+        try {
+            requestURI.resolve(attributeValue)
+        }
+        catch (IllegalArgumentException ex) {
+            log.warn(ex.message)
+            new URL(requestURI.toURL(), attributeValue)
+        }
     }
 
 }

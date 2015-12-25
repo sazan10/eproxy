@@ -90,7 +90,7 @@ class Proxy {
                 ContentType contentType = ContentType.getLenient(httpResponse.entity)
                 Charset charset = contentType?.charset ?: Charset.forName('UTF-8')
                 OutputStream outputStream = response.outputStream
-                if (rewriteConfig && contentType && supportedMIMETypes.html.contains(contentType.mimeType ?: '')) {
+                if (rewriteConfig && contentType?.mimeType && supportedMIMETypes.html.contains(contentType.mimeType)) {
                     Writer outputWriter = new OutputStreamWriter(outputStream, charset)
                     Parser parser = new Parser()
                     try {
@@ -183,7 +183,7 @@ class Proxy {
     }
     
     int getPort(String scheme, int port) {
-        port == -1I || (scheme?.equalsIgnoreCase('http') && port == 80I) || (scheme?.equalsIgnoreCase('https') && port == 443I) ? -1I : port
+        port == -1I || (scheme == 'http' && port == 80I) || (scheme == 'https' && port == 443I) ? -1I : port
     }
     
     void setRequestEntity(HttpEntityEnclosingRequest uriRequest, String contentLength, InputStream inputStream) {
