@@ -1,7 +1,6 @@
 package com.eaio.eproxy.rewriting
 
 import static org.apache.commons.lang3.StringUtils.*
-import groovy.util.logging.Slf4j
 
 import org.ccil.cowan.tagsoup.AttributesImpl
 import org.springframework.web.util.UriComponentsBuilder
@@ -11,12 +10,11 @@ import org.xml.sax.SAXException
 import com.eaio.eproxy.entities.RewriteConfig
 
 /**
- * Rewrites <tt>src</tt>, <tt>href</tt> and <tt>&lt;meta content</tt> attributes.
+ * Rewrites <tt>src</tt>, <tt>href</tt> and <tt>action</tt> attributes.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@Slf4j
 class URIRewritingContentHandler extends URIAwareContentHandler {
 
     RewriteConfig rewriteConfig
@@ -63,7 +61,6 @@ class URIRewritingContentHandler extends URIAwareContentHandler {
             requestURI.resolve(attributeValue)
         }
         catch (IllegalArgumentException ex) {
-            log.warn(ex.message)
             new URL(new URL(requestURI.scheme, requestURI.host, requestURI.port, requestURI.rawPath), attributeValue)
         }
     }
