@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriComponentsBuilder
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
+import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.*
@@ -79,8 +80,8 @@ class Proxy {
             response.setStatus(httpResponse.statusLine.statusCode, httpResponse.statusLine.reasonPhrase)
             
             httpResponse.headerIterator().each { Header header ->
-                if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link
-                    response.setHeader(header.name, rewriteURI(baseURI, header.value.toURI()) as String)                    
+                if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
+                    response.setHeader(header.name, rewrite(baseURI, header.value.toURI(), rewriteConfig ? new RewriteConfig(rewrite: true) : null) as String)                    
                 }
                 else {
                     response.setHeader(header.name, header.value)
@@ -93,18 +94,20 @@ class Proxy {
                 OutputStream outputStream = response.outputStream
                 if (rewriteConfig && contentType?.mimeType && supportedMIMETypes.html.contains(contentType.mimeType)) {
                     Writer outputWriter = new OutputStreamWriter(outputStream, charset)
-                    Parser parser = new Parser()
+                    XMLReader xmlReader = newXMLReader()
                     try {
-                        parser.contentHandler = new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
-                            new RemoveActiveContentContentHandler(delegate:
-                                new RemoveNoScriptElementsContentHandler(delegate: new HTMLSerializer(outputWriter))
-                                )  
-                            )
-                        parser.parse(new InputSource(new InputStreamReader(httpResponse.entity.content, charset)))
+                        xmlReader.contentHandler = new MetaRewritingContentHandler(delegate:
+                                new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
+                                    new RemoveActiveContentContentHandler(delegate:
+                                        new RemoveNoScriptElementsContentHandler(delegate: new HTMLSerializer(outputWriter))
+                                            )
+                                        )
+                                    )
+                        xmlReader.parse(new InputSource(new InputStreamReader(httpResponse.entity.content, charset)))
                     }
                     catch (SAXException ex) {
-                        log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) parser.contentHandler).documentLocator.lineNumber,
-                             ((DelegatingContentHandler) parser.contentHandler).documentLocator.columnNumber, ex)
+                        log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
+                             ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber, ex)
                         throw ex
                     }
                     finally {
@@ -175,8 +178,8 @@ class Proxy {
         contextPath ? StringUtils.substringAfter(requestURI, contextPath) : requestURI
     }
     
-    URI rewriteURI(URI baseURI, URI target) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment(target.scheme, target.authority)
+    URI rewrite(URI baseURI, URI target, RewriteConfig rewriteConfig = null) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment((rewriteConfig ? 'ah-' : '') + target.scheme, target.authority)
         if (target.rawPath) {
             builder.path(target.rawPath)
         }
@@ -189,6 +192,10 @@ class Proxy {
     
     void setRequestEntity(HttpEntityEnclosingRequest uriRequest, String contentLength, InputStream inputStream) {
         uriRequest.entity = contentLength?.integer ? new InputStreamEntity(inputStream, contentLength as int) : new InputStreamEntity(inputStream)
+    }
+    
+    XMLReader newXMLReader() {
+        new Parser()
     }
 
 }
