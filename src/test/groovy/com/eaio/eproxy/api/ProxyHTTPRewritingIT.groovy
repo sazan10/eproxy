@@ -42,7 +42,7 @@ class ProxyHTTPRewritingIT {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
-            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+            getHeader: { String name -> null }
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -64,7 +64,7 @@ class ProxyHTTPRewritingIT {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
-            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+            getHeader: { String name -> null }
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -87,7 +87,7 @@ class ProxyHTTPRewritingIT {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
-            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+            getHeader: { String name -> null }
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -109,7 +109,7 @@ class ProxyHTTPRewritingIT {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
-            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+            getHeader: { String name -> null }
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -131,7 +131,7 @@ class ProxyHTTPRewritingIT {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
-            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+            getHeader: { String name -> null }
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -143,7 +143,7 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), not(containsString('onmouse')))
     }
     
-    /*// Currently broken due to TagSoup. Investigating...
+    // Broken in TagSoup. Investigating...
     @Test
     void '<noscript> contents should be removed'() {
         HttpServletRequest request = [
@@ -154,7 +154,7 @@ class ProxyHTTPRewritingIT {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
-            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+            getHeader: { String name -> null }
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -165,6 +165,5 @@ class ProxyHTTPRewritingIT {
         proxy.proxy('ah', 'https', request, response)
         assertThat(bOut.toString(0I), not(containsString('<meta http-equiv="refresh" content="0; URL=/?_fb_noscript=1')))
     }
-    */
     
 }

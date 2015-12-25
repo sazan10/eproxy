@@ -3,11 +3,13 @@ package com.eaio.eproxy.rewriting
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
 
-import org.ccil.cowan.tagsoup.Parser
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
 import org.xml.sax.InputSource
+import org.xml.sax.XMLReader
+
+import com.eaio.eproxy.api.Proxy
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -21,9 +23,9 @@ class RemoveActiveContentContentHandlerTest {
     @Test
     void 'active content and on* handlers should be removed'() {
         StringWriter output = new StringWriter()
-        Parser parser = new Parser()
-        parser.contentHandler = new RemoveActiveContentContentHandler(delegate: new HTMLSerializer(output))
-        parser.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/bla.html'))))
+        XMLReader xmlReader = new Proxy().newXMLReader()
+        xmlReader.contentHandler = new RemoveActiveContentContentHandler(delegate: new HTMLSerializer(output))
+        xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/bla.html'))))
         errorCollector.checkThat(output as String, not(containsString('<script')))
         errorCollector.checkThat(output as String, not(containsString('<noscript/>')))
         errorCollector.checkThat(output as String, containsString('<img src="fnuh.jpg">'))

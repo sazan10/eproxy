@@ -2,6 +2,7 @@ package com.eaio.eproxy.rewriting
 
 import static org.apache.commons.lang3.StringUtils.*
 
+import org.apache.xerces.parsers.AbstractSAXParser.AttributesProxy
 import org.ccil.cowan.tagsoup.AttributesImpl
 import org.springframework.web.util.UriComponentsBuilder
 import org.xml.sax.Attributes
@@ -27,7 +28,8 @@ class URIRewritingContentHandler extends URIAwareContentHandler {
                 
                 def resolvedAttributeValue = resolve(requestURI, attributeValue)
                 
-                ((AttributesImpl) atts).setValue(i, rewrite(baseURI, resolvedAttributeValue) as String)
+                //((AttributesImpl) atts).setValue(i, rewrite(baseURI, resolvedAttributeValue) as String) // TagSoup
+                ((AttributesProxy) atts).@fAttributes.setValue(i, rewrite(baseURI, resolvedAttributeValue) as String) // NekoHTML
             }
         }
         delegate.startElement(uri, localName, qName, atts)

@@ -2,6 +2,7 @@ package com.eaio.eproxy.rewriting
 
 import static org.apache.commons.lang3.StringUtils.*
 
+import org.apache.xerces.parsers.AbstractSAXParser.AttributesProxy
 import org.ccil.cowan.tagsoup.AttributesImpl
 import org.xml.sax.Attributes
 import org.xml.sax.ContentHandler
@@ -26,7 +27,8 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
         else {
             for (int i = 0I; i < atts?.length; ) {
                 if (startsWithIgnoreCase(name(atts.getLocalName(i), atts.getQName(i)), 'on')) {
-                    ((AttributesImpl) atts).removeAttribute(i)
+                    //((AttributesImpl) atts).removeAttribute(i) // TagSoup
+                    ((AttributesProxy) atts).@fAttributes.removeAttributeAt(i) // NekoHTML
                 }
                 else {
                     ++i

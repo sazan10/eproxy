@@ -42,7 +42,7 @@ class ProxyHTTPNoRedirectsIT {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
-            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+            getHeader: { String name -> null }
         ] as HttpServletRequest
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
@@ -65,7 +65,7 @@ class ProxyHTTPNoRedirectsIT {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
-            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+            getHeader: { String name -> null }
         ] as HttpServletRequest
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [

@@ -74,9 +74,8 @@ class ProxyHTTPPOSTNoRedirectsIT {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
-            getInputStream: { new DelegatingServletInputStream(new ByteArrayInputStream(data)) },
             getHeader: { String name -> name == 'Content-Length' ? data.length as String : null },
-            getHeaderNames: { [ 'Content-Length' ] as Enumeration }
+            getInputStream: { new DelegatingServletInputStream(new ByteArrayInputStream(data)) },
         ] as HttpServletRequest
         boolean statusSet = false, redirected = false
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()

@@ -20,6 +20,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.InputStreamEntity
 import org.apache.http.util.EntityUtils
 import org.ccil.cowan.tagsoup.Parser
+import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.PathVariable
@@ -71,6 +72,7 @@ class Proxy {
         HttpResponse httpResponse
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
+            addRequestHeadersTo(uriRequest, request)
             if (uriRequest instanceof HttpEntityEnclosingRequest) {
                 setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
             }
@@ -195,7 +197,19 @@ class Proxy {
     }
     
     XMLReader newXMLReader() {
-        new Parser()
+        //new Parser() // TagSoup
+        SAXParser out = new SAXParser()
+        out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
+        out
     }
+    
+    void addRequestHeadersTo(HttpUriRequest uriRequest, HttpServletRequest request) {
+        [ 'Accept', 'Accept-Language' ].each {
+            if (request.getHeader(it)) {
+                uriRequest.setHeader(it, request.getHeader(it))
+            }
+        }
+    }
+    
 
 }
