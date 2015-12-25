@@ -24,7 +24,7 @@ public class RewriteConfigTest {
      */
     @Test
     void testAsBoolean_2() {
-        assertThat(new RewriteConfig(removeActiveContent: true, rewrite: true, cloakUserAgent: true, removeNoScriptElements: true) as boolean, is(true))
+        assertThat(new RewriteConfig(removeActiveContent: true, rewrite: true, removeNoScriptElements: true) as boolean, is(true))
     }
 
 }

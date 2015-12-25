@@ -1,12 +1,11 @@
 package com.eaio.eproxy.rewriting
 
-import groovy.transform.InheritConstructors
-
 /**
+ * {@link ContentHandler} that knows where the document is coming from.
+ * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@InheritConstructors
 class URIAwareContentHandler extends DelegatingContentHandler {
 
     URI baseURI, requestURI 

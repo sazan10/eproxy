@@ -12,7 +12,6 @@ public class DummyTest {
 
     @Test
     public void hardlyATestLOL() {
-        new Dummy();
     }
 
 }

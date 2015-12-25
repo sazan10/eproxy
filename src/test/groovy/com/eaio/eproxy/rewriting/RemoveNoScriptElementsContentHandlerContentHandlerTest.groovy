@@ -22,7 +22,7 @@ class RemoveNoScriptElementsContentHandlerContentHandlerTest {
     void '<noscript> elements should be removed'() {
         StringWriter output = new StringWriter()
         Parser parser = new Parser()
-        parser.contentHandler = new RemoveNoScriptElementsContentHandler(new HTMLSerializer(output))
+        parser.contentHandler = new RemoveNoScriptElementsContentHandler(delegate: new HTMLSerializer(output))
         parser.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/bla.html'))))
         errorCollector.checkThat(output as String, containsString('''<img width="1" height="1" onerror="alert('oh')" src="dah.jpg">
 

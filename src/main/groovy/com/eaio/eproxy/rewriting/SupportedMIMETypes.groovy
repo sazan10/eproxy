@@ -3,6 +3,8 @@ package com.eaio.eproxy.rewriting
 import org.springframework.stereotype.Component
 
 /**
+ * MIME types that will be rewritten.
+ * 
  * @author <a href='mailto:johann@johannburkard.de'>Johann Burkard</a>
  * @version $Id$
  */

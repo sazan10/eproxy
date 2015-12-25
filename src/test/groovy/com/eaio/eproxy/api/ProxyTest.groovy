@@ -54,12 +54,12 @@ class ProxyTest {
     }
     
     @Test
-    @Parameters(method = 'rewriteLocationValueParameters')
-    void 'rewriteLocationValue should redirect URIs correctly'(String locationValue, String requestScheme, String requestHost, int requestPort, String contextPath, String expectation) {
-        assertThat(proxy.rewriteLocationValue(locationValue.toURI(), proxy.buildBaseURI(requestScheme, requestHost, requestPort, contextPath)), is (expectation.toURI()))
+    @Parameters(method = 'rewriteURIParameters')
+    void 'rewriteURI should redirect URIs correctly'(String locationValue, String requestScheme, String requestHost, int requestPort, String contextPath, String expectation) {
+        assertThat(proxy.rewriteURI(proxy.buildBaseURI(requestScheme, requestHost, requestPort, contextPath), locationValue.toURI()), is (expectation.toURI()))
     }
     
-    Collection<Object[]> rewriteLocationValueParameters() {
+    Collection<Object[]> rewriteURIParameters() {
         [
             [ 'http://www.n-tv.de', 'https', 'fnuh.com', -1, '/ah', 'https://fnuh.com/ah/http/www.n-tv.de' ],
             [ 'http://www.n-tv.de/', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/' ],

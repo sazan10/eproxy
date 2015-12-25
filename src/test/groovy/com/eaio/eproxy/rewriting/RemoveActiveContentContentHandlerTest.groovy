@@ -22,7 +22,7 @@ class RemoveActiveContentContentHandlerTest {
     void 'active content and on* handlers should be removed'() {
         StringWriter output = new StringWriter()
         Parser parser = new Parser()
-        parser.contentHandler = new RemoveActiveContentContentHandler(new HTMLSerializer(output))
+        parser.contentHandler = new RemoveActiveContentContentHandler(delegate: new HTMLSerializer(output))
         parser.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/bla.html'))))
         errorCollector.checkThat(output as String, not(containsString('<script')))
         errorCollector.checkThat(output as String, not(containsString('<noscript/>')))

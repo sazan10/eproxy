@@ -1,7 +1,6 @@
 package com.eaio.eproxy.rewriting
 
 import static org.apache.commons.lang3.StringUtils.*
-import groovy.transform.InheritConstructors
 
 import org.ccil.cowan.tagsoup.AttributesImpl
 import org.xml.sax.Attributes
@@ -18,7 +17,6 @@ import org.xml.sax.SAXException
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: TryEaioTransformer.java 7547 2015-07-01 20:02:47Z johann $
  */
-@InheritConstructors
 class RemoveActiveContentContentHandler extends DelegatingContentHandler {
     
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
@@ -52,12 +50,12 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
      * @see com.eaio.try_eaio.HTMLSerializer#characters(char[], int, int)
      */
     void characters(char[] ch, int start, int length) throws SAXException {
-        String tag = ''
+        String tag
         try {
             tag = stack.peek()
         }
         catch (EmptyStackException ex) {}
-        if (!defaultString(tag).equals('script')) {
+        if (tag != 'script') {
             delegate.characters(ch, start, length)
         }
     }

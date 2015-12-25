@@ -6,10 +6,10 @@ package com.eaio.eproxy.entities
  */
 class RewriteConfig {
 
-    boolean removeActiveContent, rewrite, cloakUserAgent, removeNoScriptElements
+    boolean removeActiveContent, rewrite, removeNoScriptElements
     
     boolean asBoolean() {
-        removeActiveContent || rewrite || cloakUserAgent || removeNoScriptElements
+        removeActiveContent || rewrite || removeNoScriptElements
     }
 
 }

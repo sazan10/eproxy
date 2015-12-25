@@ -1,7 +1,5 @@
 package com.eaio.eproxy.rewriting
 
-import groovy.transform.InheritConstructors
-
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
@@ -14,7 +12,6 @@ import org.xml.sax.SAXException
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@InheritConstructors
 class RemoveNoScriptElementsContentHandler extends DelegatingContentHandler {
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {

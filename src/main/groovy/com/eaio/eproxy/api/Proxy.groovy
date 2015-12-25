@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse
 
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.Header
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpResponse
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriComponentsBuilder
 import org.xml.sax.InputSource
+import org.xml.sax.SAXException
 
 import com.eaio.eproxy.rewriting.*
 import com.eaio.net.httpclient.TimingInterceptor
@@ -77,7 +79,7 @@ class Proxy {
             
             httpResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link
-                    response.setHeader(header.name, rewriteLocationValue(header.value.toURI(), baseURI) as String)                    
+                    response.setHeader(header.name, rewriteURI(baseURI, header.value.toURI()) as String)                    
                 }
                 else {
                     response.setHeader(header.name, header.value)
@@ -86,36 +88,49 @@ class Proxy {
 
             if (httpResponse.entity) {
                 ContentType contentType = ContentType.getLenient(httpResponse.entity)
-                Charset charset = contentType.charset ?: Charset.forName('UTF-8')
-                URIAwareContentHandler ch = new URIAwareContentHandler(baseURI: baseURI, requestURI: requestURI)
+                Charset charset = contentType?.charset ?: Charset.forName('UTF-8')
+                OutputStream outputStream = response.outputStream
                 if (rewriteConfig && contentType && supportedMIMETypes.html.contains(contentType.mimeType ?: '')) {
-                    Writer outputWriter = new OutputStreamWriter(response.outputStream, charset)
+                    Writer outputWriter = new OutputStreamWriter(outputStream, charset)
                     Parser parser = new Parser()
-                    parser.contentHandler = new URIRewritingContentHandler(
-                        new RemoveActiveContentContentHandler(
-                            new RemoveNoScriptElementsContentHandler(
-                                new HTMLSerializer(outputWriter)
-                                )
+                    try {
+                        parser.contentHandler = new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, delegate:
+                            new RemoveActiveContentContentHandler(delegate:
+                                new RemoveNoScriptElementsContentHandler(delegate: new HTMLSerializer(outputWriter))
+                                )  
                             )
-                        )
-                    parser.parse(new InputSource(new InputStreamReader(httpResponse.entity.content, charset)))
-                    outputWriter.flush()
+                        parser.parse(new InputSource(new InputStreamReader(httpResponse.entity.content, charset)))
+                    }
+                    catch (SAXException ex) {
+                        log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) parser.contentHandler).documentLocator.lineNumber,
+                             ((DelegatingContentHandler) parser.contentHandler).documentLocator.columnNumber, ex)
+                        throw ex
+                    }
+                    finally {
+                        outputWriter.flush()
+                    }
                 }
                 else {
-                    IOUtils.copyLarge(httpResponse.entity.content, response.outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+                    IOUtils.copyLarge(httpResponse.entity.content, outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
                 }
             }            
         }
 //        catch (UnknownHostException ex) {
 //            // TODO: 404?
 //        }
+        catch (IllegalStateException ex) {
+            // ignored
+        }
         catch (SocketException ex) {
             if (ex.message?.startsWith('Permission denied')) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, ex.message)
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, ExceptionUtils.getRootCauseMessage(ex))
             }
             else {
                 throw ex
             }
+        }
+        catch (SAXException ex) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ExceptionUtils.getRootCauseMessage(ex))
         }
         finally {
             TimingInterceptor.log(context, log)
@@ -159,12 +174,12 @@ class Proxy {
         contextPath ? StringUtils.substringAfter(requestURI, contextPath) : requestURI
     }
     
-    URI rewriteLocationValue(URI locationValue, URI baseURI) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment(locationValue.scheme, locationValue.authority)
-        if (locationValue.rawPath) {
-            builder.path(locationValue.rawPath)
+    URI rewriteURI(URI baseURI, URI target) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment(target.scheme, target.authority)
+        if (target.rawPath) {
+            builder.path(target.rawPath)
         }
-        builder.query(locationValue.rawQuery).fragment(locationValue.rawFragment).build().toUri()
+        builder.query(target.rawQuery).fragment(target.rawFragment).build().toUri()
     }
     
     int getPort(String scheme, int port) {
