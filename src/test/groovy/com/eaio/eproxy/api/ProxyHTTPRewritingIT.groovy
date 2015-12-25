@@ -57,7 +57,7 @@ class ProxyHTTPRewritingIT {
     @Test
     void 'Google Font API URLs should be rewritten'() {
         HttpServletRequest request = [
-            getRequestURI: { '/ui-http/www.google.com/intl/en/policies/privacy/' },
+            getRequestURI: { '/ah-http/www.google.com/intl/en/policies/privacy/' },
             getContextPath: { '' },
             getQueryString: { null },
             getMethod: { 'GET' },
@@ -72,8 +72,9 @@ class ProxyHTTPRewritingIT {
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
-        proxy.proxy('ui', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('<html'))
+        proxy.proxy('ah', 'http', request, response)
+        assertThat(bOut.toString(0I), allOf(containsString('<html'),
+            containsString('<link href="http://fnuh.com/ah-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic|Product+Sans:400&amp;lang=en"')))
     }
     
     @Test
@@ -96,6 +97,28 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletResponse
         proxy.proxy('http', request, response)
         assertThat(bOut.toString(0I), containsString(' * See: https://www.google.com/fonts/license/productsans'))
+    }
+    
+    @Test
+    void 'forms should be rewritten'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-http/www.google.com' },
+            getContextPath: { '' },
+            getQueryString: { null },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeaderNames: { Collections.EMPTY_LIST as Enumeration }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'http', request, response)
+        assertThat(bOut.toString(0I), containsString('action="http://fnuh.com/ah-http/www.google.com/search"'))
     }
     
 }

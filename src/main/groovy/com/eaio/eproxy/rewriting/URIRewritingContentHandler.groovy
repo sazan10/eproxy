@@ -24,21 +24,20 @@ class URIRewritingContentHandler extends URIAwareContentHandler {
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         atts?.length?.times { int i ->
             String attributeName = name(atts.getLocalName(i), atts.getQName(i)), attributeValue = trimToNull(atts.getValue(i))
-            if ((equalsIgnoreCase(attributeName, 'href') || equalsIgnoreCase(attributeName, 'src')) &&
+            if ((equalsIgnoreCase(attributeName, 'href') || equalsIgnoreCase(attributeName, 'src') || equalsIgnoreCase(attributeName, 'action')) &&
                 (attributeValue.startsWith('/') || startsWithIgnoreCase(attributeValue, 'http:') || startsWithIgnoreCase(attributeValue, 'https:'))) {
                 
                 def resolvedAttributeValue = resolve(requestURI, attributeValue)
                 
-                ((AttributesImpl) atts).setValue(i, resolvedAttributeValue instanceof URI ? rewriteURI(baseURI, resolvedAttributeValue) as String :
-                    rewriteURL(baseURI, resolvedAttributeValue))
+                ((AttributesImpl) atts).setValue(i, rewrite(baseURI, resolvedAttributeValue) as String)
             }
         }
         delegate.startElement(uri, localName, qName, atts)
     }
     
     // TODO: Copy & paste!
-    URI rewriteURI(URI baseURI, URI target) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment(target.scheme, target.authority)
+    URI rewrite(URI baseURI, URI target) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment((rewriteConfig ? 'ah-' : '') + target.scheme, target.authority)
         if (target.rawPath) {
             builder.path(target.rawPath)
         }
@@ -48,8 +47,8 @@ class URIRewritingContentHandler extends URIAwareContentHandler {
     /**
      * Alternative rewriting method for URIs that {@link URI} doesn't want to parse.
      */
-    String rewriteURL(URI baseURI, URL target) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment(target.protocol, target.authority)
+    String rewrite(URI baseURI, URL target) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment((rewriteConfig ? 'ah-' : '') + target.protocol, target.authority)
         if (target.path) {
             builder.path(target.path)
         }
@@ -65,7 +64,7 @@ class URIRewritingContentHandler extends URIAwareContentHandler {
         }
         catch (IllegalArgumentException ex) {
             log.warn(ex.message)
-            new URL(requestURI.toURL(), attributeValue)
+            new URL(new URL(requestURI.scheme, requestURI.host, requestURI.port, requestURI.rawPath), attributeValue)
         }
     }
 

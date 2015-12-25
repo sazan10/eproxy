@@ -29,6 +29,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 
+import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.*
 import com.eaio.net.httpclient.TimingInterceptor
 
@@ -94,7 +95,7 @@ class Proxy {
                     Writer outputWriter = new OutputStreamWriter(outputStream, charset)
                     Parser parser = new Parser()
                     try {
-                        parser.contentHandler = new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, delegate:
+                        parser.contentHandler = new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
                             new RemoveActiveContentContentHandler(delegate:
                                 new RemoveNoScriptElementsContentHandler(delegate: new HTMLSerializer(outputWriter))
                                 )  
