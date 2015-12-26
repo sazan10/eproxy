@@ -98,13 +98,17 @@ class Proxy {
                     Writer outputWriter = new OutputStreamWriter(outputStream, charset)
                     XMLReader xmlReader = newXMLReader()
                     try {
-                        xmlReader.contentHandler = new MetaRewritingContentHandler(delegate:
-                                new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
-                                    new RemoveActiveContentContentHandler(delegate:
-                                        new RemoveNoScriptElementsContentHandler(delegate: new HTMLSerializer(outputWriter))
+                        xmlReader.contentHandler = new CSSRewritingContentHandler(delegate:
+                            new MetaRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
+                                new RemoveActiveContentContentHandler(delegate:
+                                    new RemoveNoScriptElementsContentHandler(delegate:
+                                        new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
+                                                new HTMLSerializer(outputWriter)
+                                                )
                                             )
                                         )
                                     )
+                                )
                         xmlReader.parse(new InputSource(new InputStreamReader(httpResponse.entity.content, charset)))
                     }
                     catch (SAXException ex) {

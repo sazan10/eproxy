@@ -18,7 +18,7 @@ import org.xml.sax.SAXException
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: TryEaioTransformer.java 7547 2015-07-01 20:02:47Z johann $
  */
-class RemoveActiveContentContentHandler extends DelegatingContentHandler {
+class RemoveActiveContentContentHandler extends RewritingContentHandler {
     
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'script')) {
@@ -27,8 +27,7 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
         else {
             for (int i = 0I; i < atts?.length; ) {
                 if (startsWithIgnoreCase(name(atts.getLocalName(i), atts.getQName(i)), 'on')) {
-                    //((AttributesImpl) atts).removeAttribute(i) // TagSoup
-                    ((AttributesProxy) atts).@fAttributes.removeAttributeAt(i) // NekoHTML
+                    removeAttribute(atts, i)
                 }
                 else {
                     ++i

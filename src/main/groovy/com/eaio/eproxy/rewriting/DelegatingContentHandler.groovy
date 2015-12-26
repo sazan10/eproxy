@@ -2,8 +2,6 @@ package com.eaio.eproxy.rewriting
 
 import static org.apache.commons.lang3.StringUtils.*
 
-import groovy.transform.TupleConstructor
-
 import org.xml.sax.ContentHandler
 import org.xml.sax.Locator
 
@@ -13,13 +11,11 @@ import org.xml.sax.Locator
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: HTMLSerializer.java 7637 2015-08-12 10:55:33Z johann $
  */
-class DelegatingContentHandler {
-    
-    final Stack<String> stack = new Stack<String>()
+class DelegatingContentHandler extends BaseContentHandler {
 
     Locator documentLocator
 
-    @Delegate    
+    @Delegate
     ContentHandler delegate
 
     @Override
@@ -28,12 +24,4 @@ class DelegatingContentHandler {
         delegate?.setDocumentLocator(documentLocator)
     }
     
-    static String name(String localName, String qName) {
-        lowerCase(defaultString(localName, defaultString(qName)))
-    }
-
-    static boolean nameIs(String localName, String qName, String expected) {
-        equalsIgnoreCase(name(localName, qName), expected)
-    }
-
 }

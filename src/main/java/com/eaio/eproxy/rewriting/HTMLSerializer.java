@@ -1,13 +1,14 @@
 package com.eaio.eproxy.rewriting;
 
-import static org.apache.commons.lang3.StringUtils.*;
-import static org.apache.commons.lang3.StringEscapeUtils.*;
-
-import static com.eaio.eproxy.rewriting.DelegatingContentHandler.*;
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.EmptyStackException;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -20,15 +21,13 @@ import org.xml.sax.SAXException;
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: HTMLSerializer.java 7637 2015-08-12 10:55:33Z johann $
  */
-public class HTMLSerializer implements ContentHandler {
+public class HTMLSerializer extends BaseContentHandler {
 
     private final Set<String> emptyElements = new TreeSet<String>(Arrays.asList("area", "base", "basefont", "br", "col", "frame", "hr", "img", "input", "isindex", "link", "meta", "param"));
 
     private Locator locator;
 
     private final Writer output;
-
-    private final Stack<String> stack = new Stack<String>();
 
     public HTMLSerializer(Writer output) {
         this.output = output;
@@ -45,12 +44,12 @@ public class HTMLSerializer implements ContentHandler {
 
     @Override
     public void startDocument() throws SAXException {
-        stack.clear();
+        getStack().clear();
     }
 
     @Override
     public void endDocument() throws SAXException {
-        stack.clear();
+        getStack().clear();
     }
 
     @Override
@@ -73,7 +72,7 @@ public class HTMLSerializer implements ContentHandler {
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         try {
             if (!emptyElements.contains(name(localName, qName))) {
-                stack.push(name(localName, qName));
+                getStack().push(name(localName, qName));
             }
             output.write('<');
             output.write(name(localName, qName));
@@ -97,10 +96,10 @@ public class HTMLSerializer implements ContentHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (!emptyElements.contains(name(localName, qName))) {
             try {
-                try {
-                    stack.pop();
-                }
-                catch (EmptyStackException ex) {}
+                getStack().pop();
+            }
+            catch (EmptyStackException ex) {}
+            try {
                 output.write("</");
                 output.write(name(localName, qName));
                 output.write(">");
@@ -129,14 +128,6 @@ public class HTMLSerializer implements ContentHandler {
         catch (IOException ex) {
             throw new SAXException(ex);
         }
-    }
-
-    @Override
-    public void processingInstruction(String target, String data) throws SAXException {
-    }
-
-    @Override
-    public void skippedEntity(String name) throws SAXException {
     }
 
 }

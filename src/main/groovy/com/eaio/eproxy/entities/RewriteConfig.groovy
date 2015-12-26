@@ -11,5 +11,10 @@ class RewriteConfig {
     boolean asBoolean() {
         removeActiveContent || rewrite || removeNoScriptElements
     }
+    
+    // Temporary
+    String toString() {
+        'ah-'
+    }
 
 }
