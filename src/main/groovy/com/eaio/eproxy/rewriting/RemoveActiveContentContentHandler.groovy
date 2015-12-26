@@ -22,7 +22,7 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
     
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'script')) {
-            stack.push(name(localName, qName))
+            stack.push('script')
         }
         else {
             for (int i = 0I; i < atts?.length; ) {
@@ -52,7 +52,6 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
 
     /**
      * Skips <tt>&lt;script&gt;</tt> contents.
-     * @see com.eaio.try_eaio.HTMLSerializer#characters(char[], int, int)
      */
     void characters(char[] ch, int start, int length) throws SAXException {
         String tag
