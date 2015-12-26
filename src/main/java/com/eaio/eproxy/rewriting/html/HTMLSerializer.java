@@ -116,7 +116,7 @@ public class HTMLSerializer extends BaseContentHandler {
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
         try {
-            output.write(ch, start, length);
+            output.write(escapeHtml4(new String(ch, start, length)));
         }
         catch (IOException ex) {
             throw new SAXException(ex);

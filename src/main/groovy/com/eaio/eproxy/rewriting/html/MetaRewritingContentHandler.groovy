@@ -9,12 +9,15 @@ import org.apache.http.util.CharArrayBuffer
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
+import com.eaio.eproxy.rewriting.URLManipulation
+
 /**
  * Rewrites <tt>meta refresh</tt>. Should be placed after {@link RemoveNoScriptElementsContentHandler}.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@Mixin(URLManipulation)
 class MetaRewritingContentHandler extends URIAwareContentHandler {
     
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
@@ -27,7 +30,7 @@ class MetaRewritingContentHandler extends URIAwareContentHandler {
                 HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
                 String timeout = elements[0I]?.name,
                     name = elements[0I].getParameterByName('URL')?.name,
-                    url = elements[0I]?.getParameterByName('URL')?.value,
+                    url = elements[0I]?.getParameterByName('URL')?.value?.trim()?.replaceFirst('^["\']', '').replaceFirst('["\']$', ''),
                     rewrittenURL = rewrite(baseURI, resolve(requestURI, url), rewriteConfig)
                 setAttributeValue(atts, atts.getIndex('content'), "${timeout}; ${name}=${rewrittenURL}")
             }

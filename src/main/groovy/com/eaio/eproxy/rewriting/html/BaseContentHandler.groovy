@@ -17,7 +17,7 @@ class BaseContentHandler extends DefaultHandler {
     final Stack<String> stack = new Stack<String>()
 
     String name(String localName, String qName) {
-        lowerCase(defaultString(localName, defaultString(qName)))
+        lowerCase(defaultString(qName, localName))
     }
 
     boolean nameIs(String localName, String qName, String expected) {
