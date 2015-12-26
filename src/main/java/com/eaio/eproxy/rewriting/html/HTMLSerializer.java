@@ -1,4 +1,4 @@
-package com.eaio.eproxy.rewriting;
+package com.eaio.eproxy.rewriting.html;
 
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -10,6 +10,7 @@ import java.util.EmptyStackException;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.xml.serialize.BaseMarkupSerializer;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -20,6 +21,8 @@ import org.xml.sax.SAXException;
  *
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: HTMLSerializer.java 7637 2015-08-12 10:55:33Z johann $
+ * @see BaseMarkupSerializer
+ * @see org.apache.xml.serialize.HTMLSerializer
  */
 public class HTMLSerializer extends BaseContentHandler {
 

@@ -1,4 +1,4 @@
-package com.eaio.eproxy.rewriting
+package com.eaio.eproxy.rewriting.html
 
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException

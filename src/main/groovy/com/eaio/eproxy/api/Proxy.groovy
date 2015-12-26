@@ -33,6 +33,7 @@ import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.*
+import com.eaio.eproxy.rewriting.html.*
 import com.eaio.net.httpclient.TimingInterceptor
 
 /**
@@ -41,6 +42,7 @@ import com.eaio.net.httpclient.TimingInterceptor
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@Mixin(URLManipulation)
 @RestController
 @Slf4j
 class Proxy {
@@ -72,7 +74,7 @@ class Proxy {
         HttpResponse httpResponse
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
-            addRequestHeadersTo(uriRequest, request)
+            addRequestHeaders(uriRequest, request)
             if (uriRequest instanceof HttpEntityEnclosingRequest) {
                 setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
             }
@@ -85,7 +87,7 @@ class Proxy {
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                     response.setHeader(header.name, rewrite(baseURI, header.value.toURI(), rewriteConfig ? new RewriteConfig(rewrite: true) : null) as String)                    
                 }
-                else {
+                else { // TODO Header whitelist
                     response.setHeader(header.name, header.value)
                 }
             }
@@ -125,9 +127,9 @@ class Proxy {
                 }
             }            
         }
-//        catch (UnknownHostException ex) {
-//            // TODO: 404?
-//        }
+        catch (UnknownHostException ex) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+        }
         catch (IllegalStateException ex) {
             // ignored
         }
@@ -162,7 +164,7 @@ class Proxy {
     }
     
     URI buildBaseURI(String scheme, String host, int port, String contextPath) {
-        UriComponentsBuilder.newInstance().scheme(scheme).host(host).port(getPort(scheme, port)).path(contextPath).build().toUri()
+        new URI(scheme, null, host, getPort(scheme, port), contextPath, null, null)
     }
     
     /**
@@ -184,20 +186,12 @@ class Proxy {
         contextPath ? StringUtils.substringAfter(requestURI, contextPath) : requestURI
     }
     
-    URI rewrite(URI baseURI, URI target, RewriteConfig rewriteConfig = null) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment((rewriteConfig ? 'ah-' : '') + target.scheme, target.authority)
-        if (target.rawPath) {
-            builder.path(target.rawPath)
-        }
-        builder.query(target.rawQuery).fragment(target.rawFragment).build().toUri()
-    }
-    
     int getPort(String scheme, int port) {
         port == -1I || (scheme == 'http' && port == 80I) || (scheme == 'https' && port == 443I) ? -1I : port
     }
     
     void setRequestEntity(HttpEntityEnclosingRequest uriRequest, String contentLength, InputStream inputStream) {
-        uriRequest.entity = contentLength?.integer ? new InputStreamEntity(inputStream, contentLength as int) : new InputStreamEntity(inputStream)
+        uriRequest.entity = contentLength?.isInteger() ? new InputStreamEntity(inputStream, contentLength as int) : new InputStreamEntity(inputStream)
     }
     
     XMLReader newXMLReader() {
@@ -207,7 +201,7 @@ class Proxy {
         out
     }
     
-    void addRequestHeadersTo(HttpUriRequest uriRequest, HttpServletRequest request) {
+    void addRequestHeaders(HttpUriRequest uriRequest, HttpServletRequest request) {
         [ 'Accept', 'Accept-Language' ].each {
             if (request.getHeader(it)) {
                 uriRequest.setHeader(it, request.getHeader(it))

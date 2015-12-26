@@ -1,4 +1,4 @@
-package com.eaio.eproxy.rewriting
+package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
 

@@ -1,4 +1,4 @@
-package com.eaio.eproxy.rewriting
+package com.eaio.eproxy.rewriting.html
 
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
@@ -8,6 +8,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
 import org.xml.sax.InputSource
+
+import com.eaio.eproxy.rewriting.html.RemoveNoScriptElementsContentHandler;
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>

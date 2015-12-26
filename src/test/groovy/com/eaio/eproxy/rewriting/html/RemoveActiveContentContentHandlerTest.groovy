@@ -1,4 +1,4 @@
-package com.eaio.eproxy.rewriting
+package com.eaio.eproxy.rewriting.html
 
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
@@ -10,6 +10,7 @@ import org.xml.sax.InputSource
 import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.api.Proxy
+import com.eaio.eproxy.rewriting.html.RemoveActiveContentContentHandler
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>

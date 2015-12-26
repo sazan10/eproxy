@@ -117,7 +117,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     HttpClient httpClient() {
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register('http', PlainConnectionSocketFactory.socketFactory)
-                .register('https', validateSSL ? new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(), NoopHostnameVerifier.INSTANCE) : SSLConnectionSocketFactory.systemSocketFactory) // TODO?
+                .register('https', validateSSL ? new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(), NoopHostnameVerifier.INSTANCE) : SSLConnectionSocketFactory.systemSocketFactory) // TODO Funktioniert das?
                 .build()
 
         if (!OnGoogleAppEngineOrDevserver.CONDITION) {

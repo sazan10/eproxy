@@ -56,7 +56,7 @@ class ProxyTest {
     @Test
     @Parameters(method = 'rewriteParameters')
     void 'rewrite should redirect URIs correctly'(String locationValue, String requestScheme, String requestHost, int requestPort, String contextPath, String expectation) {
-        assertThat(proxy.rewrite(proxy.buildBaseURI(requestScheme, requestHost, requestPort, contextPath), locationValue.toURI()), is (expectation.toURI()))
+        assertThat(proxy.rewrite(proxy.buildBaseURI(requestScheme, requestHost, requestPort, contextPath), locationValue.toURI()), is (expectation))
     }
     
     Collection<Object[]> rewriteParameters() {
