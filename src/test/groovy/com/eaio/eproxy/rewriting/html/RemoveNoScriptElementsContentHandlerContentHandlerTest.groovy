@@ -25,7 +25,7 @@ class RemoveNoScriptElementsContentHandlerContentHandlerTest {
         StringWriter output = new StringWriter()
         XMLReader reader = new Rewriting().newXMLReader()
         reader.contentHandler = new RemoveNoScriptElementsContentHandler(delegate: new HTMLSerializer(output))
-        reader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/bla.html'))))
+        reader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         errorCollector.checkThat(output as String, containsString('''<img width="1" height="1" onerror="alert('oh')" src="dah.jpg">
 
 

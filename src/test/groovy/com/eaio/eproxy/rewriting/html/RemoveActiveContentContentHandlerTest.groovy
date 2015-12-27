@@ -25,7 +25,7 @@ class RemoveActiveContentContentHandlerTest {
         StringWriter output = new StringWriter()
         XMLReader xmlReader = new Rewriting().newXMLReader()
         xmlReader.contentHandler = new RemoveActiveContentContentHandler(delegate: new HTMLSerializer(output))
-        xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/bla.html'))))
+        xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         errorCollector.checkThat(output as String, not(containsString('<script')))
         errorCollector.checkThat(output as String, not(containsString('<noscript/>')))
         errorCollector.checkThat(output as String, containsString('<img src="fnuh.jpg">'))

@@ -12,6 +12,7 @@ import org.xml.sax.SAXException
 import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
+import com.eaio.eproxy.rewriting.css.CSSRewritingContentHandler
 import com.eaio.eproxy.rewriting.html.*
 
 /**
@@ -37,7 +38,7 @@ class Rewriting {
             rewriteHTML(inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
         }
         else if (supportedMIMETypes.isCSS(mimeType)) {
-            
+            rewriteCSS(inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
         }
     }
     
@@ -45,7 +46,7 @@ class Rewriting {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset)
         XMLReader xmlReader = newXMLReader()
         try {
-            xmlReader.contentHandler = new CSSRewritingContentHandler(delegate:
+            xmlReader.contentHandler = new CSSRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
                 new MetaRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
                     new RemoveActiveContentContentHandler(delegate:
                         new RemoveNoScriptElementsContentHandler(delegate:
@@ -65,6 +66,16 @@ class Rewriting {
         }
         finally {
             outputWriter.flush()
+        }
+    }
+    
+    void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+        Writer outputWriter = new OutputStreamWriter(outputStream, charset)
+        try {
+            
+        }
+        finally {
+            
         }
     }
     

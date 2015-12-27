@@ -31,7 +31,7 @@ class MetaRewritingContentHandlerTest {
         XMLReader xmlReader = new Rewriting().newXMLReader()
         xmlReader.contentHandler = new MetaRewritingContentHandler(baseURI: 'http://rah.com/'.toURI(), requestURI: 'https://www.facebook.com/'.toURI(),
             rewriteConfig: new RewriteConfig(rewrite: true), delegate: new HTMLSerializer(output))
-        xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/bla.html'))))
+        xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         errorCollector.checkThat(output as String, containsString('<meta http-equiv="refresh" content="5; url=http://rah.com/ah-https/www.facebook.com/blorb.html"'))
     }
     
@@ -41,7 +41,7 @@ class MetaRewritingContentHandlerTest {
         XMLReader xmlReader = new Rewriting().newXMLReader()
         xmlReader.contentHandler = new MetaRewritingContentHandler(baseURI: 'http://rah.com/'.toURI(), requestURI: 'https://www.facebook.com/'.toURI(),
             rewriteConfig: new RewriteConfig(rewrite: true), delegate: new HTMLSerializer(output))
-        xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/baidu-redirect.html'))))
+        xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/baidu-redirect.html'))))
         errorCollector.checkThat(output as String, containsString('<meta http-equiv="refresh" content="0;URL=http://rah.com/ah-http/www.n-tv.de/"'))
     }
 
