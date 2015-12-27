@@ -1,5 +1,8 @@
 package com.eaio.eproxy.rewriting.css
 
+import static org.hamcrest.Matchers.*
+import static org.hamcrest.MatcherAssert.*
+
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 
@@ -16,7 +19,7 @@ import com.helger.css.decl.*
  */
 @Mixin(URLManipulation)
 @RunWith(JUnitParamsRunner)
-class CSSRewritingTest {
+class CSSRewritingContentHandlerTest {
     
     @Lazy
     CSSRewritingContentHandler cssRewritingContentHandler = new CSSRewritingContentHandler(baseURI: 'http://fnuh.com/'.toURI(),
@@ -26,7 +29,7 @@ class CSSRewritingTest {
     @Parameters(method = 'cssFilePaths')
     void 'should rewrite CSS file'(String cssFilePath) {
         String rewrittenCSS = cssRewritingContentHandler.rewriteCSS(new File(cssFilePath).newReader())
-        println rewrittenCSS
+        assertThat(rewrittenCSS, containsString('http://fnuh.com/ah-'))
     }
     
     Collection<Object[]> cssFilePaths() {
@@ -34,6 +37,12 @@ class CSSRewritingTest {
             [ 'src/test/resources/com/eaio/eproxy/rewriting/css/static.xx.fbcdn.net_rsrc.php_v2_yp_r_I5kTXq1bSJZ.css' ],
             [ 'src/test/resources/com/eaio/eproxy/rewriting/css/www_google_de.css' ],
         ].collect { it as Object[] }
+    }
+    
+    @Test
+    void 'should rewrite inline style sheet'() {
+        String style = 'height:110px;width:276px;background:url(/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png) no-repeat'
+        assertThat(cssRewritingContentHandler.rewriteStyleAttribute(style), containsString('background:url(http://fnuh.com/ah-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png'))
     }
 
 }

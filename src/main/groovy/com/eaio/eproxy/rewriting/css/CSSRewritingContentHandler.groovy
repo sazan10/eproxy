@@ -6,10 +6,12 @@ import org.xml.sax.SAXException
 import com.eaio.eproxy.rewriting.URLManipulation
 import com.eaio.eproxy.rewriting.html.URIAwareContentHandler
 import com.helger.css.ECSSVersion
+import com.helger.css.decl.CSSDeclarationList
 import com.helger.css.decl.CSSExpressionMemberTermURI
 import com.helger.css.decl.CascadingStyleSheet
 import com.helger.css.decl.IHasCSSDeclarations
 import com.helger.css.reader.CSSReader
+import com.helger.css.reader.CSSReaderDeclarationList
 import com.helger.css.reader.CSSReaderSettings
 import com.helger.css.writer.CSSWriter
 
@@ -26,12 +28,10 @@ class CSSRewritingContentHandler extends URIAwareContentHandler {
         if (nameIs(localName, qName, 'style')) {
             stack.push('style')
         }
-        /*else if (atts.getValue('style')) {
-            println atts.getValue('style')
-            String rewrittenCSS = rewriteCSS(new StringReader(atts.getValue('style')))
-            setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS) // TODO
+        else if (atts.getValue('style')) {
+            String rewrittenCSS = rewriteStyleAttribute(atts.getValue('style'))
+            setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS)
         }
-        */
         delegate.startElement(uri, localName, qName, atts)
     }
 
@@ -66,7 +66,23 @@ class CSSRewritingContentHandler extends URIAwareContentHandler {
     CSSReaderSettings newCSSReaderSettings() {
         new CSSReaderSettings(CSSVersion: ECSSVersion.CSS30)
     }
-    
+
+    String rewriteStyleAttribute(String attribute) {
+        CSSDeclarationList declarations = CSSReaderDeclarationList.readFromString(attribute, ECSSVersion.CSS30)
+        if (declarations == null) {
+            //...
+        }
+        // TODO
+        declarations.allDeclarations.each {
+            it.expression.each {
+                it.allMembers.findAll { it instanceof CSSExpressionMemberTermURI }.each {
+                    it.URI.URI = rewrite(baseURI, resolve(requestURI, it.URI.URI), rewriteConfig)
+                }
+            }
+        }
+        new CSSWriter(ECSSVersion.CSS30, true).getCSSAsString(declarations)
+    }
+
     String rewriteCSS(Reader reader) {
         CascadingStyleSheet css = CSSReader.readFromReader(new HasReaderImpl(reader: reader), newCSSReaderSettings())
         [ css.allRules, css.allImportRules, css.allNamespaceRules ].flatten().each {
