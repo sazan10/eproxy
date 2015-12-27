@@ -3,7 +3,7 @@ package com.eaio.eproxy.rewriting
 import org.springframework.stereotype.Component
 
 /**
- * MIME types that will be rewritten.
+ * MIME types that can be rewritten.
  * 
  * @author <a href='mailto:johann@johannburkard.de'>Johann Burkard</a>
  * @version $Id$
@@ -32,14 +32,22 @@ class SupportedMIMETypes {
 
     // TODO: Get rid of VBScript
 
-    Set<String> html = [
+    private Set<String> html = [
         'text/html',
         'text/x-server-parsed-html',
         'application/xml+xhtml',
     ] as Set
 
-    Set<String> css = [
+    boolean isHTML(String mimeType) {
+        html.contains(mimeType?.toLowerCase() ?: '')
+    }
+
+    /*private Set<String> css = [
         'text/css',
-    ] as Set
+    ] as Set*/
+
+    boolean isCSS(String mimeType) {
+        mimeType?.equalsIgnoreCase('text/css')
+    }
 
 }

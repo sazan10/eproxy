@@ -28,11 +28,9 @@ class MetaRewritingContentHandler extends URIAwareContentHandler {
                 buf.append(content)
                 ParserCursor cursor = new ParserCursor(0I, content.length())
                 HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
-                String timeout = elements[0I]?.name,
-                    name = elements[0I].getParameterByName('URL')?.name,
-                    url = elements[0I]?.getParameterByName('URL')?.value?.trim()?.replaceFirst('^["\']', '').replaceFirst('["\']$', ''),
-                    rewrittenURL = rewrite(baseURI, resolve(requestURI, url), rewriteConfig)
-                setAttributeValue(atts, atts.getIndex('content'), "${timeout}; ${name}=${rewrittenURL}")
+                String url = elements[0I]?.getParameterByName('URL')?.value,
+                    rewrittenURL = rewrite(baseURI, resolve(requestURI, url?.replaceFirst('^["\']', '').replaceFirst('["\']$', ''),), rewriteConfig)
+                setAttributeValue(atts, atts.getIndex('content'), replaceOnce(content, url, rewrittenURL))
             }
         }
         delegate.startElement(uri, localName, qName, atts)

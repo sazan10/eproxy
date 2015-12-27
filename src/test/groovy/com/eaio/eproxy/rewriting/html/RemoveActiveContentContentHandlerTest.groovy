@@ -9,8 +9,7 @@ import org.junit.rules.ErrorCollector
 import org.xml.sax.InputSource
 import org.xml.sax.XMLReader
 
-import com.eaio.eproxy.api.Proxy
-import com.eaio.eproxy.rewriting.html.RemoveActiveContentContentHandler
+import com.eaio.eproxy.rewriting.Rewriting
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -24,7 +23,7 @@ class RemoveActiveContentContentHandlerTest {
     @Test
     void 'active content and on* handlers should be removed'() {
         StringWriter output = new StringWriter()
-        XMLReader xmlReader = new Proxy().newXMLReader()
+        XMLReader xmlReader = new Rewriting().newXMLReader()
         xmlReader.contentHandler = new RemoveActiveContentContentHandler(delegate: new HTMLSerializer(output))
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/bla.html'))))
         errorCollector.checkThat(output as String, not(containsString('<script')))

@@ -54,7 +54,7 @@ class Proxy {
     HttpClient httpClient
     
     @Autowired
-    SupportedMIMETypes supportedMIMETypes
+    Rewriting rewriting
 
     @RequestMapping('/{scheme:https?}/**')
     void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
@@ -71,7 +71,7 @@ class Proxy {
         }
 
         HttpCacheContext context = HttpCacheContext.create()
-        HttpResponse httpResponse
+        HttpResponse remoteResponse
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
             addRequestHeaders(uriRequest, request)
@@ -79,11 +79,11 @@ class Proxy {
                 setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
             }
             
-            httpResponse = httpClient.execute(uriRequest, context)
+            remoteResponse = httpClient.execute(uriRequest, context)
             
-            response.setStatus(httpResponse.statusLine.statusCode, httpResponse.statusLine.reasonPhrase)
+            response.setStatus(remoteResponse.statusLine.statusCode, remoteResponse.statusLine.reasonPhrase)
             
-            httpResponse.headerIterator().each { Header header ->
+            remoteResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                     response.setHeader(header.name, rewrite(baseURI, header.value.toURI(), rewriteConfig ? new RewriteConfig(rewrite: true) : null) as String)                    
                 }
@@ -92,38 +92,15 @@ class Proxy {
                 }
             }
 
-            if (httpResponse.entity) {
-                ContentType contentType = ContentType.getLenient(httpResponse.entity)
+            if (remoteResponse.entity) {
+                ContentType contentType = ContentType.getLenient(remoteResponse.entity)
                 Charset charset = contentType?.charset ?: Charset.forName('UTF-8')
                 OutputStream outputStream = response.outputStream
-                if (rewriteConfig && contentType?.mimeType && supportedMIMETypes.html.contains(contentType.mimeType)) {
-                    Writer outputWriter = new OutputStreamWriter(outputStream, charset)
-                    XMLReader xmlReader = newXMLReader()
-                    try {
-                        xmlReader.contentHandler = new CSSRewritingContentHandler(delegate:
-                            new MetaRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
-                                new RemoveActiveContentContentHandler(delegate:
-                                    new RemoveNoScriptElementsContentHandler(delegate:
-                                        new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
-                                                new HTMLSerializer(outputWriter)
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                        xmlReader.parse(new InputSource(new InputStreamReader(httpResponse.entity.content, charset)))
-                    }
-                    catch (SAXException ex) {
-                        log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
-                             ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber, ex)
-                        throw ex
-                    }
-                    finally {
-                        outputWriter.flush()
-                    }
+                if (rewriting.canRewrite(rewriteConfig ? new RewriteConfig(rewrite: true) : null, contentType?.mimeType)) {
+                    rewriting.rewrite(remoteResponse.entity.content, outputStream, charset, baseURI, requestURI, new RewriteConfig(rewrite: true), contentType.mimeType)
                 }
                 else {
-                    IOUtils.copyLarge(httpResponse.entity.content, outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+                    IOUtils.copyLarge(remoteResponse.entity.content, outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
                 }
             }            
         }
@@ -146,7 +123,7 @@ class Proxy {
         }
         finally {
             TimingInterceptor.log(context, log)
-            EntityUtils.consumeQuietly(httpResponse?.entity)
+            EntityUtils.consumeQuietly(remoteResponse?.entity)
         }
     }
     
@@ -192,13 +169,6 @@ class Proxy {
     
     void setRequestEntity(HttpEntityEnclosingRequest uriRequest, String contentLength, InputStream inputStream) {
         uriRequest.entity = contentLength?.isInteger() ? new InputStreamEntity(inputStream, contentLength as int) : new InputStreamEntity(inputStream)
-    }
-    
-    XMLReader newXMLReader() {
-        //new Parser() // TagSoup
-        SAXParser out = new SAXParser()
-        out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
-        out
     }
     
     void addRequestHeaders(HttpUriRequest uriRequest, HttpServletRequest request) {
