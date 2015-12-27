@@ -19,21 +19,18 @@ import org.apache.http.client.methods.*
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.InputStreamEntity
 import org.apache.http.util.EntityUtils
-import org.ccil.cowan.tagsoup.Parser
-import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriComponentsBuilder
-import org.xml.sax.InputSource
 import org.xml.sax.SAXException
-import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.*
 import com.eaio.eproxy.rewriting.html.*
+import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.TimingInterceptor
 
 /**
@@ -50,11 +47,17 @@ class Proxy {
     @Value('${proxy.hostName}')
     String hostName
     
+    @Value('${http.totalTimeout}')
+    Long totalTimeout
+    
     @Autowired
     HttpClient httpClient
     
     @Autowired
     Rewriting rewriting
+    
+    @Autowired(required = false)
+    Timer timer
 
     @RequestMapping('/{scheme:https?}/**')
     void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
@@ -77,6 +80,10 @@ class Proxy {
             addRequestHeaders(uriRequest, request)
             if (uriRequest instanceof HttpEntityEnclosingRequest) {
                 setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
+            }
+            
+            if (totalTimeout) {
+                timer?.schedule(new AbortHttpUriRequestTask(uriRequest), totalTimeout)
             }
             
             remoteResponse = httpClient.execute(uriRequest, context)

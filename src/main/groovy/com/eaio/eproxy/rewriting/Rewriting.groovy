@@ -28,12 +28,16 @@ class Rewriting {
     SupportedMIMETypes supportedMIMETypes
     
     boolean canRewrite(RewriteConfig rewriteConfig, String mimeType) {
-        rewriteConfig && (supportedMIMETypes.isHTML(mimeType) || supportedMIMETypes.isCSS(mimeType))
+        // TODO: Look at Content-Disposition header to prevent downloads from being rewritten
+        rewriteConfig && supportedMIMETypes.isHTML(mimeType)// || supportedMIMETypes.isCSS(mimeType))
     }
     
     void rewrite(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig, String mimeType) {
         if (supportedMIMETypes.isHTML(mimeType)) {
             rewriteHTML(inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
+        }
+        else if (supportedMIMETypes.isCSS(mimeType)) {
+            
         }
     }
     
@@ -64,7 +68,7 @@ class Rewriting {
         }
     }
     
-    private XMLReader newXMLReader() {
+    XMLReader newXMLReader() {
         //new Parser() // TagSoup
         SAXParser out = new SAXParser()
         out.setFeature('http://cyberneko.org/html/features/balance-tags', false)

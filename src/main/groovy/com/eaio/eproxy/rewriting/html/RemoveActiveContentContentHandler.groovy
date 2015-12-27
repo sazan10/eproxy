@@ -2,8 +2,6 @@ package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
 
-import org.apache.xerces.parsers.AbstractSAXParser.AttributesProxy
-import org.ccil.cowan.tagsoup.AttributesImpl
 import org.xml.sax.Attributes
 import org.xml.sax.ContentHandler
 import org.xml.sax.SAXException
