@@ -44,9 +44,6 @@ import com.eaio.net.httpclient.TimingInterceptor
 @Slf4j
 class Proxy {
     
-    @Value('${proxy.hostName}')
-    String hostName
-    
     @Value('${http.totalTimeout}')
     Long totalTimeout
     
@@ -154,7 +151,6 @@ class Proxy {
     /**
      * Make sure to remove the context path before calling this method.
      */
-    // TODO: Use ReEncodingRedirectStrategy
     URI buildRequestURI(String scheme, String requestURI, String queryString) {
         String host, path
         host = StringUtils.substringAfter(requestURI[1..-1], '/')
@@ -175,7 +171,7 @@ class Proxy {
     }
     
     void setRequestEntity(HttpEntityEnclosingRequest uriRequest, String contentLength, InputStream inputStream) {
-        uriRequest.entity = contentLength?.isInteger() ? new InputStreamEntity(inputStream, contentLength as int) : new InputStreamEntity(inputStream)
+        uriRequest.entity = new InputStreamEntity(inputStream, contentLength?.isLong() ? contentLength as long : -1L)
     }
     
     void addRequestHeaders(HttpUriRequest uriRequest, HttpServletRequest request) {
