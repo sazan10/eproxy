@@ -194,4 +194,26 @@ class ProxyHTTPRewritingIT {
         errorCollector.checkThat(bOut.toString(0I), containsString('<use xlink:href="'))
     }
     
+    @Test
+    void 'CSS should be rewritten'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-https/static.xx.fbcdn.net/rsrc.php/v2/yL/r/EZnQqgEpw9Z.css' },
+            getContextPath: { '' },
+            getQueryString: { null },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeader: { String name -> null }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('._4f7n{background-image:url(data:image/png;base64,iVBORw0KGgoAAAA'))
+    }
+    
 }
