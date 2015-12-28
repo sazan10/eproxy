@@ -6,10 +6,9 @@ import org.xml.sax.SAXException
 import com.eaio.eproxy.rewriting.URLManipulation
 import com.eaio.eproxy.rewriting.html.URIAwareContentHandler
 import com.helger.css.ECSSVersion
-import com.helger.css.decl.CSSDeclarationList
-import com.helger.css.decl.CSSExpressionMemberTermURI
-import com.helger.css.decl.CascadingStyleSheet
-import com.helger.css.decl.IHasCSSDeclarations
+import com.helger.css.decl.*
+import com.helger.css.decl.visit.CSSVisitor
+import com.helger.css.decl.visit.ICSSUrlVisitor
 import com.helger.css.reader.CSSReader
 import com.helger.css.reader.CSSReaderDeclarationList
 import com.helger.css.reader.CSSReaderSettings
@@ -22,7 +21,7 @@ import com.helger.css.writer.CSSWriter
  * @version $Id$
  */
 @Mixin(URLManipulation)
-class CSSRewritingContentHandler extends URIAwareContentHandler {
+class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSUrlVisitor {
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'style')) {
@@ -66,37 +65,46 @@ class CSSRewritingContentHandler extends URIAwareContentHandler {
     CSSReaderSettings newCSSReaderSettings() {
         new CSSReaderSettings(CSSVersion: ECSSVersion.CSS30)
     }
+    
+    CSSWriter newCSSWriter() {
+        new CSSWriter(ECSSVersion.CSS30, true)
+    }
 
     String rewriteStyleAttribute(String attribute) {
         CSSDeclarationList declarations = CSSReaderDeclarationList.readFromString(attribute, ECSSVersion.CSS30)
         if (declarations == null) {
-            //...
+            // TODO...
         }
-        // TODO
-        declarations.allDeclarations.each {
-            it.expression.each {
-                it.allMembers.findAll { it instanceof CSSExpressionMemberTermURI }.each {
-                    it.URI.URI = rewrite(baseURI, resolve(requestURI, it.URI.URI), rewriteConfig)
-                }
-            }
-        }
-        new CSSWriter(ECSSVersion.CSS30, true).getCSSAsString(declarations)
+        CSSVisitor.visitAllDeclarationUrls(declarations, this)
+        newCSSWriter().getCSSAsString(declarations)
     }
 
     String rewriteCSS(Reader reader) {
         CascadingStyleSheet css = CSSReader.readFromReader(new HasReaderImpl(reader: reader), newCSSReaderSettings())
-        [ css.allRules, css.allImportRules, css.allNamespaceRules ].flatten().each {
-            if (it instanceof IHasCSSDeclarations) {
-                it.allDeclarations.each {
-                    it.expression.each {
-                        it.allMembers.findAll { it instanceof CSSExpressionMemberTermURI }.each {
-                            it.URI.URI = rewrite(baseURI, resolve(requestURI, it.URI.URI), rewriteConfig)
-                        }
-                    }
-                }
-            }
+        if (css == null) {
+            // TODO...
         }
-        new CSSWriter(ECSSVersion.CSS30, true).getCSSAsString(css)
+        CSSVisitor.visitCSSUrl(css, this)
+        newCSSWriter().getCSSAsString(css)
+    }
+
+    @Override
+    void begin() {
+    }
+
+    @Override
+    void onImport(CSSImportRule importRule) {
+        importRule.location.URI = rewrite(baseURI, resolve(requestURI, importRule.location.URI), rewriteConfig)
+    }
+
+    @Override
+    void onUrlDeclaration(ICSSTopLevelRule topLevelRule,
+            CSSDeclaration declaration, CSSExpressionMemberTermURI uriTerm) {
+        uriTerm.URI.URI = rewrite(baseURI, resolve(requestURI, uriTerm.URI.URI), rewriteConfig)
+    }
+
+    @Override
+    void end() {
     }
 
 }
