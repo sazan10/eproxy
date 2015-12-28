@@ -8,7 +8,7 @@ import org.apache.commons.lang3.text.StrBuilder;
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-public class DirectStrBuilder extends StrBuilder {
+class DirectStrBuilder extends StrBuilder {
     
     private static final long serialVersionUID = -6168436101601496505L;
     
