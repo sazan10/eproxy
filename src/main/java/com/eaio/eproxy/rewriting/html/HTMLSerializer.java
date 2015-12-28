@@ -24,6 +24,7 @@ import org.xml.sax.SAXException;
  * @see BaseMarkupSerializer
  * @see org.apache.xml.serialize.HTMLSerializer
  */
+@SuppressWarnings("deprecation")
 public class HTMLSerializer extends BaseContentHandler {
 
     private final Set<String> emptyElements = new TreeSet<String>(Arrays.asList("area", "base", "basefont", "br", "col", "frame", "hr", "img", "input", "isindex", "link", "meta", "param"));

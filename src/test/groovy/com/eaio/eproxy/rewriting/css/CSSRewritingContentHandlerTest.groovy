@@ -1,11 +1,11 @@
 package com.eaio.eproxy.rewriting.css
 
-import static org.hamcrest.Matchers.*
 import static org.hamcrest.MatcherAssert.*
-
+import static org.hamcrest.Matchers.*
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 
+import org.apache.commons.lang3.text.StrBuilder
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -28,12 +28,14 @@ class CSSRewritingContentHandlerTest {
     @Test
     @Parameters(method = 'cssFilePaths')
     void 'should rewrite CSS file'(String cssFilePath) {
-        String rewrittenCSS = cssRewritingContentHandler.rewriteCSS(new File(cssFilePath).newReader())
-        assertThat(rewrittenCSS, containsString('http://fnuh.com/ah-'))
+        StrBuilder builder = new StrBuilder()
+        cssRewritingContentHandler.rewriteCSS(new File(cssFilePath).newReader(), builder.asWriter())
+        assertThat(builder.toString(), allOf(containsString('http://fnuh.com/ah-'), not(containsString('/ah-data'))))
     }
     
     Collection<Object[]> cssFilePaths() {
         [
+            [ 'src/test/resources/com/eaio/eproxy/rewriting/css/static.xx.fbcdn.net_rsrc.php_v2_yL_r_EZnQqgEpw9Z.css' ],
             [ 'src/test/resources/com/eaio/eproxy/rewriting/css/static.xx.fbcdn.net_rsrc.php_v2_yp_r_I5kTXq1bSJZ.css' ],
             [ 'src/test/resources/com/eaio/eproxy/rewriting/css/www_google_de.css' ],
         ].collect { it as Object[] }

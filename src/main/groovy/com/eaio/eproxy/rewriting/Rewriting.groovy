@@ -30,7 +30,7 @@ class Rewriting {
     
     boolean canRewrite(RewriteConfig rewriteConfig, String mimeType) {
         // TODO: Look at Content-Disposition header to prevent downloads from being rewritten
-        rewriteConfig && supportedMIMETypes.isHTML(mimeType)// || supportedMIMETypes.isCSS(mimeType))
+        rewriteConfig && (supportedMIMETypes.isHTML(mimeType) || supportedMIMETypes.isCSS(mimeType))
     }
     
     void rewrite(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig, String mimeType) {
@@ -46,11 +46,11 @@ class Rewriting {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset)
         XMLReader xmlReader = newXMLReader()
         try {
-            xmlReader.contentHandler = new CSSRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
-                new MetaRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
+            xmlReader.contentHandler = new CSSRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
+                new MetaRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
                     new RemoveActiveContentContentHandler(delegate:
                         new RemoveNoScriptElementsContentHandler(delegate:
-                            new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: new RewriteConfig(rewrite: true), delegate:
+                            new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
                                     new HTMLSerializer(outputWriter)
                                     )
                                 )
@@ -65,22 +65,28 @@ class Rewriting {
             throw ex
         }
         finally {
-            outputWriter.flush()
+            try {
+                outputWriter.flush()
+            }
+            catch (IOException ignored) {}
         }
     }
     
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset)
         try {
-            
+            new CSSRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
+                .rewriteCSS(new InputStreamReader(inputStream, charset), outputWriter)
         }
         finally {
-            
+            try {
+                outputWriter.flush()
+            }
+            catch (IOException ignored) {}
         }
     }
     
     XMLReader newXMLReader() {
-        //new Parser() // TagSoup
         SAXParser out = new SAXParser()
         out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
         out

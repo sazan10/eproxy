@@ -1,5 +1,7 @@
 package com.eaio.eproxy.rewriting.css
 
+import groovy.util.logging.Slf4j
+
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
@@ -21,6 +23,7 @@ import com.helger.css.writer.CSSWriter
  * @version $Id$
  */
 @Mixin(URLManipulation)
+@Slf4j
 class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSUrlVisitor {
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
@@ -54,8 +57,9 @@ class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSU
         }
         catch (EmptyStackException ex) {}
         if (tag == 'style') {
-            String rewrittenCSS = rewriteCSS(new CharArrayReader(ch, start, length))
-            delegate.characters(rewrittenCSS.toCharArray(), 0I, rewrittenCSS.length()) // TODO FFS
+            DirectStrBuilder builder = new DirectStrBuilder(length)
+            rewriteCSS(new CharArrayReader(ch, start, length), builder.asWriter())
+            delegate.characters(builder.buffer, 0I, builder.length())
         }
         else {
             delegate.characters(ch, start, length)
@@ -79,13 +83,17 @@ class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSU
         newCSSWriter().getCSSAsString(declarations)
     }
 
-    String rewriteCSS(Reader reader) {
+    void rewriteCSS(Reader reader, Writer writer) {
         CascadingStyleSheet css = CSSReader.readFromReader(new HasReaderImpl(reader: reader), newCSSReaderSettings())
         if (css == null) {
             // TODO...
+            log.warn('couldn\'t parse {}', requestURI)
+            IOUtils.copyLarge(reader, writer)
         }
-        CSSVisitor.visitCSSUrl(css, this)
-        newCSSWriter().getCSSAsString(css)
+        else {
+            CSSVisitor.visitCSSUrl(css, this)
+            newCSSWriter().writeCSS(css, writer)
+        }
     }
 
     @Override
@@ -94,13 +102,16 @@ class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSU
 
     @Override
     void onImport(CSSImportRule importRule) {
-        importRule.location.URI = rewrite(baseURI, resolve(requestURI, importRule.location.URI), rewriteConfig)
+        if (!importRule.location.dataURL) {
+            importRule.location.URI = rewrite(baseURI, resolve(requestURI, importRule.location.URI), rewriteConfig)
+        }
     }
 
     @Override
-    void onUrlDeclaration(ICSSTopLevelRule topLevelRule,
-            CSSDeclaration declaration, CSSExpressionMemberTermURI uriTerm) {
-        uriTerm.URI.URI = rewrite(baseURI, resolve(requestURI, uriTerm.URI.URI), rewriteConfig)
+    void onUrlDeclaration(ICSSTopLevelRule topLevelRule, CSSDeclaration declaration, CSSExpressionMemberTermURI uriTerm) {
+        if (!uriTerm.URI.dataURL) {
+            uriTerm.URI.URI = rewrite(baseURI, resolve(requestURI, uriTerm.URI.URI), rewriteConfig)
+        }
     }
 
     @Override
