@@ -15,7 +15,7 @@
     </static-files>
 
     <automatic-scaling>
-        <max-concurrent-requests>5</max-concurrent-requests>
+        <max-concurrent-requests>10</max-concurrent-requests>
     </automatic-scaling>
 
 </appengine-web-app>
