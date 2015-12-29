@@ -10,6 +10,7 @@ import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
 import com.eaio.eproxy.rewriting.URLManipulation
+import com.eaio.stringsearch.BNDMCI
 
 /**
  * Rewrites <tt>meta refresh</tt>. Should be placed after {@link RemoveNoScriptElementsContentHandler}.
@@ -20,10 +21,18 @@ import com.eaio.eproxy.rewriting.URLManipulation
 @Mixin(URLManipulation)
 class MetaRewritingContentHandler extends URIAwareContentHandler {
     
+    @Lazy
+    private transient BNDMCI bndmci = new BNDMCI()
+    
+    @Lazy
+    private transient Object patternRefresh = bndmci.processString('refresh'),
+        patternURL = bndmci.processString('url')
+    
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-        if (nameIs(localName, qName, 'meta') && containsIgnoreCase(atts.getValue('http-equiv'), 'refresh')) {
-            String content = atts.getValue('content')
-            if (containsIgnoreCase(content, 'url')) {
+        if (nameIs(localName, qName, 'meta')) {
+            String httpEquiv = atts.getValue('http-equiv'),
+                content = atts.getValue('content')
+            if (httpEquiv && content && bndmci.searchString(httpEquiv, 'refresh', patternRefresh) >= 0I && bndmci.searchString(content, 'url', patternURL) >= 0I) {
                 CharArrayBuffer buf = new CharArrayBuffer(content.length())
                 buf.append(content)
                 ParserCursor cursor = new ParserCursor(0I, content.length())

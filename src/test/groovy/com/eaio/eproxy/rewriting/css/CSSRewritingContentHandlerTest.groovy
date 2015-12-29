@@ -27,19 +27,14 @@ class CSSRewritingContentHandlerTest {
 
     @Test
     @Parameters(method = 'cssFilePaths')
-    void 'should rewrite CSS file'(String cssFilePath) {
+    void 'should rewrite CSS file'(File cssFile) {
         StrBuilder builder = new StrBuilder()
-        cssRewritingContentHandler.rewriteCSS(new File(cssFilePath).newReader(), builder.asWriter())
+        cssRewritingContentHandler.rewriteCSS(cssFile.newReader(), builder.asWriter())
         assertThat(builder.toString(), allOf(containsString('http://fnuh.com/ah-'), not(containsString('/ah-data')), not(containsString('url(/rsrc.php'))))
     }
     
     Collection<Object[]> cssFilePaths() {
-        [
-            [ 'src/test/resources/com/eaio/eproxy/rewriting/css/static.xx.fbcdn.net_rsrc.php_v2_yL_r_EZnQqgEpw9Z.css' ],
-            [ 'src/test/resources/com/eaio/eproxy/rewriting/css/static.xx.fbcdn.net_rsrc.php_v2_yp_r_I5kTXq1bSJZ.css' ],
-            [ 'src/test/resources/com/eaio/eproxy/rewriting/css/static.xx.fbcdn.net_rsrc.php_v2_yU_r_uJkddOF83JT.css' ],
-            [ 'src/test/resources/com/eaio/eproxy/rewriting/css/www_google_de.css' ],
-        ].collect { it as Object[] }
+        new File('src/test/resources/com/eaio/eproxy/rewriting/css').listFiles().collect { [ it ] as Object[] } 
     }
     
     @Test

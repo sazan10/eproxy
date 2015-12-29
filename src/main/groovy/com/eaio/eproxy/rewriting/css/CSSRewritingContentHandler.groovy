@@ -7,13 +7,16 @@ import org.xml.sax.SAXException
 
 import com.eaio.eproxy.rewriting.URLManipulation
 import com.eaio.eproxy.rewriting.html.URIAwareContentHandler
+import com.eaio.stringsearch.BNDMCI
 import com.helger.css.ECSSVersion
 import com.helger.css.decl.*
 import com.helger.css.decl.visit.CSSVisitor
 import com.helger.css.decl.visit.ICSSUrlVisitor
+import com.helger.css.handler.LoggingCSSParseExceptionCallback
 import com.helger.css.reader.CSSReader
 import com.helger.css.reader.CSSReaderDeclarationList
 import com.helger.css.reader.CSSReaderSettings
+import com.helger.css.reader.errorhandler.LoggingCSSParseErrorHandler
 import com.helger.css.writer.CSSWriter
 
 /**
@@ -24,15 +27,29 @@ import com.helger.css.writer.CSSWriter
  */
 @Mixin(URLManipulation)
 @Slf4j
-class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSUrlVisitor {
+class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSUrlVisitor/*, ICSSParseErrorHandler */ {
+    
+    // TODO: implement ICSSParseErrorHandler
+    
+    @Lazy
+    private transient BNDMCI bndmci = new BNDMCI()
+    
+    @Lazy
+    private transient Object patternURL = bndmci.processString('url')
+    
+    @Lazy
+    private transient char[] charArrayURL = 'url'.toCharArray()
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'style')) {
             stack.push('style')
         }
-        else if (atts.getValue('style')) {
-            String rewrittenCSS = rewriteStyleAttribute(atts.getValue('style'))
-            setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS)
+        else {
+            String styleAttribute = atts?.getValue('style')
+            if (styleAttribute && bndmci.searchString(styleAttribute, 'url', patternURL) >= 0I) {
+                String rewrittenCSS = rewriteStyleAttribute(styleAttribute)
+                setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS)
+            }
         }
         delegate.startElement(uri, localName, qName, atts)
     }
@@ -56,7 +73,7 @@ class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSU
             tag = stack.peek()
         }
         catch (EmptyStackException ex) {}
-        if (tag == 'style') {
+        if (tag == 'style' && bndmci.searchChars(ch, start, start + length, charArrayURL, patternURL) >= 0I) {
             DirectStrBuilder builder = new DirectStrBuilder(length)
             rewriteCSS(new CharArrayReader(ch, start, length), builder.asWriter())
             delegate.characters(builder.buffer, 0I, builder.length())
@@ -67,30 +84,29 @@ class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSU
     }
 
     CSSReaderSettings newCSSReaderSettings() {
-        new CSSReaderSettings(CSSVersion: ECSSVersion.CSS30)
+        new CSSReaderSettings(CSSVersion: ECSSVersion.CSS30, customErrorHandler: new LoggingCSSParseErrorHandler(),
+            customExceptionHandler: new LoggingCSSParseExceptionCallback())
     }
-    
+
     CSSWriter newCSSWriter() {
         new CSSWriter(ECSSVersion.CSS30, true)
     }
 
     String rewriteStyleAttribute(String attribute) {
-        CSSDeclarationList declarations = CSSReaderDeclarationList.readFromString(attribute, ECSSVersion.CSS30)
+        CSSDeclarationList declarations = CSSReaderDeclarationList.readFromString(attribute, ECSSVersion.CSS30,
+            new LoggingCSSParseErrorHandler(), new LoggingCSSParseExceptionCallback()) // TODO
         if (declarations == null) {
-            // TODO...
+            '' // Should be logged already.
         }
-        CSSVisitor.visitAllDeclarationUrls(declarations, this)
-        newCSSWriter().getCSSAsString(declarations)
+        else {
+            CSSVisitor.visitAllDeclarationUrls(declarations, this)
+            newCSSWriter().getCSSAsString(declarations)
+        }
     }
 
     void rewriteCSS(Reader reader, Writer writer) {
         CascadingStyleSheet css = CSSReader.readFromReader(new HasReaderImpl(reader: reader), newCSSReaderSettings())
-        if (css == null) {
-            // TODO...
-            log.warn('couldn\'t parse {}', requestURI)
-            IOUtils.copyLarge(reader, writer)
-        }
-        else {
+        if (css != null) {
             CSSVisitor.visitCSSUrl(css, this)
             newCSSWriter().writeCSS(css, writer)
         }
