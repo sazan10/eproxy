@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-import org.apache.commons.io.output.NullOutputStream
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +15,6 @@ import org.springframework.mock.web.DelegatingServletInputStream
 import org.springframework.mock.web.DelegatingServletOutputStream
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-import com.eaio.eproxy.api.Proxy
 import com.eaio.eproxy.Eproxy
 
 /**

@@ -15,7 +15,6 @@ import org.springframework.boot.test.WebIntegrationTest
 import org.springframework.mock.web.DelegatingServletOutputStream
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-import com.eaio.eproxy.api.Proxy
 import com.eaio.eproxy.Eproxy
 
 /**
@@ -71,6 +70,29 @@ class ProxyHTTPNoRedirectsIT {
         HttpServletResponse response = [
             setStatus: { int status, String message -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/ah-http/www.n-tv.de/')); redirected = true } },
+            getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'http', request, response)
+        assertThat(statusSet, is(true))
+        assertThat(redirected, is(true))
+    }
+    
+    @Test
+    void 'relative redirects should be supported'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/http/edition.cnn.com/guides' },
+            getContextPath: { '' },
+            getQueryString: { null },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeader: { String name -> null }
+        ] as HttpServletRequest
+        boolean statusSet = false, redirected = false
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
+            setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/ah-http/edition.cnn.com/specials/travel/guides')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
         ] as HttpServletResponse
         proxy.proxy('ah', 'http', request, response)

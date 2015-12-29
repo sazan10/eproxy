@@ -89,7 +89,7 @@ class Proxy {
             
             remoteResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
-                    response.setHeader(header.name, rewrite(baseURI, header.value.toURI(), rewriteConfig ? new RewriteConfig(rewrite: true) : null) as String)                    
+                    response.setHeader(header.name, rewrite(baseURI, resolve(requestURI, header.value), rewriteConfig ? new RewriteConfig(rewrite: true) : null) as String)
                 }
                 else { // TODO Header whitelist
                     response.setHeader(header.name, header.value)

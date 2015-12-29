@@ -147,7 +147,6 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), not(containsString(' on')))
     }
     
-    // Broken in TagSoup. Investigating...
     @Test
     void '<noscript> contents should be removed'() {
         HttpServletRequest request = [
