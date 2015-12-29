@@ -38,7 +38,7 @@ class MetaRewritingContentHandler extends URIAwareContentHandler {
                 ParserCursor cursor = new ParserCursor(0I, content.length())
                 HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
                 String url = elements[0I]?.getParameterByName('URL')?.value,
-                    rewrittenURL = rewrite(baseURI, resolve(requestURI, url?.replaceFirst('^["\']', '').replaceFirst('["\']$', ''),), rewriteConfig)
+                    rewrittenURL = rewrite(baseURI, requestURI, url?.replaceFirst('^["\']', '').replaceFirst('["\']$', ''), rewriteConfig)
                 setAttributeValue(atts, atts.getIndex('content'), replaceOnce(content, url, rewrittenURL))
             }
         }

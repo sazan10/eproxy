@@ -23,7 +23,7 @@ class URIRewritingContentHandler extends URIAwareContentHandler {
             if ((equalsIgnoreCase(attributeName, 'href') || equalsIgnoreCase(attributeName, 'src') || equalsIgnoreCase(attributeName, 'action')) &&
                 (attributeValue.startsWith('/') || startsWithIgnoreCase(attributeValue, 'http:') || startsWithIgnoreCase(attributeValue, 'https:'))) {
                 
-                setAttributeValue(atts, i, rewrite(baseURI, resolve(requestURI, attributeValue), rewriteConfig))
+                setAttributeValue(atts, i, rewrite(baseURI, requestURI, attributeValue, rewriteConfig))
             }
         }
         delegate.startElement(uri, localName, qName, atts)

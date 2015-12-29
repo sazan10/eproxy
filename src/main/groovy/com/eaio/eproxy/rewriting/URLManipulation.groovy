@@ -2,39 +2,45 @@ package com.eaio.eproxy.rewriting
 
 import org.springframework.web.util.UriComponentsBuilder
 
+import com.eaio.eproxy.entities.RewriteConfig
+
 /**
- * Mixin for a few URL manipulation methods. Not a <tt>trait</tt> because of weird side-effects.
+ * Mixin for very few URL manipulation methods. Not a <tt>trait</tt> because of weird side-effects.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
 class URLManipulation {
-    
-    String rewrite(URI baseURI, URI target, def rewriteConfig = null) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment((rewriteConfig?.toString() ?: '') + target.scheme, target.authority)
-        if (target.rawPath) {
-            builder.path(target.rawPath)
-        }
-        builder.query(target.rawQuery).fragment(target.rawFragment).build().toUriString()
-    }
-    
+
     /**
-     * Alternative rewriting method for URIs that {@link URI} doesn't want to parse.
+     * Resolves <tt>uri</tt> relative to <tt>requestURI</tt>, then turns it all into Eproxy's URL scheme.
      */
-    String rewrite(URI baseURI, URL target, def rewriteConfig = null) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI).pathSegment((rewriteConfig?.toString() ?: '') + target.protocol, target.authority)
-        if (target.path) {
-            builder.path(target.path)
+    String rewrite(URI baseURI, URI requestURI, String uri, RewriteConfig rewriteConfig = null) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI)
+        def resolvedURI = resolve(requestURI, uri)
+        if (resolvedURI instanceof URI) {
+            builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURI.scheme, resolvedURI.authority)
+            if (resolvedURI.rawPath) {
+                builder.path(resolvedURI.rawPath)
+            }
+            builder.query(resolvedURI.rawQuery).fragment(resolvedURI.rawFragment)
         }
-        builder.query(target.query).fragment(target.ref).build().toUriString()
+        else if (resolvedURI instanceof URL) {
+            builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURI.protocol, resolvedURI.authority)
+            if (resolvedURI.path) {
+                builder.path(resolvedURI.path)
+            }
+            builder.query(resolvedURI.query).fragment(resolvedURI.ref)
+        }
+        builder.build().toUriString()
     }
-    
+
     /**
      * Resolves a potentially relative URI to a reference URI.
      * 
      * @return either a {@link URI} or a {@link URL}
      */
-    Serializable resolve(URI requestURI, String attributeValue) {
+    private Serializable resolve(URI requestURI, String attributeValue) {
         try {
             requestURI.resolve(attributeValue)
         }
@@ -42,4 +48,5 @@ class URLManipulation {
             new URL(new URL(requestURI.scheme, requestURI.host, requestURI.port, requestURI.rawPath), attributeValue)
         }
     }
+    
 }

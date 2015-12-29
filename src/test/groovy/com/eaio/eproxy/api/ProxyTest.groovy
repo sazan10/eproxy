@@ -52,22 +52,6 @@ class ProxyTest {
     }
     
     @Test
-    @Parameters(method = 'rewriteParameters')
-    void 'rewrite should redirect URIs correctly'(String locationValue, String requestScheme, String requestHost, int requestPort, String contextPath, String expectation) {
-        assertThat(proxy.rewrite(proxy.buildBaseURI(requestScheme, requestHost, requestPort, contextPath), locationValue.toURI()), is (expectation))
-    }
-    
-    Collection<Object[]> rewriteParameters() {
-        [
-            [ 'http://www.n-tv.de', 'https', 'fnuh.com', -1, '/ah', 'https://fnuh.com/ah/http/www.n-tv.de' ],
-            [ 'http://www.n-tv.de/', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/' ],
-            [ 'http://www.n-tv.de:81/', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de:81/' ],
-            [ 'http://www.n-tv.de/#rah', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/#rah' ],
-            [ 'http://www.n-tv.de/?ah=ha#rah', 'https', 'fnuh.com', -1, '', 'https://fnuh.com/http/www.n-tv.de/?ah=ha#rah' ],
-        ].collect { it as Object[] }
-    }
-    
-    @Test
     @Parameters(method = 'getPortParameters')
     void 'getPort should skip port 80 and 443'(String scheme, int port, int expectation) {
         assertThat(proxy.getPort(scheme, port), is(expectation))

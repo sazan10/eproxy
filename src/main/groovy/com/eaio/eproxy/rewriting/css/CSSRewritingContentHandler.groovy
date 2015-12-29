@@ -119,14 +119,14 @@ class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSU
     @Override
     void onImport(CSSImportRule importRule) {
         if (!importRule.location.dataURL) {
-            importRule.location.URI = rewrite(baseURI, resolve(requestURI, importRule.location.URI), rewriteConfig)
+            importRule.location.URI = rewrite(baseURI, requestURI, importRule.location.URI, rewriteConfig)
         }
     }
 
     @Override
     void onUrlDeclaration(ICSSTopLevelRule topLevelRule, CSSDeclaration declaration, CSSExpressionMemberTermURI uriTerm) {
         if (!uriTerm.URI.dataURL) {
-            uriTerm.URI.URI = rewrite(baseURI, resolve(requestURI, uriTerm.URI.URI), rewriteConfig)
+            uriTerm.URI.URI = rewrite(baseURI, requestURI, uriTerm.URI.URI, rewriteConfig)
         }
     }
 
