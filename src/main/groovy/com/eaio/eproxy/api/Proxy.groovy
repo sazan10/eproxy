@@ -16,6 +16,7 @@ import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.cache.HttpCacheContext
 import org.apache.http.client.methods.*
+import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.InputStreamEntity
 import org.apache.http.util.EntityUtils
@@ -91,7 +92,7 @@ class Proxy {
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                     response.setHeader(header.name, rewrite(baseURI, requestURI, header.value, rewriteConfig ? new RewriteConfig(rewrite: true) : null))
                 }
-                else if (!(header.name?.equalsIgnoreCase('content-security-policy'))) { // TODO Header whitelist
+                else if (!(header.name?.equalsIgnoreCase('Content-Security-Policy')) && !(header.name?.equalsIgnoreCase('Content-Length'))) { // TODO Header whitelist
                     response.setHeader(header.name, header.value)
                 }
             }
@@ -109,21 +110,36 @@ class Proxy {
             }            
         }
         catch (UnknownHostException ex) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+            try {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+            }
+            catch (IllegalStateException ex2) {}
         }
         catch (IllegalStateException ex) {
             // ignored
         }
         catch (SocketException ex) {
             if (ex.message?.startsWith('Permission denied')) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, ExceptionUtils.getRootCauseMessage(ex))
+                try {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, ExceptionUtils.getRootCauseMessage(ex))
+                }
+                catch (IllegalStateException ex2) {}
             }
             else {
                 throw ex
             }
         }
+        catch (HttpHostConnectException ex) {
+            try {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+            }
+            catch (IllegalStateException ex2) {}
+        }
         catch (SAXException ex) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ExceptionUtils.getRootCauseMessage(ex))
+            try {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ExceptionUtils.getRootCauseMessage(ex))
+            }
+            catch (IllegalStateException ex2) {}
         }
         finally {
             TimingInterceptor.log(context, log)

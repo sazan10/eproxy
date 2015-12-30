@@ -59,7 +59,7 @@ class Rewriting {
                             )
                         )
                     )
-            xmlReader.parse(new InputSource(new InputStreamReader(inputStream, charset)))
+            xmlReader.parse(new InputSource(new InputStreamReader(inputStream, charset))) // TODO: BufferedReader?
         }
         catch (SAXException ex) {
             log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
