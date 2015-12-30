@@ -23,7 +23,7 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
             stack.push('script')
         }
         else {
-            for (int i = 0I; i < atts?.length; ) {
+            for (int i = 0I; i < atts.length; ) {
                 if (startsWithIgnoreCase(name(atts.getLocalName(i), atts.getQName(i)), 'on')) {
                     removeAttribute(atts, i)
                 }

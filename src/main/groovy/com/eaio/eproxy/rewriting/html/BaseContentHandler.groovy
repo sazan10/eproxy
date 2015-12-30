@@ -25,13 +25,11 @@ class BaseContentHandler extends DefaultHandler {
     }
     
     void setAttributeValue(Attributes atts, int index, String value) {
-        //((AttributesImpl) atts).setValue(index, value) // TagSoup
-        ((AttributesProxy) atts).@fAttributes.setValue(index, value) // NekoHTML
+        ((AttributesProxy) atts).@fAttributes.setValue(index, value)
     }
     
     void removeAttribute(Attributes atts, int index) {
-        //((AttributesImpl) atts).removeAttribute(index) // TagSoup
-        ((AttributesProxy) atts).@fAttributes.removeAttributeAt(index) // NekoHTML
+        ((AttributesProxy) atts).@fAttributes.removeAttributeAt(index)
     }
 
 }

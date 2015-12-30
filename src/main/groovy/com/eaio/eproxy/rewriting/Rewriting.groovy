@@ -50,8 +50,10 @@ class Rewriting {
                 new MetaRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
                     new RemoveActiveContentContentHandler(delegate:
                         new RemoveNoScriptElementsContentHandler(delegate:
-                            new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
-                                    new HTMLSerializer(outputWriter)
+                            new ImgSrcsetRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
+                                new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
+                                        new HTMLSerializer(outputWriter)
+                                        )
                                     )
                                 )
                             )
