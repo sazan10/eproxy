@@ -32,13 +32,13 @@ class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSU
     // TODO: implement ICSSParseErrorHandler
     
     @Lazy
-    private transient BNDMCI bndmci = new BNDMCI()
+    private BNDMCI bndmci = new BNDMCI()
     
     @Lazy
-    private transient Object patternURL = bndmci.processString('url')
+    private Object patternURL = bndmci.processString('url')
     
     @Lazy
-    private transient char[] charArrayURL = 'url'.toCharArray()
+    private char[] charArrayURL = 'url'.toCharArray()
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'style')) {
