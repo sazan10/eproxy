@@ -91,7 +91,7 @@ class Proxy {
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                     response.setHeader(header.name, rewrite(baseURI, requestURI, header.value, rewriteConfig ? new RewriteConfig(rewrite: true) : null))
                 }
-                else { // TODO Header whitelist
+                else if (!(header.name?.equalsIgnoreCase('content-security-policy'))) { // TODO Header whitelist
                     response.setHeader(header.name, header.value)
                 }
             }
