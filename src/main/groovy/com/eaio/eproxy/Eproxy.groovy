@@ -63,7 +63,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
 
     @Value('${http.connectionTimeout}')
     Integer connectionTimeout
-    
+
     @Value('${http.connectionRequestTimeout}')
     Integer connectionRequestTimeout
 
@@ -72,7 +72,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
 
     @Value('${http.maxRedirects}')
     Integer maxRedirects
-    
+
     @Value('${http.followPOSTAndDELETE}')
     Boolean followPOSTAndDELETE
 
@@ -84,23 +84,23 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
 
     @Value('${http.userAgent}')
     String userAgent
-    
+
     @Value('${http.validateAfterInactivity}')
     Integer validateAfterInactivity
-    
+
     // SOCKS proxy
-    
+
     @Value('${proxy.socks.host}')
     String proxySOCKSHost
-    
+
     @Value('${proxy.socks.port}')
     Integer proxySOCKSPort // Character not supported
-    
+
     // Cache
-    
+
     @Value('${cache.maxCacheEntries}')
     Integer maxEntries
-    
+
     @Value('${cache.maxObjectSize}')
     Integer maxObjectSize
 
@@ -116,25 +116,25 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Bean(destroyMethod = 'close')
     HttpClient httpClient() {
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register('http', PlainConnectionSocketFactory.socketFactory)
+        .register('http', PlainConnectionSocketFactory.socketFactory)
                 .register('https', validateSSL ? new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(), NoopHostnameVerifier.INSTANCE) : SSLConnectionSocketFactory.systemSocketFactory) // TODO Funktioniert das?
-                .build()
+        .build()
 
         if (!OnGoogleAppEngineOrDevserver.CONDITION) {
             if (proxySOCKSHost && proxySOCKSPort) {
                 Proxy socksProxy = new Proxy(Proxy.Type.SOCKS,
-                        InetSocketAddress.createUnresolved(proxySOCKSHost, proxySOCKSPort ?: 1080I))
+                InetSocketAddress.createUnresolved(proxySOCKSHost, proxySOCKSPort ?: 1080I))
 
                 socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                        .register('http', new SOCKSProxyConnectionSocketFactory(socketFactoryRegistry.lookup('http'), socksProxy))
-                        .register('https', new SOCKSProxyLayeredConnectionSocketFactory(socketFactoryRegistry.lookup('https'), socksProxy))
-                        .build()
+                .register('http', new SOCKSProxyConnectionSocketFactory(socketFactoryRegistry.lookup('http'), socksProxy))
+                .register('https', new SOCKSProxyLayeredConnectionSocketFactory(socketFactoryRegistry.lookup('https'), socksProxy))
+                .build()
             }
         }
-        
+
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry,
-            ManagedHttpClientConnectionFactory.INSTANCE, DefaultSchemePortResolver.INSTANCE,
-            new TimingDnsResolver(SystemDefaultDnsResolver.INSTANCE), clientConnectionTimeout ?: 60000L, TimeUnit.MILLISECONDS)
+        ManagedHttpClientConnectionFactory.INSTANCE, DefaultSchemePortResolver.INSTANCE,
+        new TimingDnsResolver(SystemDefaultDnsResolver.INSTANCE), clientConnectionTimeout ?: 60000L, TimeUnit.MILLISECONDS)
         connectionManager.with {
             maxTotal = maxTotalSockets ?: 32I
             defaultMaxPerRoute = maxSocketsPerRoute ?: 6I
@@ -144,45 +144,45 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         // Timeouts and redirect counts
 
         RequestConfig requestConfig = RequestConfig.custom()
-                .setCircularRedirectsAllowed(false)
-                .setConnectTimeout(connectionTimeout ?: 10000I)
-                .setConnectionRequestTimeout(connectionRequestTimeout ?: -1I)
-                .setSocketTimeout(readTimeout ?: 10000I)
-                .setMaxRedirects(maxRedirects ?: 10I)
-                .build()
-                
+        .setCircularRedirectsAllowed(false)
+        .setConnectTimeout(connectionTimeout ?: 10000I)
+        .setConnectionRequestTimeout(connectionRequestTimeout ?: 0I)
+        .setSocketTimeout(readTimeout ?: 10000I)
+        .setMaxRedirects(maxRedirects ?: 10I)
+        .build()
+
         log.info('RequestConfig: {}', requestConfig)
 
         // Timing
 
         TimingInterceptor timingInterceptor = new TimingInterceptor()
-        
+
         // Caching
-        
+
         CacheConfig cacheConfig = CacheConfig.custom()
-            .setMaxCacheEntries(maxEntries ?: 1000I)
-            .setMaxObjectSize(maxObjectSize ?: 1I << 20I)
-            .setSharedCache(true)
-            .build()
-            
+        .setMaxCacheEntries(maxEntries ?: 1000I)
+        .setMaxObjectSize(maxObjectSize ?: 1I << 20I)
+        .setSharedCache(true)
+        .build()
+
         // TODO: CachingExec - remove AsynchronousValidator
         // TODO: CachingExec - Via-Header-Erzeugung :(
 
         log.info('CacheConfig: {}', cacheConfig)
-        
+
         HttpClientBuilder builder = CachingHttpClients.custom()
-                .setCacheConfig(cacheConfig)
-                //.disableAuthCaching()
-                .disableCookieManagement()
-                .setConnectionManager(connectionManager)
-                // Retries
-                .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true)) // Maybe worth removing InterruptedIOException from list
-                // Fix insufficient handling of not encoded redirect URLs
-                .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy(reEncoding()) : new ReEncodingRedirectStrategy(reEncoding()))
-                .setDefaultRequestConfig(requestConfig)
-                .setUserAgent(userAgent)
-                .addInterceptorFirst((HttpRequestInterceptor) timingInterceptor)
-                .addInterceptorLast((HttpResponseInterceptor) timingInterceptor)
+        .setCacheConfig(cacheConfig)
+        //.disableAuthCaching()
+        .disableCookieManagement()
+        .setConnectionManager(connectionManager)
+        // Retries
+        .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true)) // Maybe worth removing InterruptedIOException from list
+        // Fix insufficient handling of not encoded redirect URLs
+        .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy(reEncoding()) : new ReEncodingRedirectStrategy(reEncoding()))
+        .setDefaultRequestConfig(requestConfig)
+        .setUserAgent(userAgent)
+        .addInterceptorFirst((HttpRequestInterceptor) timingInterceptor)
+        .addInterceptorLast((HttpResponseInterceptor) timingInterceptor)
 
         if (maxRedirects == 0I) {
             builder.disableRedirectHandling()
@@ -190,11 +190,11 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         if (retryCount == 0I) {
             builder.disableAutomaticRetries()
         }
-        
+
         CloseableHttpClient client = builder.build()
 
         // No standard interceptors
-        
+
         // RequestDefaultHeaders, RequestContent, RequestTargetHost, RequestClientConnControl, RequestUserAgent, RequestExpectContinue
 
         //        [ RequestExpectContinue, RequestClientConnControl, RequestAuthCache, RequestTargetAuthentication, RequestProxyAuthentication ].each {
@@ -209,7 +209,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     //                new SSLSocketFactory([ isTrusted: { X509Certificate[] chain, String authType -> true } ] as TrustStrategy, new NullX509HostnameVerifier())
     //                )
     //    }
-    
+
     @Bean
     ReEncoding reEncoding() {
         new ReEncoding()
