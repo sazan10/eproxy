@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 import org.apache.commons.io.output.NullOutputStream
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
@@ -213,6 +214,29 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletResponse
         proxy.proxy('ah', 'https', request, response)
         assertThat(bOut.toString(0I), containsString('._4f7n{background-image:url(data:image/png;base64,iVBORw0KGgoAAAA'))
+    }
+    
+    @Test
+    @Ignore('open bug at ph-css: https://github.com/phax/ph-css/issues/12')
+    void 'invalid BOMs should be ignored'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-https/www.deepdotweb.com/wp-content/themes/sahifa-child/style.css' },
+            getContextPath: { '' },
+            getQueryString: { 'ver=20150710' },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeader: { String name -> null }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('.woocommerce'))
     }
     
 }

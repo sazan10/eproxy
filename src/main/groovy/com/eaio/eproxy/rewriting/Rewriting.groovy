@@ -43,7 +43,7 @@ class Rewriting {
     }
     
     void rewriteHTML(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
-        Writer outputWriter = new OutputStreamWriter(outputStream, charset)
+        Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: Charset.forName('UTF-8'))
         XMLReader xmlReader = newXMLReader()
         try {
             xmlReader.contentHandler = new CSSRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
@@ -59,7 +59,7 @@ class Rewriting {
                             )
                         )
                     )
-            xmlReader.parse(new InputSource(new InputStreamReader(inputStream, charset))) // TODO: BufferedReader?
+            xmlReader.parse(new InputSource(new InputStreamReader(inputStream, charset ?: Charset.forName('UTF-8')))) // TODO: BufferedReader?
         }
         catch (SAXException ex) {
             log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
@@ -75,7 +75,7 @@ class Rewriting {
     }
     
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
-        Writer outputWriter = new OutputStreamWriter(outputStream, charset)
+        Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: Charset.forName('UTF-8'))
         try {
             new CSSRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
                 .rewriteCSS(new InputStreamReader(inputStream, charset), outputWriter)
