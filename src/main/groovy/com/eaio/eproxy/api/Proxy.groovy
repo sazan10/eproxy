@@ -67,7 +67,7 @@ class Proxy {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
         URI requestURI = buildRequestURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
         if (!requestURI.host) {
-            response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE)
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST)
             return
         }
 
@@ -99,10 +99,9 @@ class Proxy {
 
             if (remoteResponse.entity) {
                 ContentType contentType = ContentType.getLenient(remoteResponse.entity)
-                Charset charset = contentType?.charset ?: Charset.forName('UTF-8')
                 OutputStream outputStream = response.outputStream
                 if (rewriting.canRewrite(rewriteConfig ? new RewriteConfig(rewrite: true) : null, contentType?.mimeType)) {
-                    rewriting.rewrite(remoteResponse.entity.content, outputStream, charset, baseURI, requestURI, new RewriteConfig(rewrite: true), contentType.mimeType)
+                    rewriting.rewrite(remoteResponse.entity.content, outputStream, contentType.charset, baseURI, requestURI, new RewriteConfig(rewrite: true), contentType.mimeType)
                 }
                 else {
                     IOUtils.copyLarge(remoteResponse.entity.content, outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
@@ -119,7 +118,7 @@ class Proxy {
             // ignored
         }
         catch (SocketException ex) {
-            if (ex.message?.startsWith('Permission denied')) {
+            if (ex.message?.startsWith('Permission denied')) { // Google App Engine
                 try {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, ExceptionUtils.getRootCauseMessage(ex))
                 }
@@ -197,6 +196,5 @@ class Proxy {
             }
         }
     }
-    
 
 }
