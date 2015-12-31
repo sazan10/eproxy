@@ -134,11 +134,10 @@ class Proxy {
             }
             catch (IllegalStateException ex2) {}
         }
-        catch (SAXException ex) {
-            try {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ExceptionUtils.getRootCauseMessage(ex))
+        catch (IOException ex) {
+            if (ex.message != 'Broken pipe') {
+                throw ex
             }
-            catch (IllegalStateException ex2) {}
         }
         finally {
             TimingInterceptor.log(context, log)

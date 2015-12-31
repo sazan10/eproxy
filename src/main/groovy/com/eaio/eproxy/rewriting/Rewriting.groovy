@@ -4,6 +4,7 @@ import groovy.util.logging.Slf4j
 
 import java.nio.charset.Charset
 
+import org.apache.commons.lang3.exception.ExceptionUtils
 import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -62,9 +63,13 @@ class Rewriting {
             xmlReader.parse(new InputSource(new InputStreamReader(inputStream, charset ?: Charset.forName('UTF-8')))) // TODO: BufferedReader?
         }
         catch (SAXException ex) {
-            log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
-                 ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber, ex)
-            throw ex
+            if (ExceptionUtils.getRootCause(ex) instanceof IOException) {
+                throw ExceptionUtils.getRootCause(ex)
+            }
+            else {
+                log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
+                        ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber, ex)
+            }
         }
         finally {
             try {
@@ -78,7 +83,7 @@ class Rewriting {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: Charset.forName('UTF-8'))
         try {
             new CSSRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
-                .rewriteCSS(new InputStreamReader(inputStream, charset), outputWriter)
+                .rewriteCSS(new InputStreamReader(inputStream, charset ?: Charset.forName('UTF-8')), outputWriter)
         }
         finally {
             try {
