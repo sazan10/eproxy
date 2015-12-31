@@ -30,8 +30,6 @@ class ImgSrcsetRewritingContentContentHandlerTest {
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         errorCollector.checkThat(output as String, not(containsString('http://fnuh.com/creme.jpg')))
         errorCollector.checkThat(output as String, containsString(',http://rah.com/ah-https/plop.com/fnord.jpg 640w,'))
-        
-        println output as String
     }
 
 }
