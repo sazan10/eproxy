@@ -4,6 +4,7 @@ import groovy.util.logging.Slf4j
 
 import java.nio.charset.Charset
 
+import javax.net.ssl.SSLException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -16,6 +17,7 @@ import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.cache.HttpCacheContext
 import org.apache.http.client.methods.*
+import org.apache.http.conn.ConnectTimeoutException
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.InputStreamEntity
@@ -108,6 +110,12 @@ class Proxy {
                 }
             }            
         }
+        catch (ConnectTimeoutException ex) {
+            try {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+            }
+            catch (IllegalStateException ex2) {}
+        }
         catch (UnknownHostException ex) {
             try {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
@@ -133,6 +141,14 @@ class Proxy {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
             }
             catch (IllegalStateException ex2) {}
+        }
+        catch (SSLException ex) {
+            if (ExceptionUtils.getRootCauseMessage(ex) == 'InvalidAlgorithmParameterException: Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
+            }
+            else {
+                throw ex
+            }
         }
         catch (IOException ex) {
             if (ex.message != 'Broken pipe') {
