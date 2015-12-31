@@ -11,7 +11,6 @@ import org.junit.runner.RunWith
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.URLManipulation
-import com.helger.css.decl.*
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
