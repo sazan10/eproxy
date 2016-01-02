@@ -1,5 +1,7 @@
 package com.eaio.eproxy.rewriting.css
 
+import static org.apache.commons.lang3.StringUtils.*
+
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
 import junitparams.JUnitParamsRunner
