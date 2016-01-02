@@ -31,6 +31,7 @@ class URIRewritingContentHandler extends URIAwareContentHandler {
     
     private boolean attributeNameShouldBeRewritten(String attributeName) {
         switch (attributeName) {
+            case 'value':
             case 'object':
             case 'archive':
             case 'icon':
