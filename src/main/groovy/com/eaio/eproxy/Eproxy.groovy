@@ -1,7 +1,5 @@
 package com.eaio.eproxy
 
-import groovy.util.logging.Slf4j
-
 import java.util.concurrent.TimeUnit
 
 import org.apache.http.HttpRequestInterceptor
@@ -47,7 +45,6 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory
 @Configuration
 @EnableAutoConfiguration
 @EnableWebMvc
-@Slf4j
 class Eproxy extends WebMvcAutoConfigurationAdapter {
 
     // HttpClient
@@ -116,9 +113,9 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Bean(destroyMethod = 'close')
     HttpClient httpClient() {
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-        .register('http', PlainConnectionSocketFactory.socketFactory)
-                .register('https', validateSSL ? new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(), NoopHostnameVerifier.INSTANCE) : SSLConnectionSocketFactory.systemSocketFactory) // TODO Funktioniert das?
-        .build()
+            .register('http', PlainConnectionSocketFactory.socketFactory)
+            .register('https', validateSSL ? new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(), NoopHostnameVerifier.INSTANCE) : SSLConnectionSocketFactory.systemSocketFactory) // TODO Funktioniert das?
+            .build()
 
         if (!OnGoogleAppEngineOrDevserver.CONDITION) {
             if (proxySOCKSHost && proxySOCKSPort) {
@@ -126,15 +123,15 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
                 InetSocketAddress.createUnresolved(proxySOCKSHost, proxySOCKSPort ?: 1080I))
 
                 socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register('http', new SOCKSProxyConnectionSocketFactory(socketFactoryRegistry.lookup('http'), socksProxy))
-                .register('https', new SOCKSProxyLayeredConnectionSocketFactory(socketFactoryRegistry.lookup('https'), socksProxy))
-                .build()
+                    .register('http', new SOCKSProxyConnectionSocketFactory(socketFactoryRegistry.lookup('http'), socksProxy))
+                    .register('https', new SOCKSProxyLayeredConnectionSocketFactory(socketFactoryRegistry.lookup('https'), socksProxy))
+                    .build()
             }
         }
 
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry,
-        ManagedHttpClientConnectionFactory.INSTANCE, DefaultSchemePortResolver.INSTANCE,
-        new TimingDnsResolver(SystemDefaultDnsResolver.INSTANCE), clientConnectionTimeout ?: 60000L, TimeUnit.MILLISECONDS)
+            ManagedHttpClientConnectionFactory.INSTANCE, DefaultSchemePortResolver.INSTANCE,
+            new TimingDnsResolver(SystemDefaultDnsResolver.INSTANCE), clientConnectionTimeout ?: 60000L, TimeUnit.MILLISECONDS)
         connectionManager.with {
             maxTotal = maxTotalSockets ?: 32I
             defaultMaxPerRoute = maxSocketsPerRoute ?: 6I
@@ -144,14 +141,12 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         // Timeouts and redirect counts
 
         RequestConfig requestConfig = RequestConfig.custom()
-        .setCircularRedirectsAllowed(false)
-        .setConnectTimeout(connectionTimeout ?: 10000I)
-        .setConnectionRequestTimeout(connectionRequestTimeout ?: 0I)
-        .setSocketTimeout(readTimeout ?: 10000I)
-        .setMaxRedirects(maxRedirects ?: 10I)
-        .build()
-
-        log.info('RequestConfig: {}', requestConfig)
+            .setCircularRedirectsAllowed(false)
+            .setConnectTimeout(connectionTimeout ?: 10000I)
+            .setConnectionRequestTimeout(connectionRequestTimeout ?: 0I)
+            .setSocketTimeout(readTimeout ?: 10000I)
+            .setMaxRedirects(maxRedirects ?: 10I)
+            .build()
 
         // Timing
 
@@ -160,29 +155,27 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         // Caching
 
         CacheConfig cacheConfig = CacheConfig.custom()
-        .setMaxCacheEntries(maxEntries ?: 1000I)
-        .setMaxObjectSize(maxObjectSize ?: 1I << 20I)
-        .setSharedCache(true)
-        .build()
+            .setMaxCacheEntries(maxEntries ?: 1000I)
+            .setMaxObjectSize(maxObjectSize ?: 1I << 20I)
+            .setSharedCache(true)
+            .build()
 
         // TODO: CachingExec - remove AsynchronousValidator
         // TODO: CachingExec - Via-Header-Erzeugung :(
 
-        log.info('CacheConfig: {}', cacheConfig)
-
         HttpClientBuilder builder = CachingHttpClients.custom()
-        .setCacheConfig(cacheConfig)
-        //.disableAuthCaching()
-        .disableCookieManagement()
-        .setConnectionManager(connectionManager)
-        // Retries
-        .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true)) // Maybe worth removing InterruptedIOException from list
-        // Fix insufficient handling of not encoded redirect URLs
-        .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy(reEncoding()) : new ReEncodingRedirectStrategy(reEncoding()))
-        .setDefaultRequestConfig(requestConfig)
-        .setUserAgent(userAgent)
-        .addInterceptorFirst((HttpRequestInterceptor) timingInterceptor)
-        .addInterceptorLast((HttpResponseInterceptor) timingInterceptor)
+            .setCacheConfig(cacheConfig)
+            //.disableAuthCaching()
+            .disableCookieManagement()
+            .setConnectionManager(connectionManager)
+            // Retries
+            .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true)) // Maybe worth removing InterruptedIOException from list
+            // Fix insufficient handling of not encoded redirect URLs
+            .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy(reEncoding()) : new ReEncodingRedirectStrategy(reEncoding()))
+            .setDefaultRequestConfig(requestConfig)
+            .setUserAgent(userAgent)
+            .addInterceptorFirst((HttpRequestInterceptor) timingInterceptor)
+            .addInterceptorLast((HttpResponseInterceptor) timingInterceptor)
 
         if (maxRedirects == 0I) {
             builder.disableRedirectHandling()
@@ -235,7 +228,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Conditional(NotOnGoogleAppEngineOrDevserver)
     @Lazy
     Timer timer() {
-        new Timer('WebProxy', true)
+        new Timer('Eproxy', true)
     }
 
     static main(args) {
