@@ -13,25 +13,30 @@ import org.xml.sax.SAXException
  * @version $Id$
  */
 class RemoveNoScriptElementsContentHandler extends DelegatingContentHandler {
+    
+    boolean inNoscriptBlock
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'noscript')) {
-            stack.push('noscript')
+            inNoscriptBlock = true
         }
-        else if (!stack.contains('noscript')) {
+        else if (!inNoscriptBlock) {
             delegate.startElement(uri, localName, qName, atts)
         }
     }
 
     void endElement(String uri, String localName, String qName) throws SAXException {
         if (nameIs(localName, qName, 'noscript')) {
-            try {
-                stack.pop()
-            }
-            catch (EmptyStackException ex) {}
+            inNoscriptBlock = false
         }
-        else if (!stack.contains('noscript')) {
+        else if (!inNoscriptBlock) {
             delegate.endElement(uri, localName, qName)
+        }
+    }
+    
+    void characters(char[] ch, int start, int length) throws SAXException {
+        if (!inNoscriptBlock) {
+            delegate.characters(ch, start, length)
         }
     }
 

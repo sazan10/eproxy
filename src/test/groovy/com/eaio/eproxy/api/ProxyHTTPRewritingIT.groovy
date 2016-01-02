@@ -239,4 +239,26 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), containsString('.woocommerce'))
     }
     
+    @Test
+    void 'all <noscript> contents should be removed'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-https/twitter.com/intent/user' },
+            getContextPath: { '' },
+            getQueryString: { 'screen_name=johannburkard' },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeader: { String name -> null }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'https', request, response)
+        assertThat(bOut.toString(0I), allOf(not(containsString('display:block')), not(containsString('display: block'))))
+    }
+    
 }
