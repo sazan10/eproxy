@@ -102,7 +102,8 @@ class Proxy {
             if (remoteResponse.entity) {
                 ContentType contentType = ContentType.getLenient(remoteResponse.entity)
                 OutputStream outputStream = response.outputStream
-                if (rewriting.canRewrite(rewriteConfig ? new RewriteConfig(rewrite: true) : null, contentType?.mimeType)) {
+                String contentDisposition = request.getHeader('Content-Disposition')
+                if (rewriting.canRewrite(contentDisposition, rewriteConfig ? new RewriteConfig(rewrite: true) : null, contentType?.mimeType)) {
                     rewriting.rewrite(remoteResponse.entity.content, outputStream, contentType.charset, baseURI, requestURI, new RewriteConfig(rewrite: true), contentType.mimeType)
                 }
                 else {

@@ -29,8 +29,6 @@ class RemoveNoScriptElementsContentHandlerContentHandlerTest {
         errorCollector.checkThat(output as String, containsString('''<img width="1" height="1" onerror="alert('oh')" src="dah.jpg">
 
 
-    
-
 
 </body>''')) // Some whitespace in the HTML. :(
     }

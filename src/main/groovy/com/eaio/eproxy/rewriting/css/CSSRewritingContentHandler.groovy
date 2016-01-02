@@ -1,42 +1,37 @@
 package com.eaio.eproxy.rewriting.css
 
+import static org.apache.commons.lang3.StringUtils.*
 import groovy.util.logging.Slf4j
 
+import org.w3c.css.sac.InputSource
+import org.w3c.css.sac.LexicalUnit
+import org.w3c.dom.css.*
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
+import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.URLManipulation
 import com.eaio.eproxy.rewriting.html.URIAwareContentHandler
 import com.eaio.stringsearch.BNDMCI
-import com.helger.css.ECSSVersion
-import com.helger.css.decl.*
-import com.helger.css.decl.visit.CSSVisitor
-import com.helger.css.decl.visit.ICSSUrlVisitor
-import com.helger.css.handler.LoggingCSSParseExceptionCallback
-import com.helger.css.reader.CSSReader
-import com.helger.css.reader.CSSReaderDeclarationList
-import com.helger.css.reader.CSSReaderSettings
-import com.helger.css.reader.errorhandler.LoggingCSSParseErrorHandler
-import com.helger.css.writer.CSSWriter
+import com.steadystate.css.dom.*
+import com.steadystate.css.parser.CSSOMParser
+import com.steadystate.css.parser.LexicalUnitImpl
+import com.steadystate.css.parser.SACParserCSS3
 
 /**
- * Rewrites URLs in embedded CSS and inline style sheets. Very much a WIP.
- * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
 @Mixin(URLManipulation)
 @Slf4j
-class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSUrlVisitor/*, ICSSParseErrorHandler */ {
-    
-    // TODO: implement ICSSParseErrorHandler
-    
+class CSSRewritingContentHandler extends URIAwareContentHandler {
+
     @Lazy
     private BNDMCI bndmci = new BNDMCI()
-    
+
     @Lazy
     private Object patternURL = bndmci.processString('url')
-    
+
     @Lazy
     private char[] charArrayURL = 'url'.toCharArray()
 
@@ -77,61 +72,85 @@ class CSSRewritingContentHandler extends URIAwareContentHandler implements ICSSU
             DirectStrBuilder builder = new DirectStrBuilder(length)
             rewriteCSS(new CharArrayReader(ch, start, length), builder.asWriter())
             delegate.characters(builder.buffer, 0I, builder.length())
+
+            //println "\nrewrote\n${new String(ch, start, length)}\nto\n${new String(builder.buffer, 0I, builder.length())}"
         }
         else {
             delegate.characters(ch, start, length)
         }
     }
 
-    CSSReaderSettings newCSSReaderSettings() {
-        new CSSReaderSettings(CSSVersion: ECSSVersion.CSS30, customErrorHandler: new LoggingCSSParseErrorHandler(),
-            customExceptionHandler: new LoggingCSSParseExceptionCallback())
-    }
-
-    CSSWriter newCSSWriter() {
-        new CSSWriter(ECSSVersion.CSS30, true)
+    CSSOMParser newCSSOMParser() {
+        new CSSOMParser(new SACParserCSS3())
     }
 
     String rewriteStyleAttribute(String attribute) {
-        CSSDeclarationList declarations = CSSReaderDeclarationList.readFromString(attribute, ECSSVersion.CSS30,
-            new LoggingCSSParseErrorHandler(), new LoggingCSSParseExceptionCallback()) // TODO
-        if (declarations == null) {
-            '' // Should be logged already.
-        }
-        else {
-            CSSVisitor.visitAllDeclarationUrls(declarations, this)
-            newCSSWriter().getCSSAsString(declarations)
-        }
+        InputSource source = new InputSource(characterStream: new StringReader(attribute))
+        CSSOMParser parser = newCSSOMParser()
+        CSSStyleDeclarationImpl declaration = (CSSStyleDeclarationImpl) parser.parseStyleDeclaration(source)
+        rewriteCSSStyleDeclaration(declaration)
+        declaration as String
     }
 
     void rewriteCSS(Reader reader, Writer writer) {
-        CascadingStyleSheet css = CSSReader.readFromReader(new HasReaderImpl(reader: reader), newCSSReaderSettings())
-        if (css != null) {
-            CSSVisitor.visitCSSUrl(css, this)
-            newCSSWriter().writeCSS(css, writer)
+        InputSource source = new InputSource(characterStream: reader)
+        CSSOMParser parser = newCSSOMParser()
+        CSSStyleSheet sheet = parser.parseStyleSheet(source, null, null)
+        sheet.cssRules.length.times { int i ->
+            CSSRule rule = sheet.cssRules.item(i)
+            rewriteCSSRule(rule)
+        }
+        writer.write(sheet as String) // TODO
+    }
+    
+    void rewriteCSSStyleDeclaration(CSSStyleDeclarationImpl declaration) {
+        declaration.properties*.value.each { CSSValue value ->
+            rewriteCSSValueImpl((CSSValueImpl) value)
         }
     }
 
-    @Override
-    void begin() {
-    }
-
-    @Override
-    void onImport(CSSImportRule importRule) {
-        if (!importRule.location.dataURL) {
-            importRule.location.URI = rewrite(baseURI, requestURI, importRule.location.URI, rewriteConfig)
+    void rewriteCSSRule(CSSRule rule) {
+        if (rule instanceof CSSStyleRuleImpl || rule instanceof CSSFontFaceRuleImpl) {
+            rewriteCSSStyleDeclaration(rule.style)
+        }
+        else if (rule instanceof CSSImportRuleImpl) {
+            rule.href = rewrite(baseURI, requestURI, rule.href, rewriteConfig)
+        }
+        else if (rule instanceof CSSUnknownRuleImpl) {
+            if (containsIgnoreCase(rule.text, 'url')) {
+                log.warn("unknown CSS rule in ${requestURI}: ${rule.text}")
+            }
+            // TODO: Remove
+        }
+        else if (rule instanceof CSSMediaRuleImpl) {
+            rule.cssRules.length.times { int j ->
+                rewriteCSSRule(rule.cssRules.item(j))
+            }
+        }
+        else if (rule instanceof CSSCharsetRuleImpl) {}
+        else {
+            println rule.getClass().name
         }
     }
 
-    @Override
-    void onUrlDeclaration(ICSSTopLevelRule topLevelRule, CSSDeclaration declaration, CSSExpressionMemberTermURI uriTerm) {
-        if (!uriTerm.URI.dataURL) {
-            uriTerm.URI.URI = rewrite(baseURI, requestURI, uriTerm.URI.URI, rewriteConfig)
+    void rewriteCSSValueImpl(CSSValueImpl value) {
+        if (value.length > 0I) {
+            value.length.times { int k ->
+                CSSValueImpl item = (CSSValueImpl) value.item(k)
+                rewriteCSSValueImpl(item)
+            }
+        }
+        else if (containsURILexicalUnit(value) && !isDataURI((LexicalUnitImpl) value.value)) {
+            value.value.stringValue = rewrite(baseURI, requestURI, value.value.stringValue, rewriteConfig)
         }
     }
 
-    @Override
-    void end() {
+    boolean containsURILexicalUnit(CSSValueImpl value) {
+        value.value instanceof LexicalUnit && value.value.lexicalUnitType == LexicalUnit.SAC_URI
+    }
+
+    boolean isDataURI(LexicalUnitImpl lexicalUnit) {
+        lexicalUnit.stringValue?.trim()?.startsWith('data:') // TODO Case insensitive
     }
 
 }

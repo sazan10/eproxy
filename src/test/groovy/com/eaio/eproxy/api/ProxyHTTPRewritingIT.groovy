@@ -213,11 +213,12 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
         proxy.proxy('ah', 'https', request, response)
-        assertThat(bOut.toString(0I), containsString('._4f7n{background-image:url(data:image/png;base64,iVBORw0KGgoAAAA'))
+        assertThat(bOut.toString(0I), anyOf(
+            containsString('._4f7n{background-image:url(data:image/png;base64,iVBORw0KGgoAAAA'),
+            containsString('._4f7n { background-image: url(data:image/png;base64,iVBORw0KGgoAAAA')))
     }
     
     @Test
-    @Ignore('open bug at ph-css: https://github.com/phax/ph-css/issues/12')
     void 'invalid BOMs should be ignored'() {
         HttpServletRequest request = [
             getRequestURI: { '/ah-https/www.deepdotweb.com/wp-content/themes/sahifa-child/style.css' },
@@ -236,7 +237,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
         proxy.proxy('ah', 'https', request, response)
-        assertThat(bOut.toString(0I), containsString('.woocommerce'))
+        assertThat(bOut.toString(0I), containsString('url(http://fnuh.com/ah-https/www.deepdotweb.com/wp-content/themes/sahifa-child/fonts/tiefontello.eot?88026028)'))
     }
     
     @Test

@@ -13,7 +13,7 @@ import org.xml.sax.SAXException
 import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
-import com.eaio.eproxy.rewriting.css.CSSRewritingContentHandler
+import com.eaio.eproxy.rewriting.css.*
 import com.eaio.eproxy.rewriting.html.*
 
 /**
@@ -29,8 +29,8 @@ class Rewriting {
     @Autowired
     SupportedMIMETypes supportedMIMETypes
     
-    boolean canRewrite(RewriteConfig rewriteConfig, String mimeType) {
-        // TODO: Look at Content-Disposition header to prevent downloads from being rewritten
+    // TODO: Look at Content-Disposition header to prevent downloads from being rewritten
+    boolean canRewrite(String contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
         rewriteConfig && (supportedMIMETypes.isHTML(mimeType) || supportedMIMETypes.isCSS(mimeType))
     }
     
@@ -60,7 +60,7 @@ class Rewriting {
                             )
                         )
                     )
-            xmlReader.parse(new InputSource(new InputStreamReader(inputStream, charset ?: Charset.forName('UTF-8')))) // TODO: BufferedReader?
+            xmlReader.parse(new InputSource(new InputStreamReader(inputStream, charset ?: Charset.forName('UTF-8')))) // TODO: BufferedInputStream?
         }
         catch (SAXException ex) {
             if (ExceptionUtils.getRootCause(ex) instanceof IOException) {
@@ -68,7 +68,7 @@ class Rewriting {
             }
             else {
                 log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
-                        ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber, ex)
+                    ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber, ex)
             }
         }
         finally {
