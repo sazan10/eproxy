@@ -1,11 +1,16 @@
 package com.eaio.eproxy
 
+import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
 import org.apache.http.HttpRequestInterceptor
 import org.apache.http.HttpResponseInterceptor
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.protocol.RequestAcceptEncoding
+import org.apache.http.client.protocol.RequestClientConnControl
+import org.apache.http.client.protocol.RequestExpectContinue
+import org.apache.http.client.protocol.ResponseContentEncoding
 import org.apache.http.config.Registry
 import org.apache.http.config.RegistryBuilder
 import org.apache.http.conn.socket.ConnectionSocketFactory
@@ -18,6 +23,11 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.client.cache.CacheConfig
 import org.apache.http.impl.client.cache.CachingHttpClients
 import org.apache.http.impl.conn.*
+import org.apache.http.protocol.HttpProcessor
+import org.apache.http.protocol.HttpProcessorBuilder
+import org.apache.http.protocol.RequestContent
+import org.apache.http.protocol.RequestTargetHost
+import org.apache.http.protocol.RequestUserAgent
 import org.apache.http.ssl.SSLContexts
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
@@ -112,20 +122,14 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Lazy
     @Bean(destroyMethod = 'close')
     HttpClient httpClient() {
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-            .register('http', PlainConnectionSocketFactory.socketFactory)
-            .register('https', validateSSL ? new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(), NoopHostnameVerifier.INSTANCE) : SSLConnectionSocketFactory.systemSocketFactory) // TODO Funktioniert das?
-            .build()
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = connectionSocketFactory()
 
         if (!OnGoogleAppEngineOrDevserver.CONDITION) {
             if (proxySOCKSHost && proxySOCKSPort) {
                 Proxy socksProxy = new Proxy(Proxy.Type.SOCKS,
-                InetSocketAddress.createUnresolved(proxySOCKSHost, proxySOCKSPort ?: 1080I))
+                    InetSocketAddress.createUnresolved(proxySOCKSHost, proxySOCKSPort ?: 1080I))
 
-                socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                    .register('http', new SOCKSProxyConnectionSocketFactory(socketFactoryRegistry.lookup('http'), socksProxy))
-                    .register('https', new SOCKSProxyLayeredConnectionSocketFactory(socketFactoryRegistry.lookup('https'), socksProxy))
-                    .build()
+                socketFactoryRegistry = wrapConnectionSocketFactory(socketFactoryRegistry, socksProxy)
             }
         }
 
@@ -138,44 +142,18 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
             validateAfterInactivity = validateAfterInactivity ?: 10000I
         }
 
-        // Timeouts and redirect counts
-
-        RequestConfig requestConfig = RequestConfig.custom()
-            .setCircularRedirectsAllowed(false)
-            .setConnectTimeout(connectionTimeout ?: 10000I)
-            .setConnectionRequestTimeout(connectionRequestTimeout ?: 0I)
-            .setSocketTimeout(readTimeout ?: 10000I)
-            .setMaxRedirects(maxRedirects ?: 10I)
-            .build()
-
-        // Timing
-
-        TimingInterceptor timingInterceptor = new TimingInterceptor()
-
-        // Caching
-
-        CacheConfig cacheConfig = CacheConfig.custom()
-            .setMaxCacheEntries(maxEntries ?: 1000I)
-            .setMaxObjectSize(maxObjectSize ?: 1I << 20I)
-            .setSharedCache(true)
-            .build()
-
-        // TODO: CachingExec - remove AsynchronousValidator
         // TODO: CachingExec - Via-Header-Erzeugung :(
-
+            
         HttpClientBuilder builder = CachingHttpClients.custom()
-            .setCacheConfig(cacheConfig)
-            //.disableAuthCaching()
-            .disableCookieManagement()
+            .setCacheConfig(cacheConfig())
             .setConnectionManager(connectionManager)
             // Retries
             .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true)) // Maybe worth removing InterruptedIOException from list
             // Fix insufficient handling of not encoded redirect URLs
             .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy(reEncoding()) : new ReEncodingRedirectStrategy(reEncoding()))
-            .setDefaultRequestConfig(requestConfig)
+            .setDefaultRequestConfig(requestConfig())
             .setUserAgent(userAgent)
-            .addInterceptorFirst((HttpRequestInterceptor) timingInterceptor)
-            .addInterceptorLast((HttpResponseInterceptor) timingInterceptor)
+            .setHttpProcessor(httpProcessor())
 
         if (maxRedirects == 0I) {
             builder.disableRedirectHandling()
@@ -185,18 +163,60 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         }
 
         CloseableHttpClient client = builder.build()
-
-        // No standard interceptors
-
-        // RequestDefaultHeaders, RequestContent, RequestTargetHost, RequestClientConnControl, RequestUserAgent, RequestExpectContinue
-
-        //        [ RequestExpectContinue, RequestClientConnControl, RequestAuthCache, RequestTargetAuthentication, RequestProxyAuthentication ].each {
-        //            client.removeRequestInterceptorByClass(it)
-        //        }
-
         client
     }
 
+    @Bean
+    Registry<ConnectionSocketFactory> connectionSocketFactory() {
+        RegistryBuilder.<ConnectionSocketFactory>create()
+            .register('http', PlainConnectionSocketFactory.socketFactory)
+            .register('https', validateSSL ? new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(), NoopHostnameVerifier.INSTANCE) : SSLConnectionSocketFactory.systemSocketFactory) // TODO Funktioniert das?
+            .build()
+    }
+    
+    Registry<ConnectionSocketFactory> wrapConnectionSocketFactory(ConnectionSocketFactory delegate, Proxy socksProxy) {
+        RegistryBuilder.<ConnectionSocketFactory>create()
+            .register('http', new SOCKSProxyConnectionSocketFactory(delegate.lookup('http'), socksProxy))
+            .register('https', new SOCKSProxyLayeredConnectionSocketFactory(delegate.lookup('https'), socksProxy))
+            .build()
+    }
+    
+    // Timeouts and redirect counts
+    @Bean
+    RequestConfig requestConfig() {
+        RequestConfig.custom()
+            .setCircularRedirectsAllowed(false)
+            .setConnectTimeout(connectionTimeout ?: 10000I)
+            .setConnectionRequestTimeout(connectionRequestTimeout ?: 0I)
+            .setSocketTimeout(readTimeout ?: 10000I)
+            .setMaxRedirects(maxRedirects ?: 10I)
+            .build()
+    }
+    
+    // Caching
+    @Bean
+    CacheConfig cacheConfig() {
+        CacheConfig.custom()
+            .setMaxCacheEntries(maxEntries ?: 1000I)
+            .setMaxObjectSize(maxObjectSize ?: 1I << 20I)
+            .setSharedCache(true)
+            .setAsynchronousWorkersMax(0I)
+            .build()
+    }
+    
+    // Timeouts, timing and redirect counts
+    @Bean
+    HttpProcessor httpProcessor() {
+        // Timing
+        TimingInterceptor timingInterceptor = new TimingInterceptor()
+
+        HttpProcessorBuilder.create()
+            .addFirst((HttpRequestInterceptor) timingInterceptor)
+            .addAll(new RequestContent(), new RequestTargetHost(), new RequestClientConnControl(), new RequestUserAgent(userAgent), new RequestExpectContinue(), new RequestAcceptEncoding())
+            .addAll(new ResponseContentEncoding(), timingInterceptor)
+            .build()
+    }
+    
     //    Scheme createNonValidatingSSLScheme(int port = 443I) {
     //        new Scheme('https', port,
     //                new SSLSocketFactory([ isTrusted: { X509Certificate[] chain, String authType -> true } ] as TrustStrategy, new NullX509HostnameVerifier())
