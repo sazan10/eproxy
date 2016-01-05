@@ -32,7 +32,7 @@ class MetaRewritingContentHandler extends URIAwareContentHandler {
         if (nameIs(localName, qName, 'meta')) {
             String httpEquiv = atts.getValue('http-equiv'),
                 content = atts.getValue('content')
-            if (httpEquiv && content && bndmci.searchString(httpEquiv, 'refresh', patternRefresh) >= 0I && bndmci.searchString(content, 'url', patternURL) >= 0I) {
+            if (httpEquiv?.length() >= 6I && content?.length() > 4I && bndmci.searchString(httpEquiv, 'refresh', patternRefresh) >= 0I && bndmci.searchString(content, 'url', patternURL) >= 0I) {
                 CharArrayBuffer buf = new CharArrayBuffer(content.length())
                 buf.append(content)
                 ParserCursor cursor = new ParserCursor(0I, content.length())

@@ -12,13 +12,14 @@ import org.xml.sax.SAXException
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.URLManipulation
 import com.eaio.eproxy.rewriting.html.URIAwareContentHandler
-import com.eaio.stringsearch.BNDMCI
 import com.steadystate.css.dom.*
 import com.steadystate.css.parser.CSSOMParser
 import com.steadystate.css.parser.LexicalUnitImpl
 import com.steadystate.css.parser.SACParserCSS3
 
 /**
+ * Rewrites CSS using <a href="http://cssparser.sourceforge.net/">CSS Parser</a>
+ * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
@@ -26,22 +27,13 @@ import com.steadystate.css.parser.SACParserCSS3
 @Slf4j
 class CSSRewritingContentHandler extends URIAwareContentHandler {
 
-    @Lazy
-    private BNDMCI bndmci = new BNDMCI()
-
-    @Lazy
-    private Object patternURL = bndmci.processString('url')
-
-    @Lazy
-    private char[] charArrayURL = 'url'.toCharArray()
-
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'style')) {
             stack.push('style')
         }
         else {
             String styleAttribute = atts?.getValue('style')
-            if (styleAttribute && bndmci.searchString(styleAttribute, 'url', patternURL) >= 0I) {
+            if (styleAttribute && styleAttribute.length() > 5I) {
                 String rewrittenCSS = rewriteStyleAttribute(styleAttribute)
                 setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS)
             }
@@ -68,9 +60,10 @@ class CSSRewritingContentHandler extends URIAwareContentHandler {
             tag = stack.peek()
         }
         catch (EmptyStackException ex) {}
-        if (tag == 'style' && bndmci.searchChars(ch, start, start + length, charArrayURL, patternURL) >= 0I) {
+        if (tag == 'style' && length > 5I) {
             DirectStrBuilder builder = new DirectStrBuilder(length)
-            rewriteCSS(new CharArrayReader(ch, start, length), builder.asWriter())
+            Reader charArrayReader = new CharArrayReader(ch, start, length)
+            rewriteCSS(charArrayReader, builder.asWriter())
             delegate.characters(builder.buffer, 0I, builder.length())
 
             //println "\nrewrote\n${new String(ch, start, length)}\nto\n${new String(builder.buffer, 0I, builder.length())}"
