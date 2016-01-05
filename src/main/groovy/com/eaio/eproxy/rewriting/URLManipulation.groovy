@@ -1,5 +1,7 @@
 package com.eaio.eproxy.rewriting
 
+import groovy.transform.CompileStatic
+
 import org.springframework.web.util.UriComponentsBuilder
 
 import com.eaio.eproxy.entities.RewriteConfig
@@ -10,6 +12,7 @@ import com.eaio.eproxy.entities.RewriteConfig
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 class URLManipulation {
 
     /**
@@ -17,20 +20,22 @@ class URLManipulation {
      */
     String rewrite(URI baseURI, URI requestURI, String uri, RewriteConfig rewriteConfig = null) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI)
-        def resolvedURI = resolve(requestURI, uri)
-        if (resolvedURI instanceof URI) {
+        def resolved = resolve(requestURI, uri)
+        if (resolved instanceof URI) {
+            URI resolvedURI = (URI) resolved
             builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURI.scheme, resolvedURI.authority)
             if (resolvedURI.rawPath) {
                 builder.path(resolvedURI.rawPath)
             }
             builder.query(resolvedURI.rawQuery).fragment(resolvedURI.rawFragment)
         }
-        else if (resolvedURI instanceof URL) {
-            builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURI.protocol, resolvedURI.authority)
-            if (resolvedURI.path) {
-                builder.path(resolvedURI.path)
+        else if (resolved instanceof URL) {
+            URL resolvedURL = (URL) resolved
+            builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURL.protocol, resolvedURL.authority)
+            if (resolvedURL.path) {
+                builder.path(resolvedURL.path)
             }
-            builder.query(resolvedURI.query).fragment(resolvedURI.ref)
+            builder.query(resolvedURL.query).fragment(resolvedURL.ref)
         }
         builder.build().toUriString()
     }
