@@ -77,7 +77,7 @@ class Proxy {
         HttpResponse remoteResponse
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
-            addRequestHeaders(uriRequest, request)
+            addRequestHeaders(request, uriRequest)
             if (uriRequest instanceof HttpEntityEnclosingRequest) {
                 setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
             }
@@ -95,6 +95,7 @@ class Proxy {
                     response.setHeader(header.name, rewrite(baseURI, requestURI, header.value, rewriteConfig ? new RewriteConfig(rewrite: true) : null))
                 }
                 else if (!(header.name?.equalsIgnoreCase('Content-Security-Policy')) && !(header.name?.equalsIgnoreCase('Content-Length'))) { // TODO Header whitelist
+                    // TODO only drop Content-Length if not rewriting
                     response.setHeader(header.name, header.value)
                 }
             }
@@ -112,40 +113,28 @@ class Proxy {
             }            
         }
         catch (ConnectTimeoutException ex) {
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
-            }
-            catch (IllegalStateException ex2) {}
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
         }
         catch (UnknownHostException ex) {
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
-            }
-            catch (IllegalStateException ex2) {}
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
         }
         catch (IllegalStateException ex) {
             // ignored
         }
         catch (SocketException ex) {
             if (ex.message?.startsWith('Permission denied')) { // Google App Engine
-                try {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, ExceptionUtils.getRootCauseMessage(ex))
-                }
-                catch (IllegalStateException ex2) {}
+                sendError(response, HttpServletResponse.SC_FORBIDDEN, ExceptionUtils.getRootCauseMessage(ex))
             }
             else {
                 throw ex
             }
         }
         catch (HttpHostConnectException ex) {
-            try {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
-            }
-            catch (IllegalStateException ex2) {}
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
         }
         catch (SSLException ex) {
             if (ExceptionUtils.getRootCauseMessage(ex) == 'InvalidAlgorithmParameterException: Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
+                sendError(response, HttpServletResponse.SC_FORBIDDEN, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
             }
             else {
                 throw ex
@@ -160,6 +149,13 @@ class Proxy {
             TimingInterceptor.log(context, log)
             EntityUtils.consumeQuietly(remoteResponse?.entity)
         }
+    }
+    
+    private void sendError(HttpServletResponse response, int statusCode, String message) {
+        try {
+            response.sendError(statusCode, message)
+        }
+        catch (IllegalStateException ex) {}
     }
     
     private HttpUriRequest newRequest(String method, URI uri) {
@@ -205,7 +201,7 @@ class Proxy {
         uriRequest.entity = new InputStreamEntity(inputStream, contentLength?.isLong() ? contentLength as long : -1L)
     }
     
-    void addRequestHeaders(HttpUriRequest uriRequest, HttpServletRequest request) {
+    void addRequestHeaders(HttpServletRequest request, HttpUriRequest uriRequest) {
         [ 'Accept', 'Accept-Language' ].each {
             if (request.getHeader(it)) {
                 uriRequest.setHeader(it, request.getHeader(it))
