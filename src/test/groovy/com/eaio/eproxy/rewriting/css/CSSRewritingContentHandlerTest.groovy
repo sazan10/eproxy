@@ -1,17 +1,23 @@
 package com.eaio.eproxy.rewriting.css
 
 import static org.apache.commons.lang3.StringUtils.*
-
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 
 import org.apache.commons.lang3.text.StrBuilder
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ErrorCollector
 import org.junit.runner.RunWith
+import org.xml.sax.InputSource
+import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
+import com.eaio.eproxy.rewriting.Rewriting
+import com.eaio.eproxy.rewriting.html.HTMLSerializer
+import com.eaio.eproxy.rewriting.html.ImgSrcsetRewritingContentHandler
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -19,6 +25,23 @@ import com.eaio.eproxy.entities.RewriteConfig
  */
 @RunWith(JUnitParamsRunner)
 class CSSRewritingContentHandlerTest {
+    
+    @Rule
+    public ErrorCollector errorCollector = new ErrorCollector()
+
+    @Test
+    void 'escaped CSS attributes should be rewritten'() {
+        StringWriter output = new StringWriter()
+        XMLReader xmlReader = new Rewriting().newXMLReader()
+        xmlReader.contentHandler = new CSSRewritingContentHandler(baseURI: 'http://rah.com'.toURI(),
+            requestURI: 'https://plop.com/ui.html?fnuh=guh'.toURI(), rewriteConfig: new RewriteConfig(rewrite: true), delegate: new HTMLSerializer(output))
+        xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
+        // Either rewrite or drop the escaped rules.
+        errorCollector.checkThat(output as String, anyOf(containsString('url(http://rah.com/ah-https/plop.com/bla.jpg'),
+            not(containsString('bla.jpg'))))
+        errorCollector.checkThat(output as String, anyOf(containsString('url(http://rah.com/ah-https/plop.com/keks.jpg'),
+            not(containsString('keks.jpg'))))
+    }
 
     @Lazy
     CSSRewritingContentHandler cssRewritingContentHandler = new CSSRewritingContentHandler(baseURI: 'http://fnuh.com/'.toURI(),
