@@ -262,4 +262,26 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), allOf(not(containsString('display:block')), not(containsString('display: block'))))
     }
     
+    @Test
+    void 'GitHub\'s sign in button should not be changed'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-https/github.com/login' },
+            getContextPath: { '' },
+            getQueryString: { 'return_to=%2Fjohannburkard%2Ftinymeasurement' },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeader: { String name -> null }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('value="Sign in"'))
+    }
+    
 }

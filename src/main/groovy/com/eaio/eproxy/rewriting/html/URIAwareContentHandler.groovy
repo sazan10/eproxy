@@ -24,7 +24,7 @@ class URIAwareContentHandler extends DelegatingContentHandler {
         patternSlash = bndmci.processString(':/')
 
     boolean attributeValueNeedsRewriting(String attributeValue) {
-        attributeValue.startsWith('/') || bndmci.searchString(attributeValue, 'http:', patternHTTP) >= 0I || bndmci.searchString(attributeValue, 'https:', patternHTTPS) >= 0I || bndmci.searchString(attributeValue, ':/', patternSlash)
+        attributeValue.startsWith('/') || bndmci.searchString(attributeValue, 'http:', patternHTTP) >= 0I || bndmci.searchString(attributeValue, 'https:', patternHTTPS) >= 0I || bndmci.searchString(attributeValue, ':/', patternSlash) >= 0I
     }
 
 }
