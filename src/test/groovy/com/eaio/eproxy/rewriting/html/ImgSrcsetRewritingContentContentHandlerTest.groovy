@@ -28,7 +28,7 @@ class ImgSrcsetRewritingContentContentHandlerTest {
         xmlReader.contentHandler = new ImgSrcsetRewritingContentHandler(baseURI: 'http://rah.com'.toURI(),
             requestURI: 'https://plop.com/ui.html?fnuh=guh'.toURI(), rewriteConfig: new RewriteConfig(rewrite: true), delegate: new HTMLSerializer(output))
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
-        errorCollector.checkThat(output as String, not(containsString('http://fnuh.com/creme.jpg')))
+        errorCollector.checkThat(output as String, containsString('view-source:http://rah.com/ah-http/fnuh.com/creme.jpg'))
         errorCollector.checkThat(output as String, containsString(',http://rah.com/ah-https/plop.com/fnord.jpg 640w,'))
     }
 

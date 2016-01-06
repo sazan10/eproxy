@@ -1,7 +1,5 @@
 package com.eaio.eproxy.rewriting.html
 
-import static org.apache.commons.lang3.StringUtils.*
-
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
@@ -24,13 +22,13 @@ class ImgSrcsetRewritingContentHandler extends URIAwareContentHandler {
                 if (attributeValue.contains(',')) {
                     List<String> parts = attributeValue.tokenize(',')
                     parts.size().times { int index ->
-                        if (parts[index].startsWith('/') || startsWithIgnoreCase(parts[index], 'http:') || startsWithIgnoreCase(parts[index], 'https:')) {
+                        if (attributeValueNeedsRewriting(parts[index])) {
                             parts[index] = rewrite(baseURI, requestURI, parts[index], rewriteConfig)
                         }
                     }
                     setAttributeValue(atts, i, parts.join(','))
                 }
-                else if (attributeValue.startsWith('/') || startsWithIgnoreCase(attributeValue, 'http:') || startsWithIgnoreCase(attributeValue, 'https:')) {
+                else if (attributeValueNeedsRewriting(attributeValue)) {
                     setAttributeValue(atts, i, rewrite(baseURI, requestURI, attributeValue, rewriteConfig))
                 }
             }

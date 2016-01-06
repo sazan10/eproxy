@@ -18,28 +18,16 @@ import com.eaio.stringsearch.BNDMCI
 @Mixin(URLManipulation)
 class URIRewritingContentHandler extends URIAwareContentHandler {
     
-    @Lazy
-    private transient BNDMCI bndmci = new BNDMCI()
-    
-    @Lazy
-    private transient Object patternHTTP = bndmci.processString('http:'),
-        patternHTTPS = bndmci.processString('https:'),
-        patternSlash = bndmci.processString(':/')
-
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         atts.length.times { int i ->
             String attributeValue = trimToEmpty(atts.getValue(i))
             
             // Use local name
-            if (attributeNameShouldBeRewritten(atts.getLocalName(i)) && attributeValueMayNeedRewriting(attributeValue)) {
+            if (attributeNameShouldBeRewritten(atts.getLocalName(i)) && attributeValueNeedsRewriting(attributeValue)) {
                 setAttributeValue(atts, i, rewrite(baseURI, requestURI, attributeValue, rewriteConfig))
             }
         }
         delegate.startElement(uri, localName, qName, atts)
-    }
-    
-    private boolean attributeValueMayNeedRewriting(String attributeValue) {
-        attributeValue.startsWith('/') || bndmci.searchString(attributeValue, 'http:', patternHTTP) >= 0I || bndmci.searchString(attributeValue, 'https:', patternHTTPS) >= 0I || bndmci.searchString(attributeValue, ':/', patternSlash)
     }
     
     private boolean attributeNameShouldBeRewritten(String attributeName) {
