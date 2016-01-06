@@ -34,7 +34,10 @@ class URLManipulation {
             if (resolvedURI.rawPath) {
                 builder.path(resolvedURI.rawPath)
             }
-            builder.query(resolvedURI.rawQuery).fragment(resolvedURI.rawFragment)
+            builder.query(resolvedURI.rawQuery)
+            if (resolvedURI.rawFragment) {
+                builder.fragment(resolvedURI.rawFragment)
+            }
         }
         else if (resolved instanceof URL) {
             URL resolvedURL = (URL) resolved
@@ -43,7 +46,10 @@ class URLManipulation {
             if (resolvedURL.path) {
                 builder.path(resolvedURL.path)
             }
-            builder.query(resolvedURL.query).fragment(resolvedURL.ref)
+            builder.query(resolvedURL.query)
+            if (resolvedURL.ref) {
+                builder.fragment(resolvedURL.ref)
+            }
         }
         // TODO: Decide what to do is resolved == null
         builder.build().toUriString()
