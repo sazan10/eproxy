@@ -67,7 +67,6 @@ class CSSRewritingContentHandlerTest {
     }
 
     Collection<Object[]> cssFiles() {
-//        [ [ new File('src/test/resources/com/eaio/eproxy/rewriting/css/z-ecx.images-amazon.com_images_G_01_browser-scripts_dpMergedOverallCSS_dpMergedOverallCSS-13821758196._V1_.css') ] ].collect { it as Object[] }
         new File('src/test/resources/com/eaio/eproxy/rewriting/css').listFiles().collect { [ it ] as Object[] }
     }
 

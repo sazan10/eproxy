@@ -1,7 +1,9 @@
 package com.eaio.eproxy.rewriting
 
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 
+import org.apache.commons.lang3.exception.ExceptionUtils
 import org.springframework.web.util.UriComponentsBuilder
 
 import com.eaio.eproxy.entities.RewriteConfig
@@ -13,6 +15,7 @@ import com.eaio.eproxy.entities.RewriteConfig
  * @version $Id$
  */
 @CompileStatic
+@Slf4j
 class URLManipulation {
 
     /**
@@ -23,6 +26,10 @@ class URLManipulation {
         def resolved = resolve(requestURI, uri)
         if (resolved instanceof URI) {
             URI resolvedURI = (URI) resolved
+            if (resolvedURI.scheme != 'http' && resolvedURI.scheme != 'https') {
+                builder.scheme(resolvedURI.scheme + ':' + baseURI.scheme)
+                resolvedURI = resolvedURI.schemeSpecificPart.toURI()
+            }
             builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURI.scheme, resolvedURI.authority)
             if (resolvedURI.rawPath) {
                 builder.path(resolvedURI.rawPath)
@@ -31,12 +38,14 @@ class URLManipulation {
         }
         else if (resolved instanceof URL) {
             URL resolvedURL = (URL) resolved
+            // fallback for view-source URIs above doesn't seem to work with java.net.URL
             builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURL.protocol, resolvedURL.authority)
             if (resolvedURL.path) {
                 builder.path(resolvedURL.path)
             }
             builder.query(resolvedURL.query).fragment(resolvedURL.ref)
         }
+        // TODO: Decide what to do is resolved == null
         builder.build().toUriString()
     }
 
@@ -50,7 +59,12 @@ class URLManipulation {
             requestURI.resolve(attributeValue)
         }
         catch (IllegalArgumentException ex) {
-            new URL(new URL(requestURI.scheme, requestURI.host, requestURI.port, requestURI.rawPath), attributeValue)
+            try {
+                new URL(new URL(requestURI.scheme, requestURI.host, requestURI.port, requestURI.rawPath), attributeValue)
+            }
+            catch (MalformedURLException ex2) {
+                log.info('Couldn\'t convert {} to a URI or a URL: {}', attributeValue, ExceptionUtils.getRootCauseMessage(ex2))
+            }
         }
     }
     
