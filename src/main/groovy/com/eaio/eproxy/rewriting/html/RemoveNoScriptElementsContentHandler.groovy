@@ -1,5 +1,7 @@
 package com.eaio.eproxy.rewriting.html
 
+import groovy.transform.CompileStatic
+
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
@@ -12,6 +14,7 @@ import org.xml.sax.SAXException
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 class RemoveNoScriptElementsContentHandler extends DelegatingContentHandler {
     
     boolean inNoscriptBlock

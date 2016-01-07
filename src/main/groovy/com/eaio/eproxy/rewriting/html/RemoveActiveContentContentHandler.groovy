@@ -1,6 +1,7 @@
 package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
+import groovy.transform.CompileStatic
 
 import org.xml.sax.Attributes
 import org.xml.sax.ContentHandler
@@ -16,6 +17,7 @@ import org.xml.sax.SAXException
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: TryEaioTransformer.java 7547 2015-07-01 20:02:47Z johann $
  */
+@CompileStatic
 class RemoveActiveContentContentHandler extends DelegatingContentHandler {
     
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
