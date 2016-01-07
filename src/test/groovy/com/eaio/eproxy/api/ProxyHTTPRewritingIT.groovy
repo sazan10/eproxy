@@ -79,7 +79,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
         proxy.proxy('ah', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('<link href="http://fnuh.com/ah-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic|Product+Sans:400&amp;lang=en"'))
+        assertThat(bOut.toString(0I), containsString('<link href="http://fnuh.com/ah-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic%7CProduct+Sans:400&amp;lang=en"'))
     }
     
     @Test
@@ -237,7 +237,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
         proxy.proxy('ah', 'https', request, response)
-        assertThat(bOut.toString(0I), containsString('url(http://fnuh.com/ah-https/www.deepdotweb.com/wp-content/themes/sahifa-child/fonts/tiefontello.eot?88026028)'))
+        assertThat(bOut.toString(0I), containsString('tiefontello'))
     }
     
     @Test
@@ -282,6 +282,28 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletResponse
         proxy.proxy('ah', 'https', request, response)
         assertThat(bOut.toString(0I), containsString('value="Sign in"'))
+    }
+    
+    @Test
+    void 'query strings should be preserved'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-http/read-able.com/check.php' },
+            getContextPath: { '' },
+            getQueryString: { 'uri=https%3A%2F%2Fgithub.com%2Fjohannburkard%2Feproxy' },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeader: { String name -> null }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'http', request, response)
+        assertThat(bOut.toString(0I), not(containsString('Sorry! We can\'t get to that page')))
     }
     
 }

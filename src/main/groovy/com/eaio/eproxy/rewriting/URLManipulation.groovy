@@ -23,35 +23,19 @@ class URLManipulation {
      */
     String rewrite(URI baseURI, URI requestURI, String uri, RewriteConfig rewriteConfig = null) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI)
-        def resolved = resolve(requestURI, uri)
-        if (resolved instanceof URI) {
-            URI resolvedURI = (URI) resolved
-            if (resolvedURI.scheme != 'http' && resolvedURI.scheme != 'https') {
-                builder.scheme(resolvedURI.scheme + ':' + baseURI.scheme)
-                resolvedURI = resolvedURI.schemeSpecificPart.toURI()
-            }
-            builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURI.scheme, resolvedURI.authority)
-            if (resolvedURI.rawPath) {
-                builder.path(resolvedURI.rawPath)
-            }
-            builder.query(resolvedURI.rawQuery)
-            if (resolvedURI.rawFragment) {
-                builder.fragment(resolvedURI.rawFragment)
-            }
+        URI resolvedURI = resolve(requestURI, uri)
+        if (resolvedURI.scheme != 'http' && resolvedURI.scheme != 'https') {
+            builder.scheme(resolvedURI.scheme + ':' + baseURI.scheme)
+            resolvedURI = toURI(resolvedURI.schemeSpecificPart)
         }
-        else if (resolved instanceof URL) {
-            URL resolvedURL = (URL) resolved
-            // fallback for view-source URIs above doesn't seem to work with java.net.URL
-            builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURL.protocol, resolvedURL.authority)
-            if (resolvedURL.path) {
-                builder.path(resolvedURL.path)
-            }
-            builder.query(resolvedURL.query)
-            if (resolvedURL.ref) {
-                builder.fragment(resolvedURL.ref)
-            }
+        builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURI.scheme, resolvedURI.authority)
+        if (resolvedURI.rawPath) {
+            builder.path(resolvedURI.rawPath)
         }
-        // TODO: Decide what to do is resolved == null
+        builder.query(resolvedURI.rawQuery)
+        if (resolvedURI.rawFragment) {
+            builder.fragment(resolvedURI.rawFragment)
+        }
         builder.build().toUriString()
     }
 
@@ -60,18 +44,32 @@ class URLManipulation {
      * 
      * @return either a {@link URI} or a {@link URL}
      */
-    private Serializable resolve(URI requestURI, String attributeValue) {
+    private URI resolve(URI requestURI, String attributeValue) {
         try {
             requestURI.resolve(attributeValue)
         }
         catch (IllegalArgumentException ex) {
-            try {
-                new URL(new URL(requestURI.scheme, requestURI.host, requestURI.port, requestURI.rawPath), attributeValue)
+            if (attributeValue.contains('|')) {
+                resolve(requestURI, attributeValue.replaceAll('\\|', '%7C'))
             }
-            catch (MalformedURLException ex2) {
-                log.info('Couldn\'t convert {} to a URI or a URL: {}', attributeValue, ExceptionUtils.getRootCauseMessage(ex2))
+            else {
+                throw new IllegalArgumentException("For ${attributeValue}: ${ex.message}", ex)
             }
         }
     }
     
+    URI toURI(String s) {
+        try {
+            s.toURI()
+        }
+        catch (URISyntaxException ex) {
+            if (s.contains('|')) {
+                s.replaceAll('\\|', '%7C').toURI() // TODO: Use ReEncoding
+            }
+            else {
+                throw ex
+            }
+        }
+    }
+
 }

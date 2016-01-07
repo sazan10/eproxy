@@ -133,7 +133,7 @@ class CSSRewritingContentHandler extends URIAwareContentHandler {
                 rewriteCSSValueImpl(item)
             }
         }
-        else if (containsURILexicalUnit(value) && !isDataURI((LexicalUnitImpl) value.value)) {
+        else if (containsURILexicalUnit(value) && !isDataURI((LexicalUnitImpl) value.value) && attributeValueNeedsRewriting(value.value.stringValue)) {
             value.value.stringValue = rewrite(baseURI, requestURI, value.value.stringValue, rewriteConfig)
         }
     }

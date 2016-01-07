@@ -183,7 +183,13 @@ class Proxy {
         host = StringUtils.substringAfter(requestURI[1..-1], '/')
         path = StringUtils.substringAfter(host, '/') ?: '/'
         // TODO: Support for Ports
-        UriComponentsBuilder.newInstance().scheme(scheme).host(StringUtils.substringBefore(host, '/')).path(path).query(queryString).build().toUri()
+        UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(StringUtils.substringBefore(host, '/')).path(path)
+        if (queryString) {
+            toURI(builder.build().toUriString() + '?' + queryString)
+        }
+        else {
+            builder.build().toUri()
+        }
     }
     
     /**
