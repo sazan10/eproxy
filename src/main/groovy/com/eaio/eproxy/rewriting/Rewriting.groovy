@@ -31,6 +31,9 @@ class Rewriting {
     @Autowired
     ReEncoding reEncoding
     
+    @Lazy
+    private Charset defaultCharset = Charset.forName('UTF-8')
+    
     private Set<String> javascript = [
         'application/ecmascript',
         'application/javascript',
@@ -81,7 +84,7 @@ class Rewriting {
     }
     
     void rewriteHTML(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
-        Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: Charset.forName('UTF-8'))
+        Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
         XMLReader xmlReader = newXMLReader()
         try {
             xmlReader.contentHandler = new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
@@ -97,7 +100,11 @@ class Rewriting {
                             )
                         )
                     )
-            xmlReader.parse(new InputSource(new InputStreamReader(inputStream, charset ?: Charset.forName('UTF-8')))) // TODO: BufferedInputStream?
+            InputSource inputSource = new InputSource(byteStream: inputStream)
+            if (charset) {
+                inputSource.encoding = charset.displayName()
+            }
+            xmlReader.parse(inputSource) // TODO: BufferedInputStream?
         }
         catch (SAXException ex) {
             if (ExceptionUtils.getRootCause(ex) instanceof IOException) {
@@ -117,10 +124,14 @@ class Rewriting {
     }
     
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
-        Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: Charset.forName('UTF-8'))
+        Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         try {
+            org.w3c.css.sac.InputSource inputSource = new org.w3c.css.sac.InputSource(byteStream: inputStream)
+            if (charset) {
+                inputSource.encoding = charset.displayName()
+            }
             new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
-                .rewriteCSS(new InputStreamReader(inputStream, charset ?: Charset.forName('UTF-8')), outputWriter)
+                .rewriteCSS(inputSource, outputWriter)
         }
         finally {
             try {

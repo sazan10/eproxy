@@ -304,4 +304,26 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), not(containsString('Sorry! We can\'t get to that page')))
     }
     
+    @Test
+    void 'encoding for should be correct'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-https/www.bahn.de/p/view/index.shtml' },
+            getContextPath: { '' },
+            getQueryString: { null },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeader: { String name -> null }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('Mobilit&auml;tsportal'))
+    }
+    
 }

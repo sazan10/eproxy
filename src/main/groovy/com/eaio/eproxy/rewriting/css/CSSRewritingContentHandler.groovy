@@ -34,7 +34,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler {
         else {
             String styleAttribute = atts.getValue('style')
             if (styleAttribute && styleAttribute.length() > 5I) {
-                String rewrittenCSS = rewriteStyleAttribute(styleAttribute)
+                String rewrittenCSS = rewriteStyleAttribute(new InputSource(characterStream: new StringReader(styleAttribute)))
                 setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS)
             }
         }
@@ -63,7 +63,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler {
         if (tag == 'style' && length > 5I) {
             DirectStrBuilder builder = new DirectStrBuilder(length)
             Reader charArrayReader = new CharArrayReader(ch, start, length)
-            rewriteCSS(charArrayReader, builder.asWriter())
+            rewriteCSS(new InputSource(characterStream: charArrayReader), builder.asWriter())
             delegate.characters(builder.buffer, 0I, builder.length())
         }
         else {
@@ -75,18 +75,16 @@ class CSSRewritingContentHandler extends RewritingContentHandler {
         new CSSOMParser(new SACParserCSS3())
     }
 
-    String rewriteStyleAttribute(String attribute) {
-        InputSource source = new InputSource(characterStream: new StringReader(attribute))
+    String rewriteStyleAttribute(InputSource source) {
         CSSOMParser parser = newCSSOMParser()
         CSSStyleDeclarationImpl declaration = (CSSStyleDeclarationImpl) parser.parseStyleDeclaration(source)
         rewriteCSSStyleDeclaration(declaration)
         declaration as String
     }
 
-    void rewriteCSS(Reader reader, Writer writer) {
-        InputSource source = new InputSource(characterStream: reader)
+    void rewriteCSS(InputSource inputSource, Writer writer) {
         CSSOMParser parser = newCSSOMParser()
-        CSSStyleSheet sheet = parser.parseStyleSheet(source, null, null)
+        CSSStyleSheet sheet = parser.parseStyleSheet(inputSource, null, null)
         sheet.cssRules.length.times { int i ->
             CSSRule rule = sheet.cssRules.item(i)
             rewriteCSSRule(rule)

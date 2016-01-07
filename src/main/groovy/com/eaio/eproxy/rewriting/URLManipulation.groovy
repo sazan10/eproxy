@@ -25,7 +25,10 @@ class URLManipulation {
         URI resolvedURI = resolve(requestURI, uri)
         if (resolvedURI.scheme != 'http' && resolvedURI.scheme != 'https') {
             builder.scheme(resolvedURI.scheme + ':' + baseURI.scheme)
-            resolvedURI = reEncoding.reEncode(resolvedURI.schemeSpecificPart).toURI()
+            try {
+                resolvedURI = reEncoding.reEncode(resolvedURI.schemeSpecificPart).toURI()
+            }
+            catch (URISyntaxException ex) {} // TODO
         }
         builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURI.scheme, resolvedURI.authority)
         if (resolvedURI.rawPath) {

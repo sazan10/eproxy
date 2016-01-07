@@ -11,7 +11,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
 import org.junit.runner.RunWith
-import org.xml.sax.InputSource
+import org.w3c.css.sac.InputSource
 import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
@@ -35,7 +35,7 @@ class CSSRewritingContentHandlerTest {
         XMLReader xmlReader = new Rewriting().newXMLReader()
         xmlReader.contentHandler = new CSSRewritingContentHandler(reEncoding: new ReEncoding(), baseURI: 'http://rah.com'.toURI(),
             requestURI: 'https://plop.com/ui.html?fnuh=guh'.toURI(), rewriteConfig: new RewriteConfig(rewrite: true), delegate: new HTMLSerializer(output))
-        xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
+        xmlReader.parse(new org.xml.sax.InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         // Either rewrite or drop the escaped rules.
         errorCollector.checkThat(output as String, anyOf(containsString('url(http://rah.com/ah-https/plop.com/bla.jpg'),
             not(containsString('bla.jpg'))))
@@ -50,16 +50,16 @@ class CSSRewritingContentHandlerTest {
     @Test
     void 'should rewrite inline style sheet'() {
         String style = 'height:110px;width:276px;background:url(/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png) no-repeat'
-                assertThat(cssRewritingContentHandler.rewriteStyleAttribute(style),
-                    anyOf(containsString('background:url(http://fnuh.com/ah-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png'),
-                        containsString('background: url(http://fnuh.com/ah-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png')))
+        assertThat(cssRewritingContentHandler.rewriteStyleAttribute(new InputSource(characterStream: new StringReader(style))),
+            anyOf(containsString('background:url(http://fnuh.com/ah-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png'),
+                containsString('background: url(http://fnuh.com/ah-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png')))
     }
 
     @Test
     @Parameters(method = 'cssFiles')
     void 'should rewrite CSS file'(File cssFile) {
         StrBuilder builder = new StrBuilder()
-        cssRewritingContentHandler.rewriteCSS(cssFile.newReader(), builder.asWriter())
+        cssRewritingContentHandler.rewriteCSS(new InputSource(characterStream: cssFile.newReader()), builder.asWriter())
         String rewritten = builder as String
         assertThat(cssFile.name, trimToNull(rewritten), notNullValue())
         assertThat(cssFile.name, rewritten, allOf(containsString('http://fnuh.com/ah-'),
