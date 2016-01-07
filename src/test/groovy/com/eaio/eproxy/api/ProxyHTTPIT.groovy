@@ -17,6 +17,7 @@ import org.springframework.mock.web.DelegatingServletOutputStream
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.eaio.eproxy.Eproxy
+import com.eaio.net.httpclient.ReEncoding
 
 /**
  * Simulates disabled redirects.
@@ -33,7 +34,7 @@ class ProxyHTTPIT {
     public ErrorCollector errorCollector = new ErrorCollector()
 
     @Autowired
-    Proxy proxy
+    Proxy proxy = new Proxy(reEncoding: new ReEncoding())
     
     @Test
     void 'content-security-policy headers should be removed'() {

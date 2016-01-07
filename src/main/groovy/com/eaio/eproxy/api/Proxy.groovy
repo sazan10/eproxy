@@ -1,17 +1,16 @@
 package com.eaio.eproxy.api
 
+import static org.apache.commons.lang3.StringUtils.*
 import groovy.util.logging.Slf4j
-
-import java.nio.charset.Charset
 
 import javax.net.ssl.SSLException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 import org.apache.commons.io.IOUtils
-import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.Header
+import org.apache.http.HeaderElement
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
@@ -21,6 +20,9 @@ import org.apache.http.conn.ConnectTimeoutException
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.InputStreamEntity
+import org.apache.http.message.BasicHeaderValueParser
+import org.apache.http.message.ParserCursor
+import org.apache.http.util.CharArrayBuffer
 import org.apache.http.util.EntityUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -28,12 +30,12 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.util.UriComponentsBuilder
-import org.xml.sax.SAXException
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.*
 import com.eaio.eproxy.rewriting.html.*
 import com.eaio.net.httpclient.AbortHttpUriRequestTask
+import com.eaio.net.httpclient.ReEncoding
 import com.eaio.net.httpclient.TimingInterceptor
 
 /**
@@ -55,6 +57,9 @@ class Proxy {
     
     @Autowired
     Rewriting rewriting
+    
+    @Autowired
+    ReEncoding reEncoding
     
     @Autowired(required = false)
     Timer timer
@@ -103,7 +108,7 @@ class Proxy {
             if (remoteResponse.entity) {
                 ContentType contentType = ContentType.getLenient(remoteResponse.entity)
                 OutputStream outputStream = response.outputStream
-                String contentDisposition = request.getHeader('Content-Disposition')
+                HeaderElement contentDisposition = parseContentDispositionValue(request.getHeader('Content-Disposition'))
                 if (rewriting.canRewrite(contentDisposition, rewriteConfig ? new RewriteConfig(rewrite: true) : null, contentType?.mimeType)) {
                     rewriting.rewrite(remoteResponse.entity.content, outputStream, contentType.charset, baseURI, requestURI, new RewriteConfig(rewrite: true), contentType.mimeType)
                 }
@@ -118,9 +123,7 @@ class Proxy {
         catch (UnknownHostException ex) {
             sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
         }
-        catch (IllegalStateException ex) {
-            // ignored
-        }
+        catch (IllegalStateException ignored) {}
         catch (SocketException ex) {
             if (ex.message?.startsWith('Permission denied')) { // Google App Engine
                 sendError(response, HttpServletResponse.SC_FORBIDDEN, ExceptionUtils.getRootCauseMessage(ex))
@@ -179,16 +182,16 @@ class Proxy {
      * Make sure to remove the context path before calling this method.
      */
     URI buildRequestURI(String scheme, String requestURI, String queryString) {
-        String host, path
-        host = StringUtils.substringAfter(requestURI[1..-1], '/')
-        path = StringUtils.substringAfter(host, '/') ?: '/'
+        String uriFromHost, path
+        uriFromHost = substringAfter(requestURI[1..-1], '/')
+        path = substringAfter(uriFromHost, '/') ?: '/'
         // TODO: Support for Ports
-        UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(StringUtils.substringBefore(host, '/')).path(path)
+        UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(substringBefore(uriFromHost, '/')).path(path)
         if (queryString) {
-            toURI(builder.build().toUriString() + '?' + queryString)
+            reEncoding.reEncode(builder.build().toUriString() + '?' + queryString).toURI()
         }
         else {
-            builder.build().toUri()
+            reEncoding.reEncode(builder.build() as String).toURI()
         }
     }
     
@@ -196,7 +199,7 @@ class Proxy {
      * Removes the context path prefix from <tt>requestURI</tt>.
      */
     String stripContextPathFromRequestURI(String contextPath, String requestURI) {
-        contextPath ? StringUtils.substringAfter(requestURI, contextPath) : requestURI
+        contextPath ? substringAfter(requestURI, contextPath) : requestURI
     }
     
     int getPort(String scheme, int port) {
@@ -212,6 +215,16 @@ class Proxy {
             if (request.getHeader(it)) {
                 uriRequest.setHeader(it, request.getHeader(it))
             }
+        }
+    }
+    
+    HeaderElement parseContentDispositionValue(String contentDisposition) {
+        if (contentDisposition) {
+            CharArrayBuffer buf = new CharArrayBuffer(contentDisposition.length())
+            buf.append(contentDisposition)
+            ParserCursor cursor = new ParserCursor(0I, contentDisposition.length())
+            HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
+            elements[0I]
         }
     }
 

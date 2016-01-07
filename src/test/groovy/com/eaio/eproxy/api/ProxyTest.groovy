@@ -8,6 +8,8 @@ import junitparams.Parameters
 import org.junit.Test
 import org.junit.runner.RunWith
 
+import com.eaio.net.httpclient.ReEncoding
+
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
@@ -16,7 +18,7 @@ import org.junit.runner.RunWith
 class ProxyTest {
     
     @Lazy
-    Proxy proxy
+    Proxy proxy = new Proxy(reEncoding: new ReEncoding())
 
     /**
      * Test method for {@link com.eaio.web.Proxy#buildRequestURI(java.lang.String, java.lang.String, java.lang.String)}.

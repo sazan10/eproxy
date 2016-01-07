@@ -16,7 +16,7 @@ import com.eaio.stringsearch.BNDMCI
  * @version $Id$
  */
 @Mixin(URLManipulation)
-class URIRewritingContentHandler extends URIAwareContentHandler {
+class URIRewritingContentHandler extends RewritingContentHandler {
     
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         atts.length.times { int i ->

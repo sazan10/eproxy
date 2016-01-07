@@ -6,8 +6,6 @@ import static org.hamcrest.Matchers.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-import org.apache.commons.io.output.NullOutputStream
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
@@ -18,8 +16,8 @@ import org.springframework.boot.test.WebIntegrationTest
 import org.springframework.mock.web.DelegatingServletOutputStream
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-import com.eaio.eproxy.api.Proxy
 import com.eaio.eproxy.Eproxy
+import com.eaio.net.httpclient.ReEncoding
 
 /**
  * Simulates disabled redirects.
@@ -36,7 +34,7 @@ class ProxyHTTPRewritingIT {
     public ErrorCollector errorCollector = new ErrorCollector()
 
     @Autowired
-    Proxy proxy
+    Proxy proxy = new Proxy(reEncoding: new ReEncoding())
     
     @Test
     void 'HTML should be rewritten'() {

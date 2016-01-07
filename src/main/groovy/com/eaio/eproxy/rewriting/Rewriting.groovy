@@ -5,6 +5,7 @@ import groovy.util.logging.Slf4j
 import java.nio.charset.Charset
 
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.apache.http.HeaderElement
 import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -66,7 +67,7 @@ class Rewriting {
     }
     
     // TODO: Look at Content-Disposition header to prevent downloads from being rewritten
-    boolean canRewrite(String contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
+    boolean canRewrite(HeaderElement contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
         rewriteConfig && (isHTML(mimeType) || isCSS(mimeType))
     }
     
@@ -83,12 +84,12 @@ class Rewriting {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: Charset.forName('UTF-8'))
         XMLReader xmlReader = newXMLReader()
         try {
-            xmlReader.contentHandler = new CSSRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
-                new MetaRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
+            xmlReader.contentHandler = new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
+                new MetaRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
                     new RemoveActiveContentContentHandler(delegate:
                         new RemoveNoScriptElementsContentHandler(delegate:
-                            new ImgSrcsetRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
-                                new URIRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
+                            new ImgSrcsetRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
+                                new URIRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
                                         new HTMLSerializer(outputWriter)
                                         )
                                     )
@@ -111,21 +112,21 @@ class Rewriting {
             try {
                 outputWriter.flush()
             }
-            catch (IOException ignored) {}
+            catch (emall) {}
         }
     }
     
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: Charset.forName('UTF-8'))
         try {
-            new CSSRewritingContentHandler(baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
+            new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
                 .rewriteCSS(new InputStreamReader(inputStream, charset ?: Charset.forName('UTF-8')), outputWriter)
         }
         finally {
             try {
                 outputWriter.flush()
             }
-            catch (IOException ignored) {}
+            catch (emall) {}
         }
     }
     

@@ -14,7 +14,7 @@ import com.eaio.eproxy.rewriting.URLManipulation
  * @version $Id$
  */
 @Mixin(URLManipulation)
-class ImgSrcsetRewritingContentHandler extends URIAwareContentHandler {
+class ImgSrcsetRewritingContentHandler extends RewritingContentHandler {
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'img')) {
@@ -26,14 +26,14 @@ class ImgSrcsetRewritingContentHandler extends URIAwareContentHandler {
                     parts.size().times { int index ->
                         if (attributeValueNeedsRewriting(parts[index])) {
                             String imageURI = substringBefore(parts[index], ' ')
-                            parts[index] = [ rewrite(baseURI, requestURI, imageURI, rewriteConfig), substringAfter(parts[index], ' ') ].join(' ')
+                            parts[index] = replaceOnce(parts[index], imageURI, rewrite(baseURI, requestURI, imageURI, rewriteConfig))
                         }
                     }
                     setAttributeValue(atts, i, parts.join(','))
                 }
                 else if (attributeValueNeedsRewriting(attributeValue)) {
                     String imageURI = substringBefore(attributeValue, ' ')
-                    setAttributeValue(atts, i, [ rewrite(baseURI, requestURI, imageURI, rewriteConfig), substringAfter(attributeValue, ' ') ].join(' '))
+                    setAttributeValue(atts, i, replaceOnce(attributeValue, imageURI, rewrite(baseURI, requestURI, imageURI, rewriteConfig)))
                 }
             }
         }

@@ -16,6 +16,7 @@ import org.springframework.mock.web.DelegatingServletOutputStream
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.eaio.eproxy.Eproxy
+import com.eaio.net.httpclient.ReEncoding
 
 /**
  * Simulates a POST request with disabled redirects.
@@ -61,7 +62,7 @@ class ProxyHTTPPOSTNoRedirectsIT {
 %0D%0A-----END+PKCS7-----%0D%0A'''.replaceAll('\n', '').bytes
 
     @Autowired
-    Proxy proxy
+    Proxy proxy = new Proxy(reEncoding: new ReEncoding())
     
     @Test
     void 'POST requests to PayPal should return a new URL'() {

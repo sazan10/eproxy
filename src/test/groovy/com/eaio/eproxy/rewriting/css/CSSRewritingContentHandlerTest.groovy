@@ -17,7 +17,7 @@ import org.xml.sax.XMLReader
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.Rewriting
 import com.eaio.eproxy.rewriting.html.HTMLSerializer
-import com.eaio.eproxy.rewriting.html.ImgSrcsetRewritingContentHandler
+import com.eaio.net.httpclient.ReEncoding
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -33,7 +33,7 @@ class CSSRewritingContentHandlerTest {
     void 'escaped CSS attributes should be rewritten'() {
         StringWriter output = new StringWriter()
         XMLReader xmlReader = new Rewriting().newXMLReader()
-        xmlReader.contentHandler = new CSSRewritingContentHandler(baseURI: 'http://rah.com'.toURI(),
+        xmlReader.contentHandler = new CSSRewritingContentHandler(reEncoding: new ReEncoding(), baseURI: 'http://rah.com'.toURI(),
             requestURI: 'https://plop.com/ui.html?fnuh=guh'.toURI(), rewriteConfig: new RewriteConfig(rewrite: true), delegate: new HTMLSerializer(output))
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         // Either rewrite or drop the escaped rules.
@@ -44,7 +44,7 @@ class CSSRewritingContentHandlerTest {
     }
 
     @Lazy
-    CSSRewritingContentHandler cssRewritingContentHandler = new CSSRewritingContentHandler(baseURI: 'http://fnuh.com/'.toURI(),
+    CSSRewritingContentHandler cssRewritingContentHandler = new CSSRewritingContentHandler(reEncoding: new ReEncoding(), baseURI: 'http://fnuh.com/'.toURI(),
         requestURI: 'https://www.google.com/'.toURI(), rewriteConfig: new RewriteConfig(rewrite: true))
     
     @Test

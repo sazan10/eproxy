@@ -14,7 +14,6 @@ import com.eaio.eproxy.entities.RewriteConfig
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@CompileStatic
 @Slf4j
 class URLManipulation {
 
@@ -26,7 +25,7 @@ class URLManipulation {
         URI resolvedURI = resolve(requestURI, uri)
         if (resolvedURI.scheme != 'http' && resolvedURI.scheme != 'https') {
             builder.scheme(resolvedURI.scheme + ':' + baseURI.scheme)
-            resolvedURI = toURI(resolvedURI.schemeSpecificPart)
+            resolvedURI = reEncoding.reEncode(resolvedURI.schemeSpecificPart).toURI()
         }
         builder.pathSegment((rewriteConfig?.toString() ?: '') + resolvedURI.scheme, resolvedURI.authority)
         if (resolvedURI.rawPath) {
@@ -45,31 +44,7 @@ class URLManipulation {
      * @return either a {@link URI} or a {@link URL}
      */
     private URI resolve(URI requestURI, String attributeValue) {
-        try {
-            requestURI.resolve(attributeValue)
-        }
-        catch (IllegalArgumentException ex) {
-            if (attributeValue.contains('|')) {
-                resolve(requestURI, attributeValue.replaceAll('\\|', '%7C'))
-            }
-            else {
-                throw new IllegalArgumentException("For ${attributeValue}: ${ex.message}", ex)
-            }
-        }
-    }
-    
-    URI toURI(String s) {
-        try {
-            s.toURI()
-        }
-        catch (URISyntaxException ex) {
-            if (s.contains('|')) {
-                s.replaceAll('\\|', '%7C').toURI() // TODO: Use ReEncoding
-            }
-            else {
-                throw ex
-            }
-        }
+        requestURI.resolve(reEncoding.reEncode(attributeValue))
     }
 
 }

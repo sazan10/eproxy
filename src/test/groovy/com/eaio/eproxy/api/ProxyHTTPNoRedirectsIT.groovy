@@ -16,6 +16,7 @@ import org.springframework.mock.web.DelegatingServletOutputStream
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.eaio.eproxy.Eproxy
+import com.eaio.net.httpclient.ReEncoding
 
 /**
  * Simulates disabled redirects.
@@ -29,7 +30,7 @@ import com.eaio.eproxy.Eproxy
 class ProxyHTTPNoRedirectsIT {
 
     @Autowired
-    Proxy proxy
+    Proxy proxy = new Proxy(reEncoding: new ReEncoding())
     
     @Test
     void 'redirect URLs should be rewritten'() {

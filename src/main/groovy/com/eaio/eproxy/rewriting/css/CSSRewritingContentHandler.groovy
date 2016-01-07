@@ -11,7 +11,7 @@ import org.xml.sax.SAXException
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.URLManipulation
-import com.eaio.eproxy.rewriting.html.URIAwareContentHandler
+import com.eaio.eproxy.rewriting.html.RewritingContentHandler
 import com.steadystate.css.dom.*
 import com.steadystate.css.parser.CSSOMParser
 import com.steadystate.css.parser.LexicalUnitImpl
@@ -25,14 +25,14 @@ import com.steadystate.css.parser.SACParserCSS3
  */
 @Mixin(URLManipulation)
 @Slf4j
-class CSSRewritingContentHandler extends URIAwareContentHandler {
+class CSSRewritingContentHandler extends RewritingContentHandler {
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'style')) {
             stack.push('style')
         }
         else {
-            String styleAttribute = atts?.getValue('style')
+            String styleAttribute = atts.getValue('style')
             if (styleAttribute && styleAttribute.length() > 5I) {
                 String rewrittenCSS = rewriteStyleAttribute(styleAttribute)
                 setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS)
@@ -65,8 +65,6 @@ class CSSRewritingContentHandler extends URIAwareContentHandler {
             Reader charArrayReader = new CharArrayReader(ch, start, length)
             rewriteCSS(charArrayReader, builder.asWriter())
             delegate.characters(builder.buffer, 0I, builder.length())
-
-            //println "\nrewrote\n${new String(ch, start, length)}\nto\n${new String(builder.buffer, 0I, builder.length())}"
         }
         else {
             delegate.characters(ch, start, length)
@@ -111,7 +109,7 @@ class CSSRewritingContentHandler extends URIAwareContentHandler {
         }
         else if (rule instanceof CSSUnknownRuleImpl) {
             if (containsIgnoreCase(rule.text, 'url')) {
-                log.warn("unknown CSS rule in ${requestURI}: ${rule.text}")
+                log.warn('unknown CSS rule in {}: {}', requestURI, rule.text)
             }
             // TODO: Remove
         }
@@ -122,7 +120,7 @@ class CSSRewritingContentHandler extends URIAwareContentHandler {
         }
         else if (rule instanceof CSSCharsetRuleImpl) {}
         else {
-            println rule.getClass().name
+            log.warn('unknown CSS rule type in {}: {}', requestURI, rule.getClass().name)
         }
     }
 
