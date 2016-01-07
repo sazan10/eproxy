@@ -15,6 +15,7 @@ import org.xml.sax.XMLReader
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.css.*
 import com.eaio.eproxy.rewriting.html.*
+import com.eaio.net.httpclient.ReEncoding
 
 /**
  * Rewriting code for different MIME types.
@@ -26,7 +27,10 @@ import com.eaio.eproxy.rewriting.html.*
 @Slf4j
 class Rewriting {
     
-    Set<String> javascript = [
+    @Autowired
+    ReEncoding reEncoding
+    
+    private Set<String> javascript = [
         'application/ecmascript',
         'application/javascript',
         'application/x-ecmascript',
