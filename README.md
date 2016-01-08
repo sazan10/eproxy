@@ -2,15 +2,15 @@
 
 # Eproxy
 
-Eproxy is a content-rewriting proxy that can also double as a cheap CDN, a proxy that
+Eproxy is a proxy that can also double as a cheap CDN, a proxy that
 
-* rewrites HTML, CSS and JavaScript so you'll always stay on the proxy
-* supports cookies
+* rewrites HTML, CSS and JavaScript (planned) so you'll always stay on the proxy
+* supports cookies (planned)
 * supports all HTTP methods 
 * supports HTTPS
 * caches content
 * lets you customize the socket and HTTP setup
-* uses a real parser for HTML, CSS and JavaScript
+* uses a real parser for HTML, CSS and JavaScript (planned)
 * attempts to be as secure as possible 
 
 In other words, something you can use in a company network to look at questionable sites without needing to install anything. Or a cheap accelerator for your static content.
@@ -19,7 +19,7 @@ In other words, something you can use in a company network to look at questionab
 
 * Caching in-memory, using Memcache or Infinispan (planned).
 * Support for stand-alone operation, inside a JEE container (Tomcat or Jetty) or on Google App Engine.
-* Robust, parser-based HTML rewriting.
+* Robust, parser-based HTML and CSS rewriting.
 
 ## Demo Site
 
