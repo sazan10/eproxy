@@ -62,7 +62,7 @@ class ProxyHTTPPOSTNoRedirectsIT {
 %0D%0A-----END+PKCS7-----%0D%0A'''.replaceAll('\n', '').bytes
 
     @Autowired
-    Proxy proxy = new Proxy(reEncoding: new ReEncoding())
+    Proxy proxy
     
     @Test
     void 'POST requests to PayPal should return a new URL'() {

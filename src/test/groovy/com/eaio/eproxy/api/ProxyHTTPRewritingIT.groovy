@@ -34,7 +34,7 @@ class ProxyHTTPRewritingIT {
     public ErrorCollector errorCollector = new ErrorCollector()
 
     @Autowired
-    Proxy proxy = new Proxy(reEncoding: new ReEncoding())
+    Proxy proxy
     
     @Test
     void 'HTML should be rewritten'() {

@@ -34,7 +34,7 @@ class ProxyHTTPIT {
     public ErrorCollector errorCollector = new ErrorCollector()
 
     @Autowired
-    Proxy proxy = new Proxy(reEncoding: new ReEncoding())
+    Proxy proxy
     
     @Test
     void 'content-security-policy headers should be removed'() {

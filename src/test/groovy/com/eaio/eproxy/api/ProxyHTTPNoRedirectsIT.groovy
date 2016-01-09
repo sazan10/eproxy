@@ -30,7 +30,7 @@ import com.eaio.net.httpclient.ReEncoding
 class ProxyHTTPNoRedirectsIT {
 
     @Autowired
-    Proxy proxy = new Proxy(reEncoding: new ReEncoding())
+    Proxy proxy
     
     @Test
     void 'redirect URLs should be rewritten'() {
