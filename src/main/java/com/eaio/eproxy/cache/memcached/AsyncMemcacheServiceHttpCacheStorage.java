@@ -126,21 +126,19 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         try {
-            return future.get(memcacheTimeout, TimeUnit.MILLISECONDS);
+            return memcacheTimeout == null ? future.get() : future.get(memcacheTimeout, TimeUnit.MILLISECONDS);
         }
         catch (InterruptedException ex) {
             log.warn("operation on key {} was interrupted after {} ms", key, stopWatch.getTime());
             Thread.currentThread().interrupt();
-            return null;
         }
         catch (ExecutionException ex) {
             throw new IOException(ex.getCause());
         }
         catch (TimeoutException ex) {
-            stopWatch.stop();
             log.warn("operation on key {} timed out after {} ms", key, stopWatch.getTime());
-            throw new IOException(ex); // ?
         }
+        return null;
     }
 
 }
