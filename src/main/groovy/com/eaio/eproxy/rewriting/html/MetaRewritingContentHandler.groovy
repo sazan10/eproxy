@@ -26,7 +26,7 @@ class MetaRewritingContentHandler extends RewritingContentHandler {
 
     @Lazy
     private transient Object patternRefresh = bndmci.processString('refresh'),
-    patternURL = bndmci.processString('url')
+        patternURL = bndmci.processString('url')
 
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'meta')) {
