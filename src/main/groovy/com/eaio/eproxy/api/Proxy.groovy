@@ -99,7 +99,7 @@ class Proxy {
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                     response.setHeader(header.name, rewrite(baseURI, requestURI, header.value, rewriteConfig ? new RewriteConfig(rewrite: true) : null))
                 }
-                else if (!(header.name?.equalsIgnoreCase('Content-Security-Policy')) && !(header.name?.equalsIgnoreCase('Content-Length'))) { // TODO Header whitelist
+                else if (!dropHeader(header.name)) {
                     // TODO only drop Content-Length if not rewriting
                     response.setHeader(header.name, header.value)
                 }
@@ -226,6 +226,11 @@ class Proxy {
             HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
             elements[0I]
         }
+    }
+
+    // TODO Header whitelist
+    boolean dropHeader(String name) {
+        [ 'Content-Security-Policy', 'Content-Length', 'Transfer-Encoding' ].any { it.equalsIgnoreCase(name) }
     }
 
 }

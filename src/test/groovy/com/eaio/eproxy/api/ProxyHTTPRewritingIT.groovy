@@ -326,4 +326,27 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), containsString('Mobilit&auml;tsportal'))
     }
     
+    
+    @Test
+    void 'Transfer-Encoding header should not be sent'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-http/www.ip.de/lp/datenschutzinfo_online-werbung.cfm' },
+            getContextPath: { '' },
+            getQueryString: { null },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeader: { String name -> null }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> assertThat(name?.toLowerCase(), not(is('transfer-encoding'))) },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('Datenschutzinfo'))
+    }
+    
 }
