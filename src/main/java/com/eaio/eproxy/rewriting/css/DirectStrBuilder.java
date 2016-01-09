@@ -12,16 +12,8 @@ class DirectStrBuilder extends StrBuilder {
     
     private static final long serialVersionUID = -6168436101601496505L;
     
-    public DirectStrBuilder() {
-        super();
-    }
-
     public DirectStrBuilder(int initialCapacity) {
         super(initialCapacity);
-    }
-
-    public DirectStrBuilder(String str) {
-        super(str);
     }
 
     public char[] getBuffer() {

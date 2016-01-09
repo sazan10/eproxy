@@ -13,7 +13,6 @@ import java.util.TreeSet;
 import org.apache.xml.serialize.BaseMarkupSerializer;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
-import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
 /**
@@ -29,21 +28,10 @@ public class HTMLSerializer extends BaseContentHandler {
 
     private final Set<String> emptyElements = new TreeSet<String>(Arrays.asList("area", "base", "basefont", "br", "col", "frame", "hr", "img", "input", "isindex", "link", "meta", "param"));
 
-    private Locator locator;
-
     private final Writer output;
 
     public HTMLSerializer(Writer output) {
         this.output = output;
-    }
-
-    public Locator getDocumentLocator() {
-        return locator;
-    }
-
-    @Override
-    public void setDocumentLocator(Locator locator) {
-        this.locator = locator;
     }
 
     @Override
