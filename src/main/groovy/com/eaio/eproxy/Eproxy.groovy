@@ -4,7 +4,6 @@ import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
 import org.apache.http.HttpRequestInterceptor
-import org.apache.http.HttpResponseInterceptor
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.protocol.RequestAcceptEncoding
@@ -19,16 +18,13 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler
-import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.client.cache.CacheConfig
+import org.apache.http.impl.client.cache.CachingHttpClientBuilder
 import org.apache.http.impl.client.cache.CachingHttpClients
 import org.apache.http.impl.conn.*
-import org.apache.http.protocol.HttpProcessor
-import org.apache.http.protocol.HttpProcessorBuilder
-import org.apache.http.protocol.RequestContent
-import org.apache.http.protocol.RequestTargetHost
-import org.apache.http.protocol.RequestUserAgent
+import org.apache.http.protocol.*
 import org.apache.http.ssl.SSLContexts
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -39,10 +35,13 @@ import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 
+import com.eaio.eproxy.cache.memcached.AsyncMemcacheServiceHttpCacheStorage
 import com.eaio.net.httpclient.*
 import com.eaio.util.googleappengine.NotOnGoogleAppEngineOrDevserver
 import com.eaio.util.googleappengine.OnGoogleAppEngineOrDevserver
-import com.google.appengine.api.memcache.MemcacheService
+import com.google.appengine.api.capabilities.CapabilitiesService
+import com.google.appengine.api.capabilities.CapabilitiesServiceFactory
+import com.google.appengine.api.memcache.AsyncMemcacheService
 import com.google.appengine.api.memcache.MemcacheServiceFactory
 
 /**
@@ -110,6 +109,9 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
 
     @Value('${cache.maxObjectSize}')
     Integer maxObjectSize
+    
+    @Autowired(required = false)
+    AsyncMemcacheServiceHttpCacheStorage asyncMemcacheServiceHttpCacheStorage
 
     /**
      * Not necessary, hence stubbed out.
@@ -139,12 +141,12 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         connectionManager.with {
             maxTotal = maxTotalSockets ?: 32I
             defaultMaxPerRoute = maxSocketsPerRoute ?: 6I
-            validateAfterInactivity = validateAfterInactivity ?: 10000I
         }
+        connectionManager.validateAfterInactivity = validateAfterInactivity ?: 10000I
 
         // TODO: CachingExec - Via-Header-Erzeugung :(
             
-        HttpClientBuilder builder = CachingHttpClients.custom()
+        CachingHttpClientBuilder builder = CachingHttpClients.custom()
             .setCacheConfig(cacheConfig())
             .setConnectionManager(connectionManager)
             // Retries
@@ -155,6 +157,9 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
             .setUserAgent(userAgent)
             .setHttpProcessor(httpProcessor())
 
+        if (asyncMemcacheServiceHttpCacheStorage) {
+            builder.httpCacheStorage = asyncMemcacheServiceHttpCacheStorage
+        }
         if (maxRedirects == 0I) {
             builder.disableRedirectHandling()
         }
@@ -240,8 +245,15 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Bean
     @Conditional(OnGoogleAppEngineOrDevserver)
     @Lazy
-    MemcacheService memcacheService() {
-        MemcacheServiceFactory.memcacheService
+    AsyncMemcacheService asyncMemcacheService() {
+        MemcacheServiceFactory.asyncMemcacheService
+    }
+    
+    @Bean
+    @Conditional(OnGoogleAppEngineOrDevserver)
+    @Lazy
+    CapabilitiesService capabilitiesService() {
+        CapabilitiesServiceFactory.capabilitiesService
     }
 
     @Bean
