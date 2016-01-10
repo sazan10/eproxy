@@ -1,10 +1,10 @@
 package com.eaio.eproxy.rewriting.css
 
 import static org.apache.commons.lang3.StringUtils.*
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
-import org.w3c.css.sac.InputSource
-import org.w3c.css.sac.LexicalUnit
+import org.w3c.css.sac.*
 import org.w3c.dom.css.*
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
@@ -25,22 +25,25 @@ import com.steadystate.css.parser.SACParserCSS3
  */
 @Mixin(URLManipulation)
 @Slf4j
-class CSSRewritingContentHandler extends RewritingContentHandler {
+class CSSRewritingContentHandler extends RewritingContentHandler implements ErrorHandler {
 
+    @CompileStatic
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'style')) {
             stack.push('style')
         }
         else {
             String styleAttribute = atts.getValue('style')
-            if (styleAttribute && styleAttribute.length() > 5I) {
+            if (styleAttribute && styleAttribute.length() > 8I) {
                 String rewrittenCSS = rewriteStyleAttribute(new InputSource(characterStream: new StringReader(styleAttribute)))
                 setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS)
+                log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length())
             }
         }
         delegate.startElement(uri, localName, qName, atts)
     }
 
+    @CompileStatic
     void endElement(String uri, String localName, String qName) throws SAXException {
         if (nameIs(localName, qName, 'style')) {
             try {
@@ -54,27 +57,33 @@ class CSSRewritingContentHandler extends RewritingContentHandler {
     /**
      * Rewrites <tt>&lt;style&gt;</tt> contents.
      */
+    @CompileStatic
     void characters(char[] ch, int start, int length) throws SAXException {
         String tag
         try {
             tag = stack.peek()
         }
         catch (EmptyStackException ex) {}
-        if (tag == 'style' && length > 5I) {
+        if (tag == 'style' && length > 11I) {
             DirectStrBuilder builder = new DirectStrBuilder(length)
             Reader charArrayReader = new CharArrayReader(ch, start, length)
             rewriteCSS(new InputSource(characterStream: charArrayReader), builder.asWriter())
             delegate.characters(builder.buffer, 0I, builder.length())
+            log.debug('rewrote CSS {} chars to {} chars', length, builder.length())
         }
         else {
             delegate.characters(ch, start, length)
         }
     }
 
+    @CompileStatic
     CSSOMParser newCSSOMParser() {
-        new CSSOMParser(new SACParserCSS3())
+        CSSOMParser out = new CSSOMParser(new SACParserCSS3())
+        out.errorHandler = this
+        out
     }
 
+    @CompileStatic
     String rewriteStyleAttribute(InputSource source) {
         CSSOMParser parser = newCSSOMParser()
         CSSStyleDeclarationImpl declaration = (CSSStyleDeclarationImpl) parser.parseStyleDeclaration(source)
@@ -82,6 +91,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler {
         declaration as String
     }
 
+    @CompileStatic
     void rewriteCSS(InputSource inputSource, Writer writer) {
         CSSOMParser parser = newCSSOMParser()
         CSSStyleSheet sheet = parser.parseStyleSheet(inputSource, null, null)
@@ -90,12 +100,6 @@ class CSSRewritingContentHandler extends RewritingContentHandler {
             rewriteCSSRule(rule)
         }
         writer.write(sheet as String) // TODO
-    }
-    
-    void rewriteCSSStyleDeclaration(CSSStyleDeclarationImpl declaration) {
-        declaration.properties*.value.each { CSSValue value ->
-            rewriteCSSValueImpl((CSSValueImpl) value)
-        }
     }
 
     void rewriteCSSRule(CSSRule rule) {
@@ -106,10 +110,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler {
             rule.href = rewrite(baseURI, requestURI, rule.href, rewriteConfig)
         }
         else if (rule instanceof CSSUnknownRuleImpl) {
-            if (containsIgnoreCase(rule.text, 'url')) {
-                log.warn('unknown CSS rule in {}: {}', requestURI, rule.text)
-            }
-            // TODO: Remove
+            log.warn('unknown CSS rule in {}: {}', requestURI, rule.text)
         }
         else if (rule instanceof CSSMediaRuleImpl) {
             rule.cssRules.length.times { int j ->
@@ -121,6 +122,13 @@ class CSSRewritingContentHandler extends RewritingContentHandler {
             log.warn('unknown CSS rule type in {}: {}', requestURI, rule.getClass().name)
         }
     }
+    
+    @CompileStatic
+    void rewriteCSSStyleDeclaration(CSSStyleDeclarationImpl declaration) {
+        declaration.properties*.value.each { CSSValue value ->
+            rewriteCSSValueImpl((CSSValueImpl) value)
+        }
+    }
 
     void rewriteCSSValueImpl(CSSValueImpl value) {
         if (value.length > 0I) {
@@ -129,17 +137,29 @@ class CSSRewritingContentHandler extends RewritingContentHandler {
                 rewriteCSSValueImpl(item)
             }
         }
-        else if (containsURILexicalUnit(value) && !isDataURI((LexicalUnitImpl) value.value) && attributeValueNeedsRewriting(value.value.stringValue)) {
+        else if (containsURILexicalUnit(value) && attributeValueNeedsRewriting(value.value.stringValue)) {
             value.value.stringValue = rewrite(baseURI, requestURI, value.value.stringValue, rewriteConfig)
         }
     }
 
+    @CompileStatic
     boolean containsURILexicalUnit(CSSValueImpl value) {
-        value.value instanceof LexicalUnit && value.value.lexicalUnitType == LexicalUnit.SAC_URI
+        value.value instanceof LexicalUnit && ((LexicalUnit) value.value).lexicalUnitType == LexicalUnit.SAC_URI
     }
 
-    boolean isDataURI(LexicalUnitImpl lexicalUnit) {
-        lexicalUnit.stringValue?.trim()?.startsWith('data:') // TODO Case insensitive
+    @CompileStatic
+    @Override
+    void warning(CSSParseException exception) throws CSSException {
+    }
+
+    @CompileStatic
+    @Override
+    void error(CSSParseException exception) throws CSSException {
+    }
+
+    @CompileStatic
+    @Override
+    void fatalError(CSSParseException exception) throws CSSException {
     }
 
 }
