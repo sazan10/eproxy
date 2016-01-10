@@ -1,5 +1,6 @@
 package com.eaio.eproxy.rewriting
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import java.nio.charset.Charset
@@ -24,6 +25,7 @@ import com.eaio.net.httpclient.ReEncoding
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 @Component
 @Slf4j
 class Rewriting {

@@ -1,6 +1,7 @@
 package com.eaio.eproxy.api
 
 import static org.apache.commons.lang3.StringUtils.*
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import javax.net.ssl.SSLException
@@ -92,8 +93,9 @@ class Proxy {
             }
             
             remoteResponse = httpClient.execute(uriRequest, context)
+            TimingInterceptor.log(context, log)
             
-            response.setStatus(remoteResponse.statusLine.statusCode, remoteResponse.statusLine.reasonPhrase)
+            response.setStatus(remoteResponse.statusLine.statusCode)
             
             remoteResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
@@ -116,6 +118,9 @@ class Proxy {
                     IOUtils.copyLarge(remoteResponse.entity.content, outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
                 }
             }            
+        }
+        catch (SocketTimeoutException ex) {
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
         }
         catch (ConnectTimeoutException ex) {
             sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
@@ -144,12 +149,14 @@ class Proxy {
             }
         }
         catch (IOException ex) {
-            if (ex.message != 'Broken pipe') {
+            if (ex.message == 'Connection reset by peer') {
+                sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+            }
+            else if (ex.message != 'Broken pipe') {
                 throw ex
             }
         }
         finally {
-            TimingInterceptor.log(context, log)
             EntityUtils.consumeQuietly(remoteResponse?.entity)
         }
     }
@@ -161,6 +168,7 @@ class Proxy {
         catch (IllegalStateException ex) {}
     }
     
+    @CompileStatic
     private HttpUriRequest newRequest(String method, URI uri) {
         switch (method) {
             case 'GET': return new HttpGet(uri)
@@ -181,6 +189,7 @@ class Proxy {
     /**
      * Make sure to remove the context path before calling this method.
      */
+    @CompileStatic
     URI buildRequestURI(String scheme, String requestURI, String queryString) {
         String uriFromHost, path
         uriFromHost = substringAfter(requestURI[1..-1], '/')

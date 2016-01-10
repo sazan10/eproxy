@@ -2,6 +2,7 @@ package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
 import groovy.lang.Lazy
+import groovy.transform.CompileStatic
 
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
@@ -30,6 +31,7 @@ class URIRewritingContentHandler extends RewritingContentHandler {
         delegate.startElement(uri, localName, qName, atts)
     }
     
+    @CompileStatic
     private boolean attributeNameShouldBeRewritten(String attributeName) {
         switch (attributeName) {
             case 'value':
