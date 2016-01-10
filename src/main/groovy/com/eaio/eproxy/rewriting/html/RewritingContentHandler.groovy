@@ -26,6 +26,7 @@ class RewritingContentHandler extends DelegatingContentHandler {
         patternHTTPS = bndmci.processString('https:'),
         patternColonSlash = bndmci.processString(':/')
 
+    // TODO: data: and javascript: URIs
     boolean attributeValueNeedsRewriting(String attributeValue) {
         attributeValue.startsWith('/') ||
             bndmci.searchString(attributeValue, 'http:', patternHTTP) >= 0I ||
