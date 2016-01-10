@@ -50,7 +50,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -72,7 +72,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -94,7 +94,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -116,7 +116,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -138,7 +138,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -160,7 +160,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -182,7 +182,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -206,7 +206,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -230,7 +230,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -252,7 +252,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -274,7 +274,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -296,7 +296,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -318,7 +318,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
@@ -341,7 +341,7 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> assertThat(name?.toLowerCase(), not(is('transfer-encoding'))) },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse

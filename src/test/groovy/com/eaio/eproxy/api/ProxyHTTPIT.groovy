@@ -50,7 +50,7 @@ class ProxyHTTPIT {
         ] as HttpServletRequest
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> assertThat('Content-Security-Policy headers should be removed for now',
                 name?.toLowerCase() ?: '', not(is('content-security-policy'))) },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },

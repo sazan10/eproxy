@@ -46,7 +46,7 @@ class ProxyHTTPNoRedirectsIT {
         ] as HttpServletRequest
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
+            setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/http/www.n-tv.de/')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
         ] as HttpServletResponse
@@ -69,7 +69,7 @@ class ProxyHTTPNoRedirectsIT {
         ] as HttpServletRequest
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
+            setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/ah-http/www.n-tv.de/')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
         ] as HttpServletResponse
@@ -92,7 +92,7 @@ class ProxyHTTPNoRedirectsIT {
         ] as HttpServletRequest
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
-            setStatus: { int status, String message -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
+            setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/ah-http/edition.cnn.com/specials/travel/guides')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
         ] as HttpServletResponse
