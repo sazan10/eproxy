@@ -14,6 +14,7 @@ import org.apache.http.Header
 import org.apache.http.HeaderElement
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpResponse
+import org.apache.http.NoHttpResponseException
 import org.apache.http.client.HttpClient
 import org.apache.http.client.cache.HttpCacheContext
 import org.apache.http.client.methods.*
@@ -119,30 +120,33 @@ class Proxy {
                 }
             }            
         }
+        catch (NoHttpResponseException ex) {
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
+        }
         catch (SocketTimeoutException ex) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
         }
         catch (ConnectTimeoutException ex) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
         }
         catch (UnknownHostException ex) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
         }
         catch (IllegalStateException ignored) {}
         catch (SocketException ex) {
             if (ex.message?.startsWith('Permission denied')) { // Google App Engine
-                sendError(response, HttpServletResponse.SC_FORBIDDEN, ExceptionUtils.getRootCauseMessage(ex))
+                sendError(response, HttpServletResponse.SC_FORBIDDEN, ex)
             }
             else {
                 throw ex
             }
         }
         catch (HttpHostConnectException ex) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
         }
         catch (SSLException ex) {
             if (ExceptionUtils.getRootCauseMessage(ex) == 'InvalidAlgorithmParameterException: Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
-                sendError(response, HttpServletResponse.SC_FORBIDDEN, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
+                sendError(response, HttpServletResponse.SC_FORBIDDEN, ex, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
             }
             else {
                 throw ex
@@ -150,7 +154,7 @@ class Proxy {
         }
         catch (IOException ex) {
             if (ex.message == 'Connection reset by peer') {
-                sendError(response, HttpServletResponse.SC_NOT_FOUND, ExceptionUtils.getRootCauseMessage(ex))
+                sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
             else if (ex.message != 'Broken pipe') {
                 throw ex
@@ -161,7 +165,7 @@ class Proxy {
         }
     }
     
-    private void sendError(HttpServletResponse response, int statusCode, String message) {
+    private void sendError(HttpServletResponse response, int statusCode, Throwable thrw, String message = ExceptionUtils.getRootCauseMessage(thrw)) {
         try {
             response.sendError(statusCode, message)
         }

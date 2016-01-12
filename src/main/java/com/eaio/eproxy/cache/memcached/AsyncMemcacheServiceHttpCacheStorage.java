@@ -52,14 +52,18 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
     @Value("${cache.memcacheTimeout}")
     private Integer memcacheTimeout;
     
+    private boolean isMemcacheEnabled() {
+        return capabilitiesService.getStatus(Capability.MEMCACHE).getStatus() == CapabilityStatus.ENABLED;
+    }
+    
     /**
      * @see org.apache.http.client.cache.HttpCacheStorage#putEntry(java.lang.String, org.apache.http.client.cache.HttpCacheEntry)
      */
     @Override
     public void putEntry(String key, HttpCacheEntry entry) throws IOException {
-        if (capabilitiesService.getStatus(Capability.MEMCACHE).getStatus() == CapabilityStatus.ENABLED) {
+        if (isMemcacheEnabled()) {
             Future<Void> future = asyncMemcacheService.put(key, entry);
-            awaitFutureUntilTimeout(key, future);
+            awaitFutureUntilTimeout("put", key, future);
         }
     }
 
@@ -68,9 +72,9 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public HttpCacheEntry getEntry(String key) throws IOException {
-        if (capabilitiesService.getStatus(Capability.MEMCACHE).getStatus() == CapabilityStatus.ENABLED) {
+        if (isMemcacheEnabled()) {
             Future<Object> future = asyncMemcacheService.get(key);
-            return (HttpCacheEntry) awaitFutureUntilTimeout(key, future);
+            return (HttpCacheEntry) awaitFutureUntilTimeout("get", key, future);
         }
         return null;
     }
@@ -80,9 +84,9 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public void removeEntry(String key) throws IOException {
-        if (capabilitiesService.getStatus(Capability.MEMCACHE).getStatus() == CapabilityStatus.ENABLED) {
+        if (isMemcacheEnabled()) {
             Future<Boolean> future = asyncMemcacheService.delete(key);
-            awaitFutureUntilTimeout(key, future);
+            awaitFutureUntilTimeout("delete", key, future);
         }
     }
 
@@ -92,10 +96,10 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
     @Override
     public void updateEntry(String key, HttpCacheUpdateCallback callback)
             throws IOException, HttpCacheUpdateException {
-        if (capabilitiesService.getStatus(Capability.MEMCACHE).getStatus() == CapabilityStatus.ENABLED) {
+        if (isMemcacheEnabled()) {
             for (int i = 0; i < maxUpdateRetries; ++i) {
                 Future<IdentifiableValue> future = asyncMemcacheService.getIdentifiable(key);
-                IdentifiableValue identifiable = awaitFutureUntilTimeout(key, future);
+                IdentifiableValue identifiable = awaitFutureUntilTimeout("getIdentifiable", key, future);
                 if (identifiable == null && Thread.currentThread().isInterrupted()) {
                     return;
                 }
@@ -109,7 +113,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
                 }
                 else {
                     Future<Boolean> futurePut = asyncMemcacheService.putIfUntouched(key, identifiable, newEntry);
-                    Boolean stored = awaitFutureUntilTimeout(key, futurePut);
+                    Boolean stored = awaitFutureUntilTimeout("putIfUntouched", key, futurePut);
                     if (stored == null && Thread.currentThread().isInterrupted()) {
                         return;
                     }
@@ -122,21 +126,21 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
         }
     }
     
-    private <T> T awaitFutureUntilTimeout(String key, Future<T> future) throws IOException {
+    private <T> T awaitFutureUntilTimeout(String operation, String key, Future<T> future) throws IOException {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         try {
             return memcacheTimeout == null ? future.get() : future.get(memcacheTimeout, TimeUnit.MILLISECONDS);
         }
         catch (InterruptedException ex) {
-            log.warn("operation on key {} was interrupted after {} ms", key, stopWatch.getTime());
+            log.warn("{} on key {} was interrupted after {} ms", operation, key, stopWatch.getTime());
             Thread.currentThread().interrupt();
         }
         catch (ExecutionException ex) {
             throw new IOException(ex.getCause());
         }
         catch (TimeoutException ex) {
-            log.warn("operation on key {} timed out after {} ms", key, stopWatch.getTime());
+            log.warn("{} on key {} was interrupted after {} ms", operation, key, stopWatch.getTime());
         }
         return null;
     }

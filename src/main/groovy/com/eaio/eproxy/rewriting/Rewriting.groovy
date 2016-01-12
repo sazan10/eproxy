@@ -102,11 +102,7 @@ class Rewriting {
                             )
                         )
                     )
-            InputSource inputSource = new InputSource(byteStream: inputStream)
-            if (charset) {
-                inputSource.encoding = charset.displayName()
-            }
-            xmlReader.parse(inputSource) // TODO: BufferedInputStream?
+            xmlReader.parse(newSAXInputSource(inputStream, charset)) // TODO: BufferedInputStream?
         }
         catch (SAXException ex) {
             if (ExceptionUtils.getRootCause(ex) instanceof IOException) {
@@ -128,12 +124,8 @@ class Rewriting {
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         try {
-            org.w3c.css.sac.InputSource inputSource = new org.w3c.css.sac.InputSource(byteStream: inputStream)
-            if (charset) {
-                inputSource.encoding = charset.displayName()
-            }
             new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
-                .rewriteCSS(inputSource, outputWriter)
+                .rewriteCSS(newSACInputSource(inputStream, charset), outputWriter)
         }
         finally {
             try {
@@ -146,6 +138,22 @@ class Rewriting {
     XMLReader newXMLReader() {
         SAXParser out = new SAXParser()
         out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
+        out
+    }
+    
+    InputSource newSAXInputSource(InputStream inputStream, Charset charset) {
+        InputSource out = new InputSource(byteStream: inputStream)
+        if (charset) {
+            out.encoding = charset.displayName()
+        }
+        out
+    }
+    
+    org.w3c.css.sac.InputSource newSACInputSource(InputStream inputStream, Charset charset) {
+        org.w3c.css.sac.InputSource out = new org.w3c.css.sac.InputSource(byteStream: inputStream)
+        if (charset) {
+            out.encoding = charset.displayName()
+        }
         out
     }
 

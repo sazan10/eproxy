@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
+import org.apache.commons.lang3.exception.ExceptionUtils
 import org.w3c.css.sac.*
 import org.w3c.dom.css.*
 import org.xml.sax.Attributes
@@ -150,16 +151,19 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
     @CompileStatic
     @Override
     void warning(CSSParseException exception) throws CSSException {
+        log.warn('while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
     }
 
     @CompileStatic
     @Override
     void error(CSSParseException exception) throws CSSException {
+        log.warn('error while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
     }
 
     @CompileStatic
     @Override
     void fatalError(CSSParseException exception) throws CSSException {
+        log.warn('fatal error while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
     }
 
 }
