@@ -107,7 +107,7 @@ class Proxy {
                     response.setHeader(header.name, header.value)
                 }
             }
-
+            
             if (remoteResponse.entity) {
                 ContentType contentType = ContentType.getLenient(remoteResponse.entity)
                 OutputStream outputStream = response.outputStream
@@ -243,7 +243,7 @@ class Proxy {
 
     // TODO Header whitelist
     boolean dropHeader(String name) {
-        [ 'Content-Security-Policy', 'Content-Length', 'Transfer-Encoding' ].any { it.equalsIgnoreCase(name) }
+        [ 'Content-Security-Policy', 'Content-Length', 'Transfer-Encoding', 'Accept-Ranges', 'Date' ].any { it.equalsIgnoreCase(name) }
     }
-
+    
 }
