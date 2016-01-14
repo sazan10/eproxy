@@ -151,7 +151,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
     @CompileStatic
     @Override
     void warning(CSSParseException exception) throws CSSException {
-        log.warn('while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
+        log.info('while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
     }
 
     @CompileStatic
@@ -163,7 +163,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
     @CompileStatic
     @Override
     void fatalError(CSSParseException exception) throws CSSException {
-        log.warn('fatal error while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
+        log.error('fatal error while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
     }
 
 }
