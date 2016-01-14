@@ -94,7 +94,6 @@ class Proxy {
             }
             
             remoteResponse = httpClient.execute(uriRequest, context)
-            TimingInterceptor.log(context, log)
             
             response.setStatus(remoteResponse.statusLine.statusCode)
             
@@ -118,7 +117,9 @@ class Proxy {
                 else {
                     IOUtils.copyLarge(remoteResponse.entity.content, outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
                 }
-            }            
+            }
+                        
+            TimingInterceptor.log(context, log)
         }
         catch (NoHttpResponseException ex) {
             sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
