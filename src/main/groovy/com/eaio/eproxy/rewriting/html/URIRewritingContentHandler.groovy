@@ -1,14 +1,12 @@
 package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
-import groovy.lang.Lazy
 import groovy.transform.CompileStatic
 
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
 import com.eaio.eproxy.rewriting.URLManipulation
-import com.eaio.stringsearch.BNDMCI
 
 /**
  * Rewrites <tt>src</tt>, <tt>href</tt> and <tt>action</tt> attributes.

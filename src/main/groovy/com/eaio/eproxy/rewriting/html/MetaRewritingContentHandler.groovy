@@ -10,7 +10,6 @@ import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
 import com.eaio.eproxy.rewriting.URLManipulation
-import com.eaio.stringsearch.BNDMCI
 
 /**
  * Rewrites <tt>meta refresh</tt>. Should be placed after {@link RemoveNoScriptElementsContentHandler}.
@@ -20,9 +19,6 @@ import com.eaio.stringsearch.BNDMCI
  */
 @Mixin(URLManipulation)
 class MetaRewritingContentHandler extends RewritingContentHandler {
-
-    @Lazy
-    private transient BNDMCI bndmci = new BNDMCI()
 
     @Lazy
     private transient Object patternRefresh = bndmci.processString('refresh'),
