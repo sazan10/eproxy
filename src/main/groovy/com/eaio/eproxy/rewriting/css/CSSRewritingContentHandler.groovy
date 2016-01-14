@@ -15,7 +15,6 @@ import com.eaio.eproxy.rewriting.URLManipulation
 import com.eaio.eproxy.rewriting.html.RewritingContentHandler
 import com.steadystate.css.dom.*
 import com.steadystate.css.parser.CSSOMParser
-import com.steadystate.css.parser.LexicalUnitImpl
 import com.steadystate.css.parser.SACParserCSS3
 
 /**
@@ -108,7 +107,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
     }
 
     void rewriteCSSRule(CSSRule rule) {
-        if (rule instanceof CSSStyleRuleImpl || rule instanceof CSSFontFaceRuleImpl) {
+        if (rule instanceof CSSStyleRuleImpl || rule instanceof CSSFontFaceRuleImpl || rule instanceof CSSPageRuleImpl) {
             rewriteCSSStyleDeclaration(rule.style)
         }
         else if (rule instanceof CSSImportRuleImpl) {
