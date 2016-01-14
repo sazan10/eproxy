@@ -3,6 +3,8 @@ package com.eaio.eproxy
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
+import javax.net.ssl.SSLException
+
 import org.apache.http.HttpRequestInterceptor
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
@@ -149,8 +151,8 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         CachingHttpClientBuilder builder = CachingHttpClients.custom()
             .setCacheConfig(cacheConfig())
             .setConnectionManager(connectionManager)
-            // Retries
-            .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true)) // Maybe worth removing InterruptedIOException from list
+            // Retries. InterruptedIOException is allowed to be retried.
+            .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true, [ UnknownHostException, ConnectException, SSLException ]))
             // Fix insufficient handling of not encoded redirect URLs
             .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy(reEncoding()) : new ReEncodingRedirectStrategy(reEncoding()))
             .setDefaultRequestConfig(requestConfig())
