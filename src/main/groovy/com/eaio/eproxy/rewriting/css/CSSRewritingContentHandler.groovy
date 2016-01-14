@@ -42,9 +42,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
             if (styleAttribute && styleAttribute.length() > 8I) {
                 String rewrittenCSS = rewriteStyleAttribute(new InputSource(characterStream: new StringReader(styleAttribute)))
                 setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS)
-                if (log.debugEnabled) {
-                    log.debug('rewrote style attribute {} chars to {} chars{}', styleAttribute.length(), rewrittenCSS.length(), styleAttribute == rewrittenCSS ? ' (identical)' : '')
-                }
+                log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length(), rewrittenCSS.length())
             }
         }
         delegate.startElement(uri, localName, qName, atts)
@@ -77,7 +75,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
             rewriteCSS(new InputSource(characterStream: charArrayReader), builder.asWriter())
             delegate.characters(builder.buffer, 0I, builder.length())
             if (log.debugEnabled) {
-                log.debug('rewrote CSS {} chars to {} chars{}', length, builder.length(), new String(ch, start, length) == new String(builder.buffer, 0I, builder.length()) ? ' (identical)' : '')
+                log.debug('rewrote CSS {} chars to {} chars', length, builder.length())
             }
         }
         else {
