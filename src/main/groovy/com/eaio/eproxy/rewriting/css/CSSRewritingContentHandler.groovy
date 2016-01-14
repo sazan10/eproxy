@@ -4,6 +4,8 @@ import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
+import java.util.regex.Pattern
+
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.w3c.css.sac.*
 import org.w3c.dom.css.*
@@ -26,6 +28,9 @@ import com.steadystate.css.parser.SACParserCSS3
 @Mixin(URLManipulation)
 @Slf4j
 class CSSRewritingContentHandler extends RewritingContentHandler implements ErrorHandler {
+    
+    @Lazy
+    private Pattern patternURL = ~/(?i)(\75 ?|u)(\72 ?|r)(\6C ?|l)/
 
     @CompileStatic
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
@@ -114,7 +119,9 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
             rule.href = rewrite(baseURI, requestURI, rule.href, rewriteConfig)
         }
         else if (rule instanceof CSSUnknownRuleImpl) {
-            log.warn('unknown CSS rule in {}: {}', requestURI, rule.text)
+            if (patternURL.matcher(rule.text).find()) {
+                log.warn('url in unknown CSS rule in {}: {}', requestURI, rule.text)
+            }
         }
         else if (rule instanceof CSSMediaRuleImpl) {
             rule.cssRules.length.times { int j ->
@@ -154,19 +161,19 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
     @CompileStatic
     @Override
     void warning(CSSParseException exception) throws CSSException {
-        log.info('while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
+        log.info('while parsing {}@{}:{}: {}', requestURI, exception.lineNumber, exception.columnNumber, ExceptionUtils.getRootCauseMessage(exception))
     }
 
     @CompileStatic
     @Override
     void error(CSSParseException exception) throws CSSException {
-        log.warn('error while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
+        log.warn('error while parsing {}@{}:{}: {}', requestURI, exception.lineNumber, exception.columnNumber, ExceptionUtils.getRootCauseMessage(exception))
     }
 
     @CompileStatic
     @Override
     void fatalError(CSSParseException exception) throws CSSException {
-        log.error('fatal error while parsing {}: {}', requestURI, ExceptionUtils.getRootCauseMessage(exception))
+        log.error('fatal error while parsing {}@{}:{}: {}', requestURI, exception.lineNumber, exception.columnNumber, ExceptionUtils.getRootCauseMessage(exception))
     }
 
 }
