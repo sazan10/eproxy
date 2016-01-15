@@ -1,6 +1,7 @@
 package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
+import groovy.transform.CompileStatic
 
 import org.xml.sax.ContentHandler
 import org.xml.sax.Locator
@@ -11,6 +12,7 @@ import org.xml.sax.Locator
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: HTMLSerializer.java 7637 2015-08-12 10:55:33Z johann $
  */
+@CompileStatic
 class DelegatingContentHandler extends BaseContentHandler {
 
     Locator documentLocator
