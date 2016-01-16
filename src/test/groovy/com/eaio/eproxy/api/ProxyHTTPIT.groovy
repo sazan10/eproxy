@@ -56,7 +56,7 @@ class ProxyHTTPIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
         proxy.proxy('ah', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('johannburkard/eproxy &middot; GitHub'))
+        assertThat(bOut.toString(0I), containsString('johannburkard/eproxy'))
     }
     
 }
