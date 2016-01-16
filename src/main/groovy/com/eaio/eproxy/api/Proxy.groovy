@@ -138,7 +138,7 @@ class Proxy {
             if (ex instanceof SSLHandshakeException) {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
-            else if (ExceptionUtils.getRootCauseMessage(ex) == 'InvalidAlgorithmParameterException: Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
+            else if ((ExceptionUtils.getRootCause(ex) ?: ex).message == 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
                 sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
             }
             else {
@@ -162,7 +162,7 @@ class Proxy {
         }
     }
     
-    private void sendError(URI requestURI, HttpServletResponse response, int statusCode, Throwable thrw, String message = ExceptionUtils.getRootCauseMessage(thrw)) {
+    private void sendError(URI requestURI, HttpServletResponse response, int statusCode, Throwable thrw, String message = (ExceptionUtils.getRootCause(thrw) ?: thrw).message) {
         try {
             response.sendError(statusCode, message)
         }

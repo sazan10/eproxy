@@ -73,9 +73,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
             Reader charArrayReader = new CharArrayReader(ch, start, length)
             rewriteCSS(new InputSource(characterStream: charArrayReader), builder.asWriter())
             delegate.characters(builder.buffer, 0I, builder.length())
-            if (log.debugEnabled) {
-                log.debug('rewrote CSS {} chars to {} chars', length, builder.length())
-            }
+            log.debug('rewrote CSS {} chars to {} chars', length, builder.length())
         }
         else {
             delegate.characters(ch, start, length)
@@ -158,19 +156,19 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
     @CompileStatic
     @Override
     void warning(CSSParseException exception) throws CSSException {
-        log.info('while parsing {}@{}:{}: {}', requestURI, exception.lineNumber, exception.columnNumber, ExceptionUtils.getRootCauseMessage(exception))
+        log.info('while parsing {}@{}:{}: {}', requestURI, exception.lineNumber, exception.columnNumber, (ExceptionUtils.getRootCause(exception) ?: exception).message)
     }
 
     @CompileStatic
     @Override
     void error(CSSParseException exception) throws CSSException {
-        log.warn('error while parsing {}@{}:{}: {}', requestURI, exception.lineNumber, exception.columnNumber, ExceptionUtils.getRootCauseMessage(exception))
+        log.warn('error while parsing {}@{}:{}: {}', requestURI, exception.lineNumber, exception.columnNumber, (ExceptionUtils.getRootCause(exception) ?: exception).message)
     }
 
     @CompileStatic
     @Override
     void fatalError(CSSParseException exception) throws CSSException {
-        log.error('fatal error while parsing {}@{}:{}: {}', requestURI, exception.lineNumber, exception.columnNumber, ExceptionUtils.getRootCauseMessage(exception))
+        log.error('fatal error while parsing {}@{}:{}: {}', requestURI, exception.lineNumber, exception.columnNumber, (ExceptionUtils.getRootCause(exception) ?: exception).message)
     }
 
 }

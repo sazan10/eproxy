@@ -55,7 +55,7 @@ class URLManipulation {
             requestURI.resolve(reEncoding.reEncode(attributeValue))
         }
         catch (IllegalArgumentException ex) {
-            log.warn('couldn\'t resolve {} relative to {}: {}', attributeValue, requestURI, ExceptionUtils.getRootCauseMessage(ex))
+            log.warn('couldn\'t resolve {} relative to {}: {}', attributeValue, requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
         }
     }
 

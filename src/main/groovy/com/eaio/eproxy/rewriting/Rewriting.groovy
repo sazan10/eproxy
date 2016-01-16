@@ -109,8 +109,8 @@ class Rewriting {
                 throw ExceptionUtils.getRootCause(ex)
             }
             else {
-                log.warn("While parsing {}@{}:{}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
-                    ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber, ex)
+                log.warn("While parsing {}@{}:{}: {}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
+                    ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
         finally {
@@ -156,5 +156,5 @@ class Rewriting {
         }
         out
     }
-
+    
 }
