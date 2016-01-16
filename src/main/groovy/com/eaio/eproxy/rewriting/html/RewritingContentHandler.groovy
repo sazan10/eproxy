@@ -1,5 +1,7 @@
 package com.eaio.eproxy.rewriting.html
 
+import groovy.transform.CompileStatic
+
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.net.httpclient.ReEncoding
 import com.eaio.stringsearch.BNDMCI
@@ -10,6 +12,7 @@ import com.eaio.stringsearch.BNDMCI
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 class RewritingContentHandler extends DelegatingContentHandler {
     
     ReEncoding reEncoding
@@ -26,12 +29,17 @@ class RewritingContentHandler extends DelegatingContentHandler {
         patternHTTPS = bndmci.processString('https:'),
         patternColonSlash = bndmci.processString(':/')
 
-    // TODO: data: and javascript: URIs
     boolean attributeValueNeedsRewriting(String attributeValue) {
-        attributeValue.startsWith('/') ||
-            bndmci.searchString(attributeValue, 'http:', patternHTTP) >= 0I ||
-            bndmci.searchString(attributeValue, 'https:', patternHTTPS) >= 0I ||
-            bndmci.searchString(attributeValue, ':/', patternColonSlash) >= 0I
+        int colonIndex = attributeValue.indexOf((int) ((char) ':'))
+        if (colonIndex == -1I) {
+            colonIndex = Integer.MAX_VALUE
+        }
+        [
+            { attributeValue.startsWith('/') },
+            { int index = bndmci.searchString(attributeValue, 'http:', patternHTTP); index >= 0I && index < colonIndex },
+            { int index = bndmci.searchString(attributeValue, 'https:', patternHTTPS); index >= 0I && index < colonIndex }, 
+            { int index = bndmci.searchString(attributeValue, ':/', patternColonSlash); index >= 0I && index < colonIndex }
+        ].any { it() }
     }
 
 }
