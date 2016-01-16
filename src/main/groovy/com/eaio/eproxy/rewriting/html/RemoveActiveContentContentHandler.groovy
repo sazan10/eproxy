@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 
 import org.xml.sax.Attributes
-import org.xml.sax.ContentHandler
 import org.xml.sax.SAXException
 
 /**

@@ -16,7 +16,6 @@ import org.springframework.mock.web.DelegatingServletOutputStream
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.eaio.eproxy.Eproxy
-import com.eaio.net.httpclient.ReEncoding
 
 /**
  * Simulates disabled redirects.

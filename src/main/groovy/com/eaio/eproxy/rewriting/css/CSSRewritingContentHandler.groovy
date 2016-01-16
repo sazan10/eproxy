@@ -12,7 +12,6 @@ import org.w3c.dom.css.*
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
-import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.URLManipulation
 import com.eaio.eproxy.rewriting.html.RewritingContentHandler
 import com.steadystate.css.dom.*
