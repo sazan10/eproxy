@@ -27,7 +27,8 @@ class RewritingContentHandler extends DelegatingContentHandler {
     @Lazy
     private def patternHTTP = bndmci.processString('http:'),
         patternHTTPS = bndmci.processString('https:'),
-        patternColonSlash = bndmci.processString(':/')
+        patternColonSlash = bndmci.processString(':/'),
+        patternViewSource = bndmci.processString('view-source:')
 
     boolean attributeValueNeedsRewriting(String attributeValue) {
         int colonIndex = attributeValue.indexOf((int) ((char) ':'))
@@ -37,8 +38,9 @@ class RewritingContentHandler extends DelegatingContentHandler {
         [
             { attributeValue.startsWith('/') },
             { int index = bndmci.searchString(attributeValue, 'http:', patternHTTP); index >= 0I && index < colonIndex },
-            { int index = bndmci.searchString(attributeValue, 'https:', patternHTTPS); index >= 0I && index < colonIndex }, 
-            { int index = bndmci.searchString(attributeValue, ':/', patternColonSlash); index >= 0I && index < colonIndex }
+            { int index = bndmci.searchString(attributeValue, 'https:', patternHTTPS); index >= 0I && index < colonIndex },
+            { int index = bndmci.searchString(attributeValue, ':/', patternColonSlash); index >= 0I && index < colonIndex },
+            { bndmci.searchString(attributeValue, 'view-source:', patternViewSource) == 0I },
         ].any { it() }
     }
 

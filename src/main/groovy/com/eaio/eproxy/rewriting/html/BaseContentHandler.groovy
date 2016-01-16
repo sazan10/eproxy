@@ -1,9 +1,10 @@
 package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
+import static org.apache.commons.lang3.reflect.FieldUtils.*
 import groovy.transform.CompileStatic
 
-import org.apache.xerces.parsers.AbstractSAXParser.AttributesProxy
+import org.apache.xerces.xni.XMLAttributes
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.DefaultHandler
 
@@ -27,11 +28,11 @@ class BaseContentHandler extends DefaultHandler {
     }
     
     void setAttributeValue(Attributes atts, int index, String value) {
-        ((AttributesProxy) atts).@fAttributes.setValue(index, value)
+        ((XMLAttributes) readDeclaredField(atts, 'fAttributes', true)).setValue(index, value)
     }
     
     void removeAttribute(Attributes atts, int index) {
-        ((AttributesProxy) atts).@fAttributes.removeAttributeAt(index)
+        ((XMLAttributes) readDeclaredField(atts, 'fAttributes', true)).removeAttributeAt(index)
     }
 
 }
