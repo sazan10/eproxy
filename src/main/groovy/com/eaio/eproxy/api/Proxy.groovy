@@ -5,6 +5,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import javax.net.ssl.SSLException
+import javax.net.ssl.SSLHandshakeException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -121,44 +122,36 @@ class Proxy {
                         
             TimingInterceptor.log(context, log)
         }
-        catch (NoHttpResponseException ex) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
-        }
-        catch (SocketTimeoutException ex) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
-        }
-        catch (ConnectTimeoutException ex) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
-        }
-        catch (UnknownHostException ex) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
-        }
         catch (IllegalStateException ignored) {}
         catch (SocketException ex) {
             if (ex.message?.startsWith('Permission denied')) { // Google App Engine
-                sendError(response, HttpServletResponse.SC_FORBIDDEN, ex)
+                sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex)
             }
             else if (ex.message?.contains('Resource temporarily unavailable')) { // Google App Engine
-                sendError(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
+                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
             }
             else {
                 throw ex
             }
         }
-        catch (HttpHostConnectException ex) {
-            sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
-        }
         catch (SSLException ex) {
-            if (ExceptionUtils.getRootCauseMessage(ex) == 'InvalidAlgorithmParameterException: Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
-                sendError(response, HttpServletResponse.SC_FORBIDDEN, ex, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
+            if (ex instanceof SSLHandshakeException) {
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else if (ExceptionUtils.getRootCauseMessage(ex) == 'InvalidAlgorithmParameterException: Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
+                sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
             }
             else {
                 throw ex
             }
         }
         catch (IOException ex) {
-            if (ex.message == 'Connection reset by peer') {
-                sendError(response, HttpServletResponse.SC_NOT_FOUND, ex)
+            if (ex instanceof NoHttpResponseException || ex instanceof SocketTimeoutException || ex instanceof ConnectTimeoutException ||
+                ex instanceof UnknownHostException || ex instanceof HttpHostConnectException) {
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else if (ex.message == 'Connection reset by peer') {
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
             else if (ex.message != 'Broken pipe') {
                 throw ex
@@ -169,7 +162,7 @@ class Proxy {
         }
     }
     
-    private void sendError(HttpServletResponse response, int statusCode, Throwable thrw, String message = ExceptionUtils.getRootCauseMessage(thrw)) {
+    private void sendError(URI requestURI, HttpServletResponse response, int statusCode, Throwable thrw, String message = ExceptionUtils.getRootCauseMessage(thrw)) {
         try {
             response.sendError(statusCode, message)
         }
