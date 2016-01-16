@@ -138,6 +138,9 @@ class Proxy {
             if (ex.message?.startsWith('Permission denied')) { // Google App Engine
                 sendError(response, HttpServletResponse.SC_FORBIDDEN, ex)
             }
+            else if (ex.message?.contains('Resource temporarily unavailable')) { // Google App Engine
+                sendError(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
+            }
             else {
                 throw ex
             }
