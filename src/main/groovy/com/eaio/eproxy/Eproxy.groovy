@@ -41,8 +41,6 @@ import com.eaio.eproxy.cache.memcached.AsyncMemcacheServiceHttpCacheStorage
 import com.eaio.net.httpclient.*
 import com.eaio.util.googleappengine.NotOnGoogleAppEngineOrDevserver
 import com.eaio.util.googleappengine.OnGoogleAppEngineOrDevserver
-import com.google.appengine.api.capabilities.CapabilitiesService
-import com.google.appengine.api.capabilities.CapabilitiesServiceFactory
 import com.google.appengine.api.memcache.AsyncMemcacheService
 import com.google.appengine.api.memcache.MemcacheServiceFactory
 
@@ -251,13 +249,6 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         MemcacheServiceFactory.asyncMemcacheService
     }
     
-    @Bean
-    @Conditional(OnGoogleAppEngineOrDevserver)
-    @Lazy
-    CapabilitiesService capabilitiesService() {
-        CapabilitiesServiceFactory.capabilitiesService
-    }
-
     @Bean
     @Conditional(NotOnGoogleAppEngineOrDevserver)
     @Lazy

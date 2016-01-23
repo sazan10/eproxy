@@ -20,8 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.eaio.util.googleappengine.OnGoogleAppEngineOrDevserver;
 import com.google.appengine.api.capabilities.CapabilitiesService;
-import com.google.appengine.api.capabilities.Capability;
-import com.google.appengine.api.capabilities.CapabilityStatus;
 import com.google.appengine.api.memcache.AsyncMemcacheService;
 import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
 
@@ -37,34 +35,25 @@ import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
 @Component
 @Conditional(OnGoogleAppEngineOrDevserver.class)
 public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
-    
+
     private Logger log = LoggerFactory.getLogger(AsyncMemcacheServiceHttpCacheStorage.class);
 
     @Autowired(required = false)
     private AsyncMemcacheService asyncMemcacheService;
-    
-    @Autowired(required = false)
-    private CapabilitiesService capabilitiesService;
-    
+
     @Value("${cache.memcacheMaxUpdateRetries}")
     private int maxUpdateRetries;
-    
+
     @Value("${cache.memcacheTimeout}")
     private Integer memcacheTimeout;
-    
-    private boolean isMemcacheEnabled() {
-        return capabilitiesService.getStatus(Capability.MEMCACHE).getStatus() == CapabilityStatus.ENABLED;
-    }
-    
+
     /**
      * @see org.apache.http.client.cache.HttpCacheStorage#putEntry(java.lang.String, org.apache.http.client.cache.HttpCacheEntry)
      */
     @Override
     public void putEntry(String key, HttpCacheEntry entry) throws IOException {
-        if (isMemcacheEnabled()) {
-            Future<Void> future = asyncMemcacheService.put(key, entry);
-            awaitFutureUntilTimeout("put", key, future);
-        }
+        Future<Void> future = asyncMemcacheService.put(key, entry);
+        awaitFutureUntilTimeout("put", key, future);
     }
 
     /**
@@ -72,11 +61,8 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public HttpCacheEntry getEntry(String key) throws IOException {
-        if (isMemcacheEnabled()) {
-            Future<Object> future = asyncMemcacheService.get(key);
-            return (HttpCacheEntry) awaitFutureUntilTimeout("get", key, future);
-        }
-        return null;
+        Future<Object> future = asyncMemcacheService.get(key);
+        return (HttpCacheEntry) awaitFutureUntilTimeout("get", key, future);
     }
 
     /**
@@ -84,48 +70,43 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public void removeEntry(String key) throws IOException {
-        if (isMemcacheEnabled()) {
-            Future<Boolean> future = asyncMemcacheService.delete(key);
-            awaitFutureUntilTimeout("delete", key, future);
-        }
+        Future<Boolean> future = asyncMemcacheService.delete(key);
+        awaitFutureUntilTimeout("delete", key, future);
     }
 
     /**
      * @see org.apache.http.client.cache.HttpCacheStorage#updateEntry(java.lang.String, org.apache.http.client.cache.HttpCacheUpdateCallback)
      */
-    @Override
     public void updateEntry(String key, HttpCacheUpdateCallback callback)
             throws IOException, HttpCacheUpdateException {
-        if (isMemcacheEnabled()) {
-            for (int i = 0; i < maxUpdateRetries; ++i) {
-                Future<IdentifiableValue> future = asyncMemcacheService.getIdentifiable(key);
-                IdentifiableValue identifiable = awaitFutureUntilTimeout("getIdentifiable", key, future);
-                if (identifiable == null && Thread.currentThread().isInterrupted()) {
+        for (int i = 0; i < maxUpdateRetries; ++i) {
+            Future<IdentifiableValue> future = asyncMemcacheService.getIdentifiable(key);
+            IdentifiableValue identifiable = awaitFutureUntilTimeout("getIdentifiable", key, future);
+            if (identifiable == null && Thread.currentThread().isInterrupted()) {
+                return;
+            }
+            HttpCacheEntry oldEntry = identifiable == null ? null : (HttpCacheEntry) identifiable.getValue();
+            HttpCacheEntry newEntry = callback.update(oldEntry);
+            if (identifiable == null) {
+                if (newEntry != null) {
+                    putEntry(key, newEntry);
+                }
+                return;
+            }
+            else {
+                Future<Boolean> futurePut = asyncMemcacheService.putIfUntouched(key, identifiable, newEntry);
+                Boolean stored = awaitFutureUntilTimeout("putIfUntouched", key, futurePut);
+                if (stored == null && Thread.currentThread().isInterrupted()) {
                     return;
                 }
-                HttpCacheEntry oldEntry = identifiable == null ? null : (HttpCacheEntry) identifiable.getValue();
-                HttpCacheEntry newEntry = callback.update(oldEntry);
-                if (identifiable == null) {
-                    if (newEntry != null) {
-                        putEntry(key, newEntry);
-                    }
+                else if (Boolean.TRUE.equals(stored)) {
                     return;
-                }
-                else {
-                    Future<Boolean> futurePut = asyncMemcacheService.putIfUntouched(key, identifiable, newEntry);
-                    Boolean stored = awaitFutureUntilTimeout("putIfUntouched", key, futurePut);
-                    if (stored == null && Thread.currentThread().isInterrupted()) {
-                        return;
-                    }
-                    else if (Boolean.TRUE.equals(stored)) {
-                        return;
-                    }
                 }
             }
-            throw new HttpCacheUpdateException(String.format("Failed to update %s after %d tries", key, maxUpdateRetries));
         }
+        throw new HttpCacheUpdateException(String.format("Failed to update %s after %d tries", key, maxUpdateRetries));
     }
-    
+
     private <T> T awaitFutureUntilTimeout(String operation, String key, Future<T> future) throws IOException {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
