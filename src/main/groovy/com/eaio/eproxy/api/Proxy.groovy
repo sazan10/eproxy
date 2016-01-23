@@ -11,11 +11,7 @@ import javax.servlet.http.HttpServletResponse
 
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
-import org.apache.http.Header
-import org.apache.http.HeaderElement
-import org.apache.http.HttpEntityEnclosingRequest
-import org.apache.http.HttpResponse
-import org.apache.http.NoHttpResponseException
+import org.apache.http.*
 import org.apache.http.client.HttpClient
 import org.apache.http.client.cache.HttpCacheContext
 import org.apache.http.client.methods.*
@@ -40,6 +36,7 @@ import com.eaio.eproxy.rewriting.html.*
 import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.ReEncoding
 import com.eaio.net.httpclient.TimingInterceptor
+import com.google.apphosting.api.DeadlineExceededException
 
 /**
  * Proxies and optionally rewrites content.
@@ -156,6 +153,9 @@ class Proxy {
             else if (ex.message != 'Broken pipe') {
                 throw ex
             }
+        }
+        catch (DeadlineExceededException ex) {
+            sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
         }
         finally {
             EntityUtils.consumeQuietly(remoteResponse?.entity)
