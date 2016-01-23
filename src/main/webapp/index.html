@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free SSL Proxy Server for Anonymous Web Surfing - Unblock Web Sites</title>
-<link rel="dns-prefetch" href="//www.google-analytics.com"/>
+<link rel="dns-prefetch" href="//eaio-api.appspot.com">
+<link rel="dns-prefetch" href="//clients1.google.com">
 <style type="text/css">
 *{text-decoration:none;font-size:1em;outline:none;margin:0;padding:0}input{font:inherit;white-space:normal}form{border-width:0}html{background:#FFF;color:#000;line-height:1;font-family:arial,sans-serif}html{font-family:sans-serif}body{background-color:transparent}html{font-size:125%}body{font-size:50%}h1{font-weight:700}input[type='text']{font-size:100%;font-family:mono-space,monospace}small{font-size:85%}input{cursor:pointer}input[type='text']{cursor:text}.content{font-size:1.2em;line-height:1.6em}.content h1{line-height:1;margin:1em 0 .5em}.content p,.content form{margin-bottom:1.6em}.content p+p{margin-top:-.8em}.content input[type='text']{padding:.1em .2em}.content input{padding:.2em .1em}input[type='text']{border:1px solid #ccc;background:#fff}input[type='text']:hover{border-color:#aaa}input[type='text']:focus{outline:2px solid #e4e4e4;border-color:#888}.container_16{margin-left:auto;margin-right:auto;width:960px}.grid_6,.grid_10,.grid_16{display:inline;float:left;margin-left:10px;margin-right:10px}.container_16 .grid_16{width:940px}.container_16 .grid_6{width:340px}.container_16 .grid_10{width:580px}.wide{width:98%}h1{font-family:Arial,"Helvetica Neue",Helvetica,sans-serif;font-weight:normal}p{font-family:tahoma,geneva,verdana,sans-serif}.content{font-size:12px;line-height:1.6em}.content h1{line-height:1.4em;font-size:24px}a{color:#069;text-decoration:none;border-bottom:1px dotted #08c;padding-bottom:1px}a:hover{color:#08c;text-decoration:none;border-bottom:2px solid #08c}small{color:#666}.section{border-top:4px solid #eee;margin-top:1em;padding-top:1em}.section p+p{margin-top:0}h1{color:#515151}.content h1,#url{font-size:25px}#url{font-family:tahoma,geneva,verdana,sans-serif}#submit{background-color:#fff;font-weight:bold;border:2px solid #aaa;padding:6px 22px;min-width:160px;min-height:34px}
 </style>
@@ -17,6 +18,7 @@
   <p><input id="url" name="url" class="wide" type="text" placeholder="http://"/></p>
   <p><input id="submit" type="submit" value="Start Browsing &raquo;"/></p>
  </form>
+ <div class="eaio"></div>
 </div>
 
 <div class="grid_16">
@@ -356,9 +358,8 @@ free anonymous web servers  &middot;
 </div>
 
 <script>
-(function(i,r){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-(i[r].q=i[r].q||[]).push(arguments)},i[r].l=+new Date()})(window,'ga')
-
+ga = function(){(ga.q=ga.q||[]).push(arguments)}
+ga.l = +new Date()
 ga('create', 'UA-7427410-88', {
     'cookieExpires': 5270400,
     'allowAnchor': true,
@@ -369,18 +370,20 @@ ga('set', 'forceSSL', true)
 window.Waldbeere && ga('set', 'dimension1', Waldbeere.customVar)
 ga('send', 'pageview', window.gaPath||((window.gaPrefix||'')+location.pathname+location.search))
 </script>
-<script src="https://www.google-analytics.com/analytics.js" async defer></script>
+<script src="https://www.google-analytics.com/analytics.js" async></script>
 <script>
 (function() {
-document.getElementById("submit").onclick=function(){var f=document.getElementById("url").value.replace(/^\s\s*/,"").replace(/\s\s*$/,"");if(f){for(var f=u(f),h=f.host.split(/\./),a=!1,d=0;d<h.length;++d){var c=v.encode(h[d],!1);c!=h[d]+"-"&&(h[d]="xn--"+c,a=!0)}a&&(f.host=h.join("."));try{ga("send","pageview","/proxy")}catch(g){}location.href=u(location.href).directory+"ah-"+f.protocol+"/"+f.authority+(f.relative?f.relative:"/")}return!1};
-function x(f){for(var h=[],a=0,d=f.length,c,g;a<d;){c=f.charCodeAt(a++);if(55296===(c&63488)){g=f.charCodeAt(a++);if(55296!==(c&64512)||56320!==(g&64512))throw new RangeError("UTF-16(decode): Illegal UTF-16 sequence");c=((c&1023)<<10)+(g&1023)+65536}h.push(c)}return h}
-var v=new function(){function f(a,d,c){a=c?Math.floor(a/700):a>>1;a+=Math.floor(a/d);for(d=0;455<a;d+=36)a=Math.floor(a/35);return Math.floor(d+36*a/(a+38))}function h(a,d){a-=(26>a-97)<<5;return a+((!d&&26>a-65)<<5)}this.decode=function(a,d){var c=[],g=[],q=a.length,l,n,b,k,e,p,h,m,r;l=128;b=0;k=72;e=a.lastIndexOf("-");0>e&&(e=0);for(p=0;p<e;++p){d&&(g[c.length]=26>a.charCodeAt(p)-65);if(128<=a.charCodeAt(p))throw new RangeError("Illegal input >= 0x80");c.push(a.charCodeAt(p))}for(e=0<e?e+1:0;e<
-q;){p=b;n=1;for(h=36;;h+=36){if(e>=q)throw RangeError("punycode_bad_input(1)");m=a.charCodeAt(e++);m=10>m-48?m-22:26>m-65?m-65:26>m-97?m-97:36;if(36<=m)throw RangeError("punycode_bad_input(2)");if(m>Math.floor((2147483647-b)/n))throw RangeError("punycode_overflow(1)");b+=m*n;r=h<=k?1:h>=k+26?26:h-k;if(m<r)break;if(n>Math.floor(2147483647/(36-r)))throw RangeError("punycode_overflow(2)");n*=36-r}n=c.length+1;k=f(b-p,n,0===p);if(Math.floor(b/n)>2147483647-l)throw RangeError("punycode_overflow(3)");l+=
-Math.floor(b/n);b%=n;d&&g.splice(b,0,26>a.charCodeAt(e-1)-65);c.splice(b,0,l);b++}if(d)for(b=0,q=c.length;b<q;b++)g[b]&&(c[b]=String.fromCharCode(c[b]).toUpperCase().charCodeAt(0));g=[];b=0;for(q=c.length;b<q;){l=c[b++];if(55296===(l&63488))throw new RangeError("UTF-16(encode): Illegal UTF-16 value");65535<l&&(l-=65536,g.push(String.fromCharCode(l>>>10&1023|55296)),l=56320|l&1023);g.push(String.fromCharCode(l))}return g.join("")};this.encode=function(a,d){var c,g,q,l,n,b,k,e,p,t;d&&(t=x(a));a=x(a.toLowerCase());
-var m=a.length;if(d)for(b=0;b<m;b++)t[b]=a[b]!=t[b];var r=[];c=128;g=0;n=72;for(b=0;b<m;++b)128>a[b]&&r.push(String.fromCharCode(t?h(a[b],t[b]):a[b]));q=l=r.length;for(0<l&&r.push("-");q<m;){k=2147483647;for(b=0;b<m;++b)e=a[b],e>=c&&e<k&&(k=e);if(k-c>Math.floor((2147483647-g)/(q+1)))throw RangeError("punycode_overflow (1)");g+=(k-c)*(q+1);c=k;for(b=0;b<m;++b){e=a[b];if(e<c&&2147483647<++g)return Error("punycode_overflow(2)");if(e==c){k=g;for(e=36;;e+=36){p=e<=n?1:e>=n+26?26:e-n;if(k<p)break;var w=
-p+(k-p)%(36-p);r.push(String.fromCharCode(w+22+75*(26>w)-0));k=Math.floor((k-p)/(36-p))}r.push(String.fromCharCode(k+22+75*(26>k)-((0!=(d&&t[b]?1:0))<<5)));n=f(g,q+1,q==l);g=0;++q}}++g;++c}return r.join("")}};
-function u(f){var h="source protocol authority userInfo user password host port relative path directory file query anchor".split(" ");f=/^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(f);for(var a={},d=14;d--;)a[h[d]]=f[d]||"";a.queryKey={};a[h[12]].replace(/(?:^|&)([^&=]*)=?([^&]*)/g,function(c,d,f){d&&(a.queryKey[d]=f)});return a};
-})();
+document.getElementById("submit").onclick=function(){var e=document.getElementById("url").value.replace(/^\s\s*/,"").replace(/\s\s*$/,"");if(e){for(var e=u(e),h=e.host.split(/\./),a=!1,d=0;d<h.length;++d){var c=v.encode(h[d],!1);c!=h[d]+"-"&&(h[d]="xn--"+c,a=!0)}a&&(e.a=e.a.replace(e.host,h.join(".")),e.host=h.join("."));try{ga("send","pageview","/proxy")}catch(g){}e=(e.protocol||"http")+"/"+e.authority+(e.relative?e.relative:"/");location.href=u(location.href).directory+"ah-"+e}return!1};
+function x(e){for(var h=[],a=0,d=e.length,c,g;a<d;){c=e.charCodeAt(a++);if(55296===(c&63488)){g=e.charCodeAt(a++);if(55296!==(c&64512)||56320!==(g&64512))throw new RangeError("UTF-16(decode): Illegal UTF-16 sequence");c=((c&1023)<<10)+(g&1023)+65536}h.push(c)}return h}
+var v=new function(){function e(a,d,c){a=c?Math.floor(a/700):a>>1;a+=Math.floor(a/d);for(d=0;455<a;d+=36)a=Math.floor(a/35);return Math.floor(d+36*a/(a+38))}function h(a,d){a-=(26>a-97)<<5;return a+((!d&&26>a-65)<<5)}this.decode=function(a,d){var c=[],g=[],q=a.length,l,n,b,k,f,p,h,m,r;l=128;b=0;k=72;f=a.lastIndexOf("-");0>f&&(f=0);for(p=0;p<f;++p){d&&(g[c.length]=26>a.charCodeAt(p)-65);if(128<=a.charCodeAt(p))throw new RangeError("Illegal input >= 0x80");c.push(a.charCodeAt(p))}for(f=0<f?f+1:0;f<
+q;){p=b;n=1;for(h=36;;h+=36){if(f>=q)throw RangeError("punycode_bad_input(1)");m=a.charCodeAt(f++);m=10>m-48?m-22:26>m-65?m-65:26>m-97?m-97:36;if(36<=m)throw RangeError("punycode_bad_input(2)");if(m>Math.floor((2147483647-b)/n))throw RangeError("punycode_overflow(1)");b+=m*n;r=h<=k?1:h>=k+26?26:h-k;if(m<r)break;if(n>Math.floor(2147483647/(36-r)))throw RangeError("punycode_overflow(2)");n*=36-r}n=c.length+1;k=e(b-p,n,0===p);if(Math.floor(b/n)>2147483647-l)throw RangeError("punycode_overflow(3)");l+=
+Math.floor(b/n);b%=n;d&&g.splice(b,0,26>a.charCodeAt(f-1)-65);c.splice(b,0,l);b++}if(d)for(b=0,q=c.length;b<q;b++)g[b]&&(c[b]=String.fromCharCode(c[b]).toUpperCase().charCodeAt(0));g=[];b=0;for(q=c.length;b<q;){l=c[b++];if(55296===(l&63488))throw new RangeError("UTF-16(encode): Illegal UTF-16 value");65535<l&&(l-=65536,g.push(String.fromCharCode(l>>>10&1023|55296)),l=56320|l&1023);g.push(String.fromCharCode(l))}return g.join("")};this.encode=function(a,d){var c,g,q,l,n,b,k,f,p,t;d&&(t=x(a));a=x(a.toLowerCase());
+var m=a.length;if(d)for(b=0;b<m;b++)t[b]=a[b]!=t[b];var r=[];c=128;g=0;n=72;for(b=0;b<m;++b)128>a[b]&&r.push(String.fromCharCode(t?h(a[b],t[b]):a[b]));q=l=r.length;for(0<l&&r.push("-");q<m;){k=2147483647;for(b=0;b<m;++b)f=a[b],f>=c&&f<k&&(k=f);if(k-c>Math.floor((2147483647-g)/(q+1)))throw RangeError("punycode_overflow (1)");g+=(k-c)*(q+1);c=k;for(b=0;b<m;++b){f=a[b];if(f<c&&2147483647<++g)return Error("punycode_overflow(2)");if(f==c){k=g;for(f=36;;f+=36){p=f<=n?1:f>=n+26?26:f-n;if(k<p)break;var w=
+p+(k-p)%(36-p);r.push(String.fromCharCode(w+22+75*(26>w)-0));k=Math.floor((k-p)/(36-p))}r.push(String.fromCharCode(k+22+75*(26>k)-((0!=(d&&t[b]?1:0))<<5)));n=e(g,q+1,q==l);g=0;++q}}++g;++c}return r.join("")}};
+function u(e){var h="source protocol authority userInfo user password host port relative path directory file query anchor".split(" ");e=/^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(e);for(var a={},d=14;d--;)a[h[d]]=e[d]||"";a.queryKey={};a[h[12]].replace(/(?:^|&)([^&=]*)=?([^&]*)/g,function(c,d,e){d&&(a.queryKey[d]=e)});return a};
+})()
 </script>
+
+<script src="https://d19sneuv3i93q3.cloudfront.net/5747194019708928.js" async defer></script>
 </body>
 </html>

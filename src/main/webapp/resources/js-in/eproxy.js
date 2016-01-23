@@ -1,27 +1,28 @@
 document.getElementById('submit').onclick=function() {
-    var url = document.getElementById('url').value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    var url = document.getElementById('url').value.replace(/^\s\s*/, '').replace(/\s\s*$/, '')
     if (url) {
-        var uri = parseUri(url);
-        var hostParts = uri.host.split(/\./);
-        var hostChanged = false;
+        var uri = parseUri(url)
+        var hostParts = uri.host.split(/\./)
+        var hostChanged = false
         for (var i = 0; i < hostParts.length; ++i) {
-            var enc = punycode.encode(hostParts[i], false);
+            var enc = punycode.encode(hostParts[i], false)
             if (enc != (hostParts[i] + '-')) {
-                hostParts[i] = 'xn--' + enc;
-                hostChanged = true;
+                hostParts[i] = 'xn--' + enc
+                hostChanged = true
             }
         }
         if (hostChanged) {
-            uri.host = hostParts.join('.');
-            // TODO: Authority muß auch neu gesetzt werden.
+            uri.authority = uri.authority.replace(uri.host, hostParts.join('.'))
+            uri.host = hostParts.join('.')
         }
         try {
-            ga('send', 'pageview', '/proxy');
+            ga('send', 'pageview', '/proxy')
         }
         catch (e) {}
-        location.href = parseUri(location.href)['directory'] + 'ah-' + uri['protocol'] + '/' + uri['authority'] + (uri['relative'] ? uri['relative'] : '/'); // Needs to be uri['relative'] because Closure Compiler will rename it.
+        var encodedURI = (uri['protocol'] || 'http') + '/' + uri['authority'] + (uri['relative'] ? uri['relative'] : '/')
+        location.href = parseUri(location.href)['directory'] + 'ah-' + encodedURI
     }
-    return false;
+    return false
 }
 
 //Javascript UTF16 converter created by some@domain.name
