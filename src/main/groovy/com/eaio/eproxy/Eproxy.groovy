@@ -50,7 +50,7 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: EaioWeb.groovy 7254 2015-05-19 10:15:33Z johann $
  */
-@ComponentScan('com.eaio')
+@ComponentScan('com.eaio.eproxy')
 @Configuration
 @EnableAutoConfiguration
 @EnableWebMvc
