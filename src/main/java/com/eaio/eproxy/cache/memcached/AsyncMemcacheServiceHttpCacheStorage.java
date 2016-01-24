@@ -52,6 +52,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public void putEntry(String key, HttpCacheEntry entry) throws IOException {
+        log.debug("putEntry {}", key);
         Future<Void> future = asyncMemcacheService.put(key, entry);
         awaitFutureUntilTimeout("put", key, future);
     }
@@ -61,6 +62,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public HttpCacheEntry getEntry(String key) throws IOException {
+        log.debug("getEntry {}", key);
         Future<Object> future = asyncMemcacheService.get(key);
         return (HttpCacheEntry) awaitFutureUntilTimeout("get", key, future);
     }
@@ -70,6 +72,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public void removeEntry(String key) throws IOException {
+        log.debug("removeEntry {}", key);
         Future<Boolean> future = asyncMemcacheService.delete(key);
         awaitFutureUntilTimeout("delete", key, future);
     }
@@ -80,8 +83,9 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
     public void updateEntry(String key, HttpCacheUpdateCallback callback)
             throws IOException, HttpCacheUpdateException {
         for (int i = 0; i < maxUpdateRetries; ++i) {
-            Future<IdentifiableValue> future = asyncMemcacheService.getIdentifiable(key);
-            IdentifiableValue identifiable = awaitFutureUntilTimeout("getIdentifiable", key, future);
+            log.debug("updateEntry {} (try {}/{})", key, i, maxUpdateRetries);
+            Future<IdentifiableValue> identifiableFuture = asyncMemcacheService.getIdentifiable(key);
+            IdentifiableValue identifiable = awaitFutureUntilTimeout("getIdentifiable", key, identifiableFuture);
             if (identifiable == null && Thread.currentThread().isInterrupted()) {
                 return;
             }
@@ -89,13 +93,14 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
             HttpCacheEntry newEntry = callback.update(oldEntry);
             if (identifiable == null) {
                 if (newEntry != null) {
-                    putEntry(key, newEntry);
+                    Future<Void> putFuture = asyncMemcacheService.put(key, newEntry);
+                    awaitFutureUntilTimeout("put", key, putFuture);
                 }
                 return;
             }
             else {
-                Future<Boolean> futurePut = asyncMemcacheService.putIfUntouched(key, identifiable, newEntry);
-                Boolean stored = awaitFutureUntilTimeout("putIfUntouched", key, futurePut);
+                Future<Boolean> putFuture = asyncMemcacheService.putIfUntouched(key, identifiable, newEntry);
+                Boolean stored = awaitFutureUntilTimeout("putIfUntouched", key, putFuture);
                 if (stored == null && Thread.currentThread().isInterrupted()) {
                     return;
                 }
