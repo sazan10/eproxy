@@ -368,6 +368,8 @@ ga('create', 'UA-7427410-88', {
 ga('set', 'anonymizeIp', true)
 ga('set', 'forceSSL', true)
 window.Waldbeere && ga('set', 'dimension1', Waldbeere.customVar)
+ga('set', 'dimension2', navigator.userAgent)
+ga('set', 'dimension3', window.innerHeight > window.innerWidth ? 'Portrait' : 'Landscape')
 ga('send', 'pageview', window.gaPath||((window.gaPrefix||'')+location.pathname+location.search))
 </script>
 <script src="https://www.google-analytics.com/analytics.js" async></script>
