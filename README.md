@@ -54,7 +54,7 @@ You'll need
 
 ## History
 
-The idea is based on [mirrorr](https://github.com/bslatkin/mirrorrr). Some of the code came from [media.io](http://media.io), a project called Delivrr (sadly gone) and [eaio](http://eaio.com).
+The idea is based on [mirrorr](https://github.com/bslatkin/mirrorrr). Some of the code came from [media.io](http://media.io), a project called Delivrr (sadly gone) and [EAIO](http://eaio.com).
 
 ## mirrorr disadvantages
 
