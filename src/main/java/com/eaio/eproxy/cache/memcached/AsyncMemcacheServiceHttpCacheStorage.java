@@ -19,18 +19,14 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import com.eaio.util.googleappengine.OnGoogleAppEngineOrDevserver;
-import com.google.appengine.api.capabilities.CapabilitiesService;
 import com.google.appengine.api.memcache.AsyncMemcacheService;
 import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
 
 /**
  * {@link HttpCacheStorage} implementation that uses Google App Engine's {@link AsyncMemcacheService}.
- * <p>
- * Does not throw exceptions when Memcache is down.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
- * @see CapabilitiesService
  */
 @Component
 @Conditional(OnGoogleAppEngineOrDevserver.class)
@@ -46,6 +42,8 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
 
     @Value("${cache.memcacheTimeout}")
     private Integer memcacheTimeout;
+    
+    private ThreadLocal<MemcacheStatus> memcacheStatuses = new ThreadLocal<MemcacheStatus>();
 
     /**
      * @see org.apache.http.client.cache.HttpCacheStorage#putEntry(java.lang.String, org.apache.http.client.cache.HttpCacheEntry)
@@ -62,9 +60,18 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public HttpCacheEntry getEntry(String key) throws IOException {
-        log.debug("getEntry {}", key);
-        Future<Object> future = asyncMemcacheService.get(key);
-        return (HttpCacheEntry) awaitFutureUntilTimeout("get", key, future);
+        MemcacheStatus getResult = memcacheStatuses.get();
+        HttpCacheEntry out;
+        if (getResult != null && getResult.key.equals(key) && !getResult.cached) {
+            out = null;
+        }
+        else {
+            log.debug("getEntry {}", key);
+            Future<Object> future = asyncMemcacheService.get(key);
+            out = (HttpCacheEntry) awaitFutureUntilTimeout("get", key, future);
+            memcacheStatuses.set(new MemcacheStatus(key, out != null));
+        }
+        return out;
     }
 
     /**
@@ -129,6 +136,23 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
             log.warn("{} on key {} was interrupted after {} ms", operation, key, stopWatch.getTime());
         }
         return null;
+    }
+    
+    /**
+     * Encapsulates the result of a {@link AsyncMemcacheServiceHttpCacheStorage#getEntry(String)} call.
+     * Used to prevent repeat <tt>getEntry</tt> calls from going to Memcache every time.
+     */
+    private class MemcacheStatus {
+        
+        private final String key;
+        
+        private final boolean cached;
+        
+        private MemcacheStatus(String key, boolean cached) {
+            this.key = key;
+            this.cached = cached;
+        }
+        
     }
 
 }
