@@ -358,8 +358,7 @@ free anonymous web servers  &middot;
 </div>
 
 <script>
-ga = function(){(ga.q=ga.q||[]).push(arguments)}
-ga.l = +new Date()
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
 ga('create', 'UA-7427410-88', {
     'cookieExpires': 5270400,
     'allowAnchor': true,
@@ -373,6 +372,7 @@ ga('set', 'dimension3', window.innerHeight > window.innerWidth ? 'Portrait' : 'L
 ga('send', 'pageview', window.gaPath||((window.gaPrefix||'')+location.pathname+location.search))
 </script>
 <script src="https://www.google-analytics.com/analytics.js" async></script>
+
 <script>
 (function() {
 document.getElementById("submit").onclick=function(){var e=document.getElementById("url").value.replace(/^\s\s*/,"").replace(/\s\s*$/,"");if(e){for(var e=u(e),h=e.host.split(/\./),a=!1,d=0;d<h.length;++d){var c=v.encode(h[d],!1);c!=h[d]+"-"&&(h[d]="xn--"+c,a=!0)}a&&(e.a=e.a.replace(e.host,h.join(".")),e.host=h.join("."));try{ga("send","pageview","/proxy")}catch(g){}e=(e.protocol||"http")+"/"+e.authority+(e.relative?e.relative:"/");location.href=u(location.href).directory+"ah-"+e}return!1};
