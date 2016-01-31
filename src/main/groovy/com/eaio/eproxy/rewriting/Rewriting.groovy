@@ -71,6 +71,10 @@ class Rewriting {
         mimeType?.equalsIgnoreCase('text/css')
     }
     
+    boolean isSVG(String mimeType) {
+        mimeType?.equalsIgnoreCase('image/svg+xml')
+    }
+    
     // TODO: Look at Content-Disposition header to prevent downloads from being rewritten
     boolean canRewrite(HeaderElement contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
         rewriteConfig && (isHTML(mimeType) || isCSS(mimeType))
