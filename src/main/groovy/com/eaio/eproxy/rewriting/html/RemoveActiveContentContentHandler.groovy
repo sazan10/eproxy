@@ -19,6 +19,7 @@ import org.xml.sax.SAXException
 @CompileStatic
 class RemoveActiveContentContentHandler extends DelegatingContentHandler {
     
+    @Override
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'script')) {
             stack.push('script')
@@ -32,10 +33,11 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
                     ++i
                 }
             }
-            delegate.startElement(uri, localName, qName, atts)
+            documentHandler.startElement(uri, localName, qName, atts)
         }
     }
 
+    @Override
     void endElement(String uri, String localName, String qName) throws SAXException {
         if (nameIs(localName, qName, 'script')) {
             try {
@@ -44,13 +46,14 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
             catch (EmptyStackException ex) {}
         }
         else {
-            delegate.endElement(uri, localName, qName)
+            documentHandler.endElement(uri, localName, qName)
         }
     }
 
     /**
      * Skips <tt>&lt;script&gt;</tt> contents.
      */
+    @Override
     void characters(char[] ch, int start, int length) throws SAXException {
         String tag
         try {
@@ -58,7 +61,7 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
         }
         catch (EmptyStackException ex) {}
         if (tag != 'script') {
-            delegate.characters(ch, start, length)
+            documentHandler.characters(ch, start, length)
         }
     }
 

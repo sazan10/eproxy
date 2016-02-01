@@ -24,6 +24,7 @@ class MetaRewritingContentHandler extends RewritingContentHandler {
     private transient Object patternRefresh = bndmci.processString('refresh'),
         patternURL = bndmci.processString('url')
 
+    @Override
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'meta')) {
             String httpEquiv = atts.getValue('http-equiv')
@@ -43,7 +44,7 @@ class MetaRewritingContentHandler extends RewritingContentHandler {
                 }
             }
         }
-        delegate.startElement(uri, localName, qName, atts)
+        documentHandler.startElement(uri, localName, qName, atts)
     }
 
 }

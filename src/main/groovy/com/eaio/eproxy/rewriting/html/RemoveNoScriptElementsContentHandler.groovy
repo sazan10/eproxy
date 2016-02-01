@@ -19,27 +19,30 @@ class RemoveNoScriptElementsContentHandler extends DelegatingContentHandler {
     
     boolean inNoscriptBlock
 
+    @Override
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         if (nameIs(localName, qName, 'noscript')) {
             inNoscriptBlock = true
         }
         else if (!inNoscriptBlock) {
-            delegate.startElement(uri, localName, qName, atts)
+            documentHandler.startElement(uri, localName, qName, atts)
         }
     }
 
+    @Override
     void endElement(String uri, String localName, String qName) throws SAXException {
         if (nameIs(localName, qName, 'noscript')) {
             inNoscriptBlock = false
         }
         else if (!inNoscriptBlock) {
-            delegate.endElement(uri, localName, qName)
+            documentHandler.endElement(uri, localName, qName)
         }
     }
     
+    @Override
     void characters(char[] ch, int start, int length) throws SAXException {
         if (!inNoscriptBlock) {
-            delegate.characters(ch, start, length)
+            documentHandler.characters(ch, start, length)
         }
     }
 

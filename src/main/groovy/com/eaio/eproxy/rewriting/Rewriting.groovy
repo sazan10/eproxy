@@ -7,6 +7,7 @@ import java.nio.charset.Charset
 
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.HeaderElement
+import org.apache.xerces.xni.parser.XMLDocumentFilter;
 import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -92,20 +93,17 @@ class Rewriting {
     void rewriteHTML(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
         XMLReader xmlReader = newXMLReader()
+        XMLDocumentFilter[] filters = (XMLDocumentFilter[]) [
+            new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
+            new MetaRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
+            new RemoveActiveContentContentHandler(),
+            new RemoveNoScriptElementsContentHandler(),
+            new ImgSrcsetRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
+            new URIRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
+            new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
+            ].toArray()
+        xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         try {
-            xmlReader.contentHandler = new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
-                new MetaRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
-                    new RemoveActiveContentContentHandler(delegate:
-                        new RemoveNoScriptElementsContentHandler(delegate:
-                            new ImgSrcsetRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
-                                new URIRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig, delegate:
-                                        new HTMLSerializer(outputWriter)
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
             xmlReader.parse(newSAXInputSource(inputStream, charset)) // TODO: BufferedInputStream?
         }
         catch (SAXException ex) {
@@ -113,8 +111,8 @@ class Rewriting {
                 throw ExceptionUtils.getRootCause(ex)
             }
             else {
-                log.warn("While parsing {}@{}:{}: {}", requestURI, ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber,
-                    ((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber, (ExceptionUtils.getRootCause(ex) ?: ex).message)
+                log.warn("While parsing {}@{}:{}: {}", requestURI, ''/*((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber*/,
+                    ''/*((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber*/, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
         finally {

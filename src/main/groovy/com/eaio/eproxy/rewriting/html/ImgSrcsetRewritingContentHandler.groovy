@@ -2,6 +2,9 @@ package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
 
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
@@ -16,7 +19,8 @@ import com.eaio.eproxy.rewriting.URLManipulation
 @Mixin(URLManipulation)
 class ImgSrcsetRewritingContentHandler extends RewritingContentHandler {
 
-    void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+    @Override
+    void startElement(QName qName, XMLAttributes atts, Augmentations augs) throws SAXException {
         if (nameIs(localName, qName, 'img')) {
             String attributeValue = atts.getValue('srcset')
             if (attributeValue) {
@@ -29,15 +33,15 @@ class ImgSrcsetRewritingContentHandler extends RewritingContentHandler {
                             parts[index] = replaceOnce(parts[index], imageURI, rewrite(baseURI, requestURI, imageURI, rewriteConfig))
                         }
                     }
-                    setAttributeValue(atts, i, parts.join(','))
+                    atts.setValue(i, parts.join(','))
                 }
                 else if (attributeValueNeedsRewriting(attributeValue)) {
                     String imageURI = substringBefore(attributeValue, ' ')
-                    setAttributeValue(atts, i, replaceOnce(attributeValue, imageURI, rewrite(baseURI, requestURI, imageURI, rewriteConfig)))
+                    atts.setValue(i, replaceOnce(attributeValue, imageURI, rewrite(baseURI, requestURI, imageURI, rewriteConfig)))
                 }
             }
         }
-        delegate.startElement(uri, localName, qName, atts)
+        documentHandler.startElement(qName, atts, augs)
     }
 
 }

@@ -44,7 +44,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
                 log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length(), rewrittenCSS.length())
             }
         }
-        delegate.startElement(uri, localName, qName, atts)
+        documentHandler.startElement(uri, localName, qName, atts)
     }
 
     @CompileStatic
@@ -55,7 +55,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
             }
             catch (EmptyStackException ex) {}
         }
-        delegate.endElement(uri, localName, qName)
+        documentHandler.endElement(uri, localName, qName)
     }
 
     /**
@@ -72,11 +72,11 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
             DirectStrBuilder builder = new DirectStrBuilder(length)
             Reader charArrayReader = new CharArrayReader(ch, start, length)
             rewriteCSS(new InputSource(characterStream: charArrayReader), builder.asWriter())
-            delegate.characters(builder.buffer, 0I, builder.length())
+            documentHandler.characters(builder.buffer, 0I, builder.length())
             log.debug('rewrote CSS {} chars to {} chars', length, builder.length())
         }
         else {
-            delegate.characters(ch, start, length)
+            documentHandler.characters(ch, start, length)
         }
     }
 

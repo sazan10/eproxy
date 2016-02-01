@@ -16,7 +16,8 @@ import com.eaio.eproxy.rewriting.URLManipulation
  */
 @Mixin(URLManipulation)
 class URIRewritingContentHandler extends RewritingContentHandler {
-    
+
+    @Override    
     void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         atts.length.times { int i ->
             String attributeValue = trimToEmpty(atts.getValue(i))
@@ -26,7 +27,7 @@ class URIRewritingContentHandler extends RewritingContentHandler {
                 setAttributeValue(atts, i, rewrite(baseURI, requestURI, attributeValue, rewriteConfig))
             }
         }
-        delegate.startElement(uri, localName, qName, atts)
+        documentHandler.startElement(uri, localName, qName, atts)
     }
     
     @CompileStatic

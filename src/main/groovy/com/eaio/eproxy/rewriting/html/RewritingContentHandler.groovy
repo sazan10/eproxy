@@ -13,7 +13,7 @@ import com.eaio.stringsearch.BNDMCI
  * @version $Id$
  */
 @CompileStatic
-class RewritingContentHandler extends DelegatingContentHandler {
+class RewritingContentHandler extends BaseContentHandler {
     
     ReEncoding reEncoding
 
