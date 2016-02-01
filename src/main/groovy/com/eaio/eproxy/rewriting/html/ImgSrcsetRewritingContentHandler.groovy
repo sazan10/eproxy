@@ -20,8 +20,8 @@ import com.eaio.eproxy.rewriting.URLManipulation
 class ImgSrcsetRewritingContentHandler extends RewritingContentHandler {
 
     @Override
-    void startElement(QName qName, XMLAttributes atts, Augmentations augs) throws SAXException {
-        if (nameIs(localName, qName, 'img')) {
+    void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        if (nameIs(qName, 'img')) {
             String attributeValue = atts.getValue('srcset')
             if (attributeValue) {
                 int i = atts.getIndex('srcset')

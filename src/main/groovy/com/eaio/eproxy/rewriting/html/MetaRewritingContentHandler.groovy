@@ -6,6 +6,9 @@ import org.apache.http.HeaderElement
 import org.apache.http.message.BasicHeaderValueParser
 import org.apache.http.message.ParserCursor
 import org.apache.http.util.CharArrayBuffer
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
@@ -25,8 +28,8 @@ class MetaRewritingContentHandler extends RewritingContentHandler {
         patternURL = bndmci.processString('url')
 
     @Override
-    void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-        if (nameIs(localName, qName, 'meta')) {
+    void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        if (nameIs(qName, 'meta')) {
             String httpEquiv = atts.getValue('http-equiv')
             if (httpEquiv) {
                 String content = atts.getValue('content')
@@ -39,12 +42,12 @@ class MetaRewritingContentHandler extends RewritingContentHandler {
                     String url = elements[0I]?.getParameterByName('URL')?.value
                     if (url) {
                         String rewrittenURL = rewrite(baseURI, requestURI, url.replaceFirst('^["\']', '').replaceFirst('["\']$', ''), rewriteConfig)
-                        setAttributeValue(atts, i, replaceOnce(content, url, rewrittenURL))
+                        atts.setValue(i, replaceOnce(content, url, rewrittenURL))
                     }
                 }
             }
         }
-        documentHandler.startElement(uri, localName, qName, atts)
+        documentHandler.startElement(qName, atts, augs)
     }
 
 }

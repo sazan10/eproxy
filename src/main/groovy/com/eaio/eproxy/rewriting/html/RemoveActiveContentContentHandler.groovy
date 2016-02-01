@@ -3,6 +3,10 @@ package com.eaio.eproxy.rewriting.html
 import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XMLString;
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
@@ -17,36 +21,36 @@ import org.xml.sax.SAXException
  * @version $Id: TryEaioTransformer.java 7547 2015-07-01 20:02:47Z johann $
  */
 @CompileStatic
-class RemoveActiveContentContentHandler extends DelegatingContentHandler {
+class RemoveActiveContentContentHandler extends BaseContentHandler {
     
     @Override
-    void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-        if (nameIs(localName, qName, 'script')) {
+    void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        if (nameIs(qName, 'script')) {
             stack.push('script')
         }
         else {
             for (int i = 0I; i < atts.length; ) {
-                if (startsWithIgnoreCase(name(atts.getLocalName(i), atts.getQName(i)), 'on')) {
-                    removeAttribute(atts, i)
+                if (startsWithIgnoreCase(atts.getLocalName(i) ?: atts.getQName(i), 'on')) {
+                    atts.removeAttributeAt(i)
                 }
                 else {
                     ++i
                 }
             }
-            documentHandler.startElement(uri, localName, qName, atts)
+            documentHandler.startElement(qName, atts, augs)
         }
     }
 
     @Override
-    void endElement(String uri, String localName, String qName) throws SAXException {
-        if (nameIs(localName, qName, 'script')) {
+    void endElement(QName qName, Augmentations augs) {
+        if (nameIs(qName, 'script')) {
             try {
                 stack.pop()
             }
             catch (EmptyStackException ex) {}
         }
         else {
-            documentHandler.endElement(uri, localName, qName)
+            documentHandler.endElement(qName, augs)
         }
     }
 
@@ -54,14 +58,14 @@ class RemoveActiveContentContentHandler extends DelegatingContentHandler {
      * Skips <tt>&lt;script&gt;</tt> contents.
      */
     @Override
-    void characters(char[] ch, int start, int length) throws SAXException {
+    void characters(XMLString xmlString, Augmentations augs) {
         String tag
         try {
             tag = stack.peek()
         }
         catch (EmptyStackException ex) {}
         if (tag != 'script') {
-            documentHandler.characters(ch, start, length)
+            documentHandler.characters(xmlString, augs)
         }
     }
 

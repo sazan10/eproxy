@@ -7,6 +7,10 @@ import groovy.util.logging.Slf4j
 import java.util.regex.Pattern
 
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XMLString;
 import org.w3c.css.sac.*
 import org.w3c.dom.css.*
 import org.xml.sax.Attributes
@@ -32,51 +36,51 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
     private Pattern patternURL = ~/(?i)(\75 ?|u)(\72 ?|r)(\6C ?|l)/
 
     @CompileStatic
-    void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-        if (nameIs(localName, qName, 'style')) {
+    void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        if (nameIs(qName, 'style')) {
             stack.push('style')
         }
         else {
             String styleAttribute = atts.getValue('style')
             if (styleAttribute && styleAttribute.length() > 8I) {
                 String rewrittenCSS = rewriteStyleAttribute(new InputSource(characterStream: new StringReader(styleAttribute)))
-                setAttributeValue(atts, atts.getIndex('style'), rewrittenCSS)
+                atts.setValue(atts.getIndex('style'), rewrittenCSS)
                 log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length(), rewrittenCSS.length())
             }
         }
-        documentHandler.startElement(uri, localName, qName, atts)
+        documentHandler.startElement(qName, atts, augs)
     }
 
     @CompileStatic
-    void endElement(String uri, String localName, String qName) throws SAXException {
-        if (nameIs(localName, qName, 'style')) {
+    void endElement(QName qName, Augmentations augs) {
+        if (nameIs(qName, 'style')) {
             try {
                 stack.pop()
             }
             catch (EmptyStackException ex) {}
         }
-        documentHandler.endElement(uri, localName, qName)
+        documentHandler.endElement(qName, augs)
     }
 
     /**
      * Rewrites <tt>&lt;style&gt;</tt> contents.
      */
     @CompileStatic
-    void characters(char[] ch, int start, int length) throws SAXException {
+    void characters(XMLString xmlString, Augmentations augs) {
         String tag
         try {
             tag = stack.peek()
         }
         catch (EmptyStackException ex) {}
-        if (tag == 'style' && length > 11I) {
-            DirectStrBuilder builder = new DirectStrBuilder(length)
-            Reader charArrayReader = new CharArrayReader(ch, start, length)
+        if (tag == 'style' && xmlString.length > 11I) {
+            DirectStrBuilder builder = new DirectStrBuilder(xmlString.length)
+            Reader charArrayReader = new CharArrayReader(xmlString.ch, xmlString.offset, xmlString.length)
             rewriteCSS(new InputSource(characterStream: charArrayReader), builder.asWriter())
-            documentHandler.characters(builder.buffer, 0I, builder.length())
-            log.debug('rewrote CSS {} chars to {} chars', length, builder.length())
+            documentHandler.characters(new XMLString(builder.buffer, 0I, builder.length()), augs)
+            log.debug('rewrote CSS {} chars to {} chars', xmlString.length, builder.length())
         }
         else {
-            documentHandler.characters(ch, start, length)
+            documentHandler.characters(xmlString, augs)
         }
     }
 

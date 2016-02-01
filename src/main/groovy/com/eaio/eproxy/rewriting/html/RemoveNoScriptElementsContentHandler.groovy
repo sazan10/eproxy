@@ -2,6 +2,10 @@ package com.eaio.eproxy.rewriting.html
 
 import groovy.transform.CompileStatic
 
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XMLString;
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
@@ -15,34 +19,34 @@ import org.xml.sax.SAXException
  * @version $Id$
  */
 @CompileStatic
-class RemoveNoScriptElementsContentHandler extends DelegatingContentHandler {
+class RemoveNoScriptElementsContentHandler extends BaseContentHandler {
     
     boolean inNoscriptBlock
 
     @Override
-    void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-        if (nameIs(localName, qName, 'noscript')) {
+    void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        if (nameIs(qName, 'noscript')) {
             inNoscriptBlock = true
         }
         else if (!inNoscriptBlock) {
-            documentHandler.startElement(uri, localName, qName, atts)
+            documentHandler.startElement(qName, atts, augs)
         }
     }
 
     @Override
-    void endElement(String uri, String localName, String qName) throws SAXException {
-        if (nameIs(localName, qName, 'noscript')) {
+    void endElement(QName qName, Augmentations augs) {
+        if (nameIs(qName, 'noscript')) {
             inNoscriptBlock = false
         }
         else if (!inNoscriptBlock) {
-            documentHandler.endElement(uri, localName, qName)
+            documentHandler.endElement(qName, augs)
         }
     }
     
     @Override
-    void characters(char[] ch, int start, int length) throws SAXException {
+    void characters(XMLString xmlString, Augmentations augs) {
         if (!inNoscriptBlock) {
-            documentHandler.characters(ch, start, length)
+            documentHandler.characters(xmlString, augs)
         }
     }
 

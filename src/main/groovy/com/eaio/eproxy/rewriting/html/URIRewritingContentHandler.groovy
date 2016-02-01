@@ -3,6 +3,9 @@ package com.eaio.eproxy.rewriting.html
 import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
@@ -18,16 +21,16 @@ import com.eaio.eproxy.rewriting.URLManipulation
 class URIRewritingContentHandler extends RewritingContentHandler {
 
     @Override    
-    void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+    void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         atts.length.times { int i ->
             String attributeValue = trimToEmpty(atts.getValue(i))
             
             // Use local name
             if (attributeNameShouldBeRewritten(atts.getLocalName(i)) && attributeValueNeedsRewriting(attributeValue)) {
-                setAttributeValue(atts, i, rewrite(baseURI, requestURI, attributeValue, rewriteConfig))
+                atts.setValue(i, rewrite(baseURI, requestURI, attributeValue, rewriteConfig))
             }
         }
-        documentHandler.startElement(uri, localName, qName, atts)
+        documentHandler.startElement(qName, atts, augs)
     }
     
     @CompileStatic
