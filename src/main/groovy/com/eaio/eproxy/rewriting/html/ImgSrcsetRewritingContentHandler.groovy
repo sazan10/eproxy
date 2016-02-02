@@ -2,11 +2,9 @@ package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
 
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.xml.sax.Attributes
-import org.xml.sax.SAXException
+import org.apache.xerces.xni.Augmentations
+import org.apache.xerces.xni.QName
+import org.apache.xerces.xni.XMLAttributes
 
 import com.eaio.eproxy.rewriting.URLManipulation
 
@@ -16,8 +14,7 @@ import com.eaio.eproxy.rewriting.URLManipulation
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@Mixin(URLManipulation)
-class ImgSrcsetRewritingContentHandler extends RewritingContentHandler {
+class ImgSrcsetRewritingContentHandler extends RewritingContentHandler implements URLManipulation {
 
     @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {

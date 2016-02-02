@@ -6,11 +6,9 @@ import org.apache.http.HeaderElement
 import org.apache.http.message.BasicHeaderValueParser
 import org.apache.http.message.ParserCursor
 import org.apache.http.util.CharArrayBuffer
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.xml.sax.Attributes
-import org.xml.sax.SAXException
+import org.apache.xerces.xni.Augmentations
+import org.apache.xerces.xni.QName
+import org.apache.xerces.xni.XMLAttributes
 
 import com.eaio.eproxy.rewriting.URLManipulation
 
@@ -20,8 +18,7 @@ import com.eaio.eproxy.rewriting.URLManipulation
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@Mixin(URLManipulation)
-class MetaRewritingContentHandler extends RewritingContentHandler {
+class MetaRewritingContentHandler extends RewritingContentHandler implements URLManipulation {
 
     @Lazy
     private transient Object patternRefresh = bndmci.processString('refresh'),

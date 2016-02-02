@@ -8,13 +8,13 @@ import org.springframework.web.util.UriComponentsBuilder
 import com.eaio.eproxy.entities.RewriteConfig
 
 /**
- * Mixin for very few URL manipulation methods. Not a <tt>trait</tt> because of weird side-effects.
+ * Trait that contains a few URL manipulation methods.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
 @Slf4j
-class URLManipulation {
+trait URLManipulation {
 
     /**
      * Resolves <tt>uri</tt> relative to <tt>requestURI</tt>, then turns it all into Eproxy's URL scheme.

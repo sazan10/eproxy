@@ -3,6 +3,7 @@ package com.eaio.eproxy.rewriting.html
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
 
+import org.apache.xerces.xni.parser.XMLDocumentFilter
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
@@ -26,11 +27,13 @@ class URIRewritingContentHandlerTest {
     void 'view-source URIs should be rewritten'() {
         StringWriter output = new StringWriter()
         XMLReader xmlReader = new Rewriting().newXMLReader()
-        xmlReader.contentHandler = new URIRewritingContentHandler(reEncoding: new ReEncoding(), baseURI: 'http://rah.com/'.toURI(), requestURI: 'https://www.facebook.com/'.toURI(),
-            rewriteConfig: new RewriteConfig(rewrite: true), delegate: new HTMLSerializer(output))
+        XMLDocumentFilter[] filters = [ new URIRewritingContentHandler(reEncoding: new ReEncoding(), baseURI: 'http://rah.com/'.toURI(), requestURI: 'https://www.facebook.com/'.toURI(),
+            rewriteConfig: new RewriteConfig(rewrite: true)),
+            new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
+        xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         errorCollector.checkThat(output as String, containsString('view-source:http://rah.com/ah-http/auer-ha.com'))
-        errorCollector.checkThat(output as String, not(containsString('view-source:https://fonts.googleapis.com')))
+        errorCollector.checkThat(output as String, allOf(not(containsString('view-source:https://fonts.googleapis.com')), not(containsString('VIEW-SOURCE:https://fonts.googleapis.com'))))
     }
 
 }

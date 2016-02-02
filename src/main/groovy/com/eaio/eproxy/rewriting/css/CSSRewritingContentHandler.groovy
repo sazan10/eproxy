@@ -7,14 +7,12 @@ import groovy.util.logging.Slf4j
 import java.util.regex.Pattern
 
 import org.apache.commons.lang3.exception.ExceptionUtils
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLString;
+import org.apache.xerces.xni.Augmentations
+import org.apache.xerces.xni.QName
+import org.apache.xerces.xni.XMLAttributes
+import org.apache.xerces.xni.XMLString
 import org.w3c.css.sac.*
 import org.w3c.dom.css.*
-import org.xml.sax.Attributes
-import org.xml.sax.SAXException
 
 import com.eaio.eproxy.rewriting.URLManipulation
 import com.eaio.eproxy.rewriting.html.RewritingContentHandler
@@ -28,9 +26,8 @@ import com.steadystate.css.parser.SACParserCSS3
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@Mixin(URLManipulation)
 @Slf4j
-class CSSRewritingContentHandler extends RewritingContentHandler implements ErrorHandler {
+class CSSRewritingContentHandler extends RewritingContentHandler implements ErrorHandler, URLManipulation {
     
     @Lazy
     private Pattern patternURL = ~/(?i)(\75 ?|u)(\72 ?|r)(\6C ?|l)/

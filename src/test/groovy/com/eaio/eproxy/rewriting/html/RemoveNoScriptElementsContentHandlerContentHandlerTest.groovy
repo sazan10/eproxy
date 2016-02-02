@@ -3,6 +3,7 @@ package com.eaio.eproxy.rewriting.html
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
 
+import org.apache.xerces.xni.parser.XMLDocumentFilter
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
@@ -24,13 +25,15 @@ class RemoveNoScriptElementsContentHandlerContentHandlerTest {
     void '<noscript> elements should be removed'() {
         StringWriter output = new StringWriter()
         XMLReader xmlReader = new Rewriting().newXMLReader()
-        xmlReader.contentHandler = new RemoveNoScriptElementsContentHandler(delegate: new HTMLSerializer(output))
+        XMLDocumentFilter[] filters = [ new RemoveNoScriptElementsContentHandler(),
+            new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
+        xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
-        errorCollector.checkThat(output as String, containsString('''<img width="1" height="1" onerror="alert('oh')" src="dah.jpg">
+        errorCollector.checkThat(output as String, containsString('''<IMG width="1" height="1" onerror="alert('oh')" src="dah.jpg">
 
 
 
-</body>''')) // Some whitespace in the HTML. :(
+</BODY>''')) // Some whitespace in the HTML. :(
     }
 
 }

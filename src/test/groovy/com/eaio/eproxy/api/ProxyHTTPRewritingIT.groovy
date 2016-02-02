@@ -77,7 +77,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
         proxy.proxy('ah', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('<link href="http://fnuh.com/ah-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic%7CProduct+Sans:400&amp;lang=en"'))
+        assertThat(bOut.toString(0I), containsString('<LINK href="http://fnuh.com/ah-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic%7CProduct+Sans:400&lang=en"'))
     }
     
     @Test

@@ -44,10 +44,9 @@ import com.google.apphosting.api.DeadlineExceededException
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@Mixin(URLManipulation)
 @RestController
 @Slf4j
-class Proxy {
+class Proxy implements URLManipulation {
     
     @Value('${http.totalTimeout}')
     Long totalTimeout
