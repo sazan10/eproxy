@@ -7,7 +7,7 @@ import java.nio.charset.Charset
 
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.HeaderElement
-import org.apache.xerces.xni.parser.XMLDocumentFilter;
+import org.apache.xerces.xni.parser.XMLDocumentFilter
 import org.cyberneko.html.filters.DefaultFilter
 import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
@@ -121,6 +121,7 @@ class Rewriting {
                 throw ExceptionUtils.getRootCause(ex)
             }
             else {
+                // TODO
                 log.warn("While parsing {}@{}:{}: {}", requestURI, ''/*((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber*/,
                     ''/*((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber*/, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }

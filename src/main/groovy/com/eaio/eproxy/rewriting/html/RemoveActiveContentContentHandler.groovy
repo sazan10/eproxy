@@ -3,10 +3,10 @@ package com.eaio.eproxy.rewriting.html
 import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLString;
+import org.apache.xerces.xni.Augmentations
+import org.apache.xerces.xni.QName
+import org.apache.xerces.xni.XMLAttributes
+import org.apache.xerces.xni.XMLString
 import org.xml.sax.Attributes
 import org.xml.sax.SAXException
 
