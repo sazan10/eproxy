@@ -19,6 +19,17 @@ class URIRewritingContentHandler extends RewritingContentHandler implements URLM
 
     @Override    
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        rewriteElement(qName, atts, augs)
+        documentHandler.startElement(qName, atts, augs)
+    }
+    
+    @Override
+    void emptyElement(QName element, XMLAttributes atts, Augmentations augs) {
+        rewriteElement(element, atts, augs)
+        documentHandler.emptyElement(element, atts, augs)
+    }
+    
+    private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         atts.length.times { int i ->
             String attributeValue = trimToEmpty(atts.getValue(i))
             
@@ -27,9 +38,8 @@ class URIRewritingContentHandler extends RewritingContentHandler implements URLM
                 atts.setValue(i, rewrite(baseURI, requestURI, attributeValue, rewriteConfig))
             }
         }
-        documentHandler.startElement(qName, atts, augs)
     }
-    
+
     @CompileStatic
     private boolean attributeNameShouldBeRewritten(String attributeName) {
         switch (attributeName) {
