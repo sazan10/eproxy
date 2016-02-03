@@ -2,12 +2,10 @@ package com.eaio.eproxy.rewriting.html
 
 import groovy.transform.CompileStatic
 
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLString;
-import org.xml.sax.Attributes
-import org.xml.sax.SAXException
+import org.apache.xerces.xni.Augmentations
+import org.apache.xerces.xni.QName
+import org.apache.xerces.xni.XMLAttributes
+import org.apache.xerces.xni.XMLString
 
 /**
  * Transforms HTML as follows:
@@ -47,6 +45,13 @@ class RemoveNoScriptElementsContentHandler extends BaseContentHandler {
     void characters(XMLString xmlString, Augmentations augs) {
         if (!inNoscriptBlock) {
             documentHandler.characters(xmlString, augs)
+        }
+    }
+
+    @Override
+    void emptyElement(QName element, XMLAttributes attributes, Augmentations augs) {
+        if (!inNoscriptBlock) {
+            documentHandler.emptyElement(element, attributes, augs)
         }
     }
 
