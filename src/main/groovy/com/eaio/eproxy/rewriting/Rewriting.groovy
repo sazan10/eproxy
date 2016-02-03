@@ -94,19 +94,7 @@ class Rewriting {
     void rewriteHTML(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
         XMLReader xmlReader = newXMLReader()
-        /*
-        XMLDocumentFilter[] filters = (XMLDocumentFilter[]) [
-            new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
-            new MetaRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
-            new RemoveActiveContentContentHandler(),
-            new RemoveNoScriptElementsContentHandler(),
-            new ImgSrcsetRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
-            new URIRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
-            new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
-            ].toArray()
-        xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
-        */
-        def filters = [
+        Collection<DefaultFilter> filters = [
             new CSSRewritingContentHandler(),
             new MetaRewritingContentHandler(),
             new RemoveActiveContentContentHandler(),
@@ -115,6 +103,7 @@ class Rewriting {
             new URIRewritingContentHandler(),
             new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
             ]
+        // Dunno why I need this but the Map constructor doesn't seem to work.
         filters.each { DefaultFilter handler ->
             if (handler instanceof RewritingContentHandler) {
                 ((RewritingContentHandler) handler).reEncoding = reEncoding
@@ -147,8 +136,13 @@ class Rewriting {
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         try {
-            new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
-                .rewriteCSS(newSACInputSource(inputStream, charset), outputWriter)
+            CSSRewritingContentHandler handler = new CSSRewritingContentHandler()
+            // Dunno why I need this but the Map constructor doesn't seem to work.
+            ((RewritingContentHandler) handler).reEncoding = reEncoding
+            ((RewritingContentHandler) handler).baseURI = baseURI
+            ((RewritingContentHandler) handler).requestURI = requestURI
+            ((RewritingContentHandler) handler).rewriteConfig = rewriteConfig
+            handler.rewriteCSS(newSACInputSource(inputStream, charset), outputWriter)
         }
         finally {
             try {

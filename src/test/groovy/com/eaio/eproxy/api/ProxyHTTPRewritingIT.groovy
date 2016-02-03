@@ -187,9 +187,8 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
         ] as HttpServletResponse
         proxy.proxy('ah', 'https', request, response)
-        errorCollector.checkThat(bOut.toString(0I), anyOf(containsString('<code>&lt;use xlink:href="sprite.svg#dog"'),
-            containsString('<code>&lt;use xlink:href=&quot;sprite.svg#dog&quot;')))
-        errorCollector.checkThat(bOut.toString(0I), containsString('<use xlink:href="'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('<CODE>&lt;use xlink:href=&quot;sprite.svg#dog&quot;'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('<USE xlink:href="'))
     }
     
     @Test
