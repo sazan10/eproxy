@@ -8,6 +8,7 @@ import java.nio.charset.Charset
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.HeaderElement
 import org.apache.xerces.xni.parser.XMLDocumentFilter;
+import org.cyberneko.html.filters.DefaultFilter
 import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -93,6 +94,7 @@ class Rewriting {
     void rewriteHTML(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
         XMLReader xmlReader = newXMLReader()
+        /*
         XMLDocumentFilter[] filters = (XMLDocumentFilter[]) [
             new CSSRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
             new MetaRewritingContentHandler(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
@@ -103,6 +105,25 @@ class Rewriting {
             new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
             ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
+        */
+        def filters = [
+            new CSSRewritingContentHandler(),
+            new MetaRewritingContentHandler(),
+            new RemoveActiveContentContentHandler(),
+            new RemoveNoScriptElementsContentHandler(),
+            new ImgSrcsetRewritingContentHandler(),
+            new URIRewritingContentHandler(),
+            new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
+            ]
+        filters.each { DefaultFilter handler ->
+            if (handler instanceof RewritingContentHandler) {
+                ((RewritingContentHandler) handler).reEncoding = reEncoding
+                ((RewritingContentHandler) handler).baseURI = baseURI
+                ((RewritingContentHandler) handler).requestURI = requestURI
+                ((RewritingContentHandler) handler).rewriteConfig = rewriteConfig
+            }
+        }
+        xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset)) // TODO: BufferedInputStream?
         }
