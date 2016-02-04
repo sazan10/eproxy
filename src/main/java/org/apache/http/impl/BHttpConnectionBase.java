@@ -325,6 +325,22 @@ public class BHttpConnectionBase implements HttpConnection, HttpInetConnection {
                         socket.shutdownOutput();
                     } catch (final IOException ignore) {
                     }
+                    /* Added */
+                    catch (NullPointerException ignore) {
+                        /*
+                         * Only on GAE...
+                         * 
+                         * Uncaught exception from servlet
+                         * java.lang.NullPointerException
+                         *     at com.google.appengine.api.socket.SocketApiHelper.translateError(SocketApiHelper.java:100)
+                         *     at com.google.appengine.api.socket.SocketApiHelper.translateError(SocketApiHelper.java:119)
+                         *     at com.google.appengine.api.socket.SocketApiHelper.makeSyncCall(SocketApiHelper.java:85)
+                         *     at com.google.appengine.api.socket.AppEngineSocketImpl.shutdownOutput(AppEngineSocketImpl.java:678)
+                         *     at java.net.Socket.shutdownOutput(Socket.java:1544)
+                         *     at org.apache.http.impl.BHttpConnectionBase.close(BHttpConnectionBase.java:325)
+                         */
+                    }
+                    /* End Added */
                     try {
                         socket.shutdownInput();
                     } catch (final IOException ignore) {
