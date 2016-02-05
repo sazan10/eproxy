@@ -50,7 +50,7 @@ trait URLManipulation {
      * <p>
      * Example: <code>resolve('http://foo.com/ah/oh.html'.toURI(), '/ui.html') = 'http://foo.com/oh.html'</code>
      */
-    private URI resolve(URI requestURI, String attributeValue) {
+    URI resolve(URI requestURI, String attributeValue) {
         try {
             requestURI.resolve(reEncoding.reEncode(attributeValue))
         }
