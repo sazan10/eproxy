@@ -53,23 +53,23 @@ import com.google.apphosting.api.DeadlineExceededException
 @RestController
 @Slf4j
 class Proxy implements URLManipulation {
-    
+
     // Note: Does not support multiple byte-range-sets.
     @Lazy
     private Pattern byte_ranges_specifier_1 = ~/(?i)^bytes=(\d+)-(\d*)$/, byte_ranges_specifier_2 = ~/(?i)^bytes=-(\d+)$/
-    
+
     @Value('${http.totalTimeout}')
     Long totalTimeout
-    
+
     @Autowired
     HttpClient httpClient
-    
+
     @Autowired
     Rewriting rewriting
-    
+
     @Autowired
     ReEncoding reEncoding
-    
+
     @Autowired(required = false)
     Timer timer
 
@@ -77,7 +77,7 @@ class Proxy implements URLManipulation {
     void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
         proxy(null, scheme, request, response)
     }
-    
+
     @RequestMapping('/{rewriteConfig}-{scheme:https?}/**')
     void proxy(@PathVariable('rewriteConfig') String rewriteConfigString, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
@@ -95,23 +95,23 @@ class Proxy implements URLManipulation {
             if (uriRequest instanceof HttpEntityEnclosingRequest) {
                 setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
             }
-            
+
             if (totalTimeout) {
                 timer?.schedule(new AbortHttpUriRequestTask(uriRequest), totalTimeout)
             }
-            
+
             remoteResponse = httpClient.execute(uriRequest, context)
-            
+
             response.status = remoteResponse.statusLine.statusCode
-            
+
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
             OutputStream outputStream = response.outputStream
             HeaderElement contentDisposition = parseContentDispositionValue(request.getHeader('Content-Disposition'))
-            
+
             RewriteConfig rewriteConfig = rewriteConfigString ? RewriteConfig.fromString('rnw') : null
-            
+
             boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
-            
+
             remoteResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                     response.setHeader(header.name, rewrite(baseURI, requestURI, header.value, rewriteConfig))
@@ -121,9 +121,9 @@ class Proxy implements URLManipulation {
                     response.setHeader(header.name, header.value)
                 }
             }
-            
+
             if (remoteResponse.entity) {
-                
+
                 long contentLength = remoteResponse.entity.contentLength
                 List<Long> range
                 if (contentLength >= 0L) {
@@ -136,7 +136,7 @@ class Proxy implements URLManipulation {
                         return
                     }
                 }
-                
+
                 if (canRewrite) {
                     if (range) {
                         response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE)
@@ -151,10 +151,12 @@ class Proxy implements URLManipulation {
                         response.status = HttpServletResponse.SC_PARTIAL_CONTENT
                         response.setHeader('Content-Range', "bytes ${range[0]}-${range[1] - 1}/${contentLength}")
                     }
-                    IOUtils.copyLarge(createRangeStream(remoteResponse.entity.content, range), outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+
+                    // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+                    IOUtils.copyLarge(range ? new RangeInputStream(remoteResponse.entity.content, range.get(0), range.get(1)) : remoteResponse.entity.content, outputStream)
                 }
             }
-                        
+
             TimingInterceptor.log(context, log)
         }
         catch (IllegalStateException ignored) {}
@@ -185,7 +187,7 @@ class Proxy implements URLManipulation {
         }
         catch (IOException ex) {
             if (ex instanceof NoHttpResponseException || ex instanceof SocketTimeoutException || ex instanceof ConnectTimeoutException ||
-                ex instanceof UnknownHostException || ex instanceof HttpHostConnectException || ex instanceof ClientProtocolException) {
+            ex instanceof UnknownHostException || ex instanceof HttpHostConnectException || ex instanceof ClientProtocolException) {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
             else if (ex.message == 'Connection reset by peer') {
@@ -202,14 +204,14 @@ class Proxy implements URLManipulation {
             EntityUtils.consumeQuietly(remoteResponse?.entity)
         }
     }
-    
+
     private void sendError(URI requestURI, HttpServletResponse response, int statusCode, Throwable thrw, String message = (ExceptionUtils.getRootCause(thrw) ?: thrw).message) {
         try {
             response.sendError(statusCode, message)
         }
         catch (IllegalStateException ex) {}
     }
-    
+
     private HttpUriRequest newRequest(String method, URI uri) {
         switch (method) {
             case 'GET': return new HttpGet(uri)
@@ -222,17 +224,17 @@ class Proxy implements URLManipulation {
             case 'TRACE': return new HttpTrace(uri)
         }
     }
-    
+
     URI buildBaseURI(String scheme, String host, int port, String contextPath) {
         new URI(scheme, null, host, getPort(scheme, port), contextPath, null, null)
     }
-    
+
     /**
      * Make sure to remove the context path before calling this method.
      */
     URI buildRequestURI(String scheme, String requestURI, String queryString) {
         String uriFromHost = substringAfter(requestURI[1..-1], '/'), path = substringAfter(uriFromHost, '/') ?: '/',
-            hostAndPort = substringBefore(uriFromHost, '/'), host = hostAndPort, port
+        hostAndPort = substringBefore(uriFromHost, '/'), host = hostAndPort, port
         if (hostAndPort.contains(':')) {
             host = substringBefore(hostAndPort, ':')
             port = substringAfter(hostAndPort, ':')
@@ -248,22 +250,22 @@ class Proxy implements URLManipulation {
             reEncoding.reEncode(builder.build() as String).toURI()
         }
     }
-    
+
     /**
      * Removes the context path prefix from <tt>requestURI</tt>.
      */
     String stripContextPathFromRequestURI(String contextPath, String requestURI) {
         contextPath ? substringAfter(requestURI, contextPath) : requestURI
     }
-    
+
     int getPort(String scheme, int port) {
         port == -1I || (scheme == 'http' && port == 80I) || (scheme == 'https' && port == 443I) ? -1I : port
     }
-    
+
     void setRequestEntity(HttpEntityEnclosingRequest uriRequest, String contentLength, InputStream inputStream) {
         uriRequest.entity = new InputStreamEntity(inputStream, contentLength?.isLong() ? contentLength as long : -1L)
     }
-    
+
     void addRequestHeaders(HttpServletRequest request, HttpUriRequest uriRequest) {
         [ 'Accept', 'Accept-Language' ].each {
             if (request.getHeader(it)) {
@@ -271,7 +273,7 @@ class Proxy implements URLManipulation {
             }
         }
     }
-    
+
     HeaderElement parseContentDispositionValue(String contentDisposition) {
         if (contentDisposition) {
             CharArrayBuffer buf = new CharArrayBuffer(contentDisposition.length())
@@ -287,12 +289,16 @@ class Proxy implements URLManipulation {
      */
     // TODO Header whitelist
     boolean dropHeader(String name, boolean canRewrite) {
-        (canRewrite ?
-            [ 'Content-Security-Policy', 'Transfer-Encoding', 'Accept-Ranges', 'Date', 'Pragma', 'Content-Length' ] :
-            [ 'Content-Security-Policy', 'Transfer-Encoding', 'Accept-Ranges', 'Date', 'Pragma' ]
-         ).any { it.equalsIgnoreCase(name) }
+        boolean out = false
+        if ([ 'Content-Security-Policy', 'Transfer-Encoding', 'Accept-Ranges', 'Date', 'Pragma', 'Set-Cookie', 'Age' ].any { it.equalsIgnoreCase(name) }) {
+            out = true
+        }
+        if (!out && canRewrite) {
+            out = 'Content-Length'.equalsIgnoreCase(name)
+        }
+        out
     }
-    
+
     /**
      * Returns start and end offsets from <tt>Range</tt> request headers.
      *
@@ -306,7 +312,7 @@ class Proxy implements URLManipulation {
         if ((m = byte_ranges_specifier_1.matcher(range ?: '')).matches()) {
             long start = m.group(1) as long
             long end = m.group(2) ? m.group(2) as long : contentLength
-            
+
             if (m.group(2)) {
                 long temp = start
                 start = Math.min(start, end)
@@ -315,11 +321,11 @@ class Proxy implements URLManipulation {
             else {
                 start = Math.min(start, contentLength)
             }
-                        
+
             if (end > contentLength || start == end) {
                 throw new IllegalArgumentException("${range} does not match file length ${contentLength}")
             }
-            
+
             start = Math.min(start, contentLength)
             end = Math.min(end + 1L, contentLength)
             [ start, end ]
@@ -329,9 +335,5 @@ class Proxy implements URLManipulation {
             [ 0L, end ]
         }
     }
-    
-    private InputStream createRangeStream(InputStream stream, List<Long> range) throws IOException {
-        range ? new RangeInputStream(stream, range.get(0), range.get(1)) : stream 
-    }
-    
+
 }
