@@ -81,4 +81,26 @@ class ProxyHTTPIT {
         assertThat(bOut.toByteArray().encodeBase64() as String, is('/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDA=='))
     }
     
+    @Test
+    void 'ports should be supported'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/ah-https/www.google.com:443/' },
+            getContextPath: { '' },
+            getQueryString: { null },
+            getMethod: { 'GET' },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getHeader: { String name -> null }
+        ] as HttpServletRequest
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+        ] as HttpServletResponse
+        proxy.proxy('ah', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('FORM action="http://fnuh.com/ah-https/www.google.com:443/search"'))
+    }
+    
 }

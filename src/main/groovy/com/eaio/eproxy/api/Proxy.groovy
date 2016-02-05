@@ -49,6 +49,7 @@ import com.google.apphosting.api.DeadlineExceededException
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 @RestController
 @Slf4j
 class Proxy implements URLManipulation {
@@ -209,7 +210,6 @@ class Proxy implements URLManipulation {
         catch (IllegalStateException ex) {}
     }
     
-    @CompileStatic
     private HttpUriRequest newRequest(String method, URI uri) {
         switch (method) {
             case 'GET': return new HttpGet(uri)
@@ -230,7 +230,6 @@ class Proxy implements URLManipulation {
     /**
      * Make sure to remove the context path before calling this method.
      */
-    @CompileStatic
     URI buildRequestURI(String scheme, String requestURI, String queryString) {
         String uriFromHost = substringAfter(requestURI[1..-1], '/'), path = substringAfter(uriFromHost, '/') ?: '/',
             hostAndPort = substringBefore(uriFromHost, '/'), host = hostAndPort, port
