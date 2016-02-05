@@ -8,10 +8,11 @@ Eproxy is a proxy that can also double as a cheap CDN, a proxy that
 * supports cookies (planned)
 * supports all HTTP methods 
 * supports HTTPS
+* supports HTTP Byte Serving using the ``Range`` header (if not rewriting)
 * caches content
 * lets you customize the socket and HTTP setup
 * uses a real parser for HTML, CSS and JavaScript (planned)
-* attempts to be as secure as possible 
+* attempts to be as secure as possible
 
 In other words, something you can use in a company network to look at questionable sites without needing to install anything. Or a cheap accelerator for your static content.
 
