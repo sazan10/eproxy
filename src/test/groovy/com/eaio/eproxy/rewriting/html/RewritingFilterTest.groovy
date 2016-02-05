@@ -9,15 +9,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(JUnitParamsRunner)
-class RewritingContentHandlerTest {
+class RewritingFilterTest {
     
     @Lazy
-    RewritingContentHandler rewritingContentHandler
+    RewritingFilter rewritingFilter
 
     @Test
     @Parameters(method = 'attributeValues')
     void testAttributeValueNeedsRewriting(String value, boolean expectedRewriting) {
-        assertThat(rewritingContentHandler.attributeValueNeedsRewriting(value), is(expectedRewriting))
+        assertThat(rewritingFilter.attributeValueNeedsRewriting(value), is(expectedRewriting))
     }
     
     Collection<Object[]> attributeValues() {

@@ -31,31 +31,31 @@ import com.eaio.net.httpclient.ReEncoding
 @Component
 @Slf4j
 class Rewriting {
-    
+
     @Autowired
     ReEncoding reEncoding
-    
+
     @Lazy
     private Charset defaultCharset = Charset.forName('UTF-8')
-    
-    private Set<String> javascript = [
-        'application/ecmascript',
-        'application/javascript',
-        'application/x-ecmascript',
-        'application/x-javascript',
-        'text/ecmascript',
-        'text/javascript',
-        'text/javascript1.0',
-        'text/javascript1.1',
-        'text/javascript1.2',
-        'text/javascript1.3',
-        'text/javascript1.4',
-        'text/javascript1.5',
-        'text/jscript',
-        'text/livescript',
-        'text/x-ecmascript',
-        'text/x-javascript',
-    ] as Set
+
+    //    private Set<String> javascript = [
+    //        'application/ecmascript',
+    //        'application/javascript',
+    //        'application/x-ecmascript',
+    //        'application/x-javascript',
+    //        'text/ecmascript',
+    //        'text/javascript',
+    //        'text/javascript1.0',
+    //        'text/javascript1.1',
+    //        'text/javascript1.2',
+    //        'text/javascript1.3',
+    //        'text/javascript1.4',
+    //        'text/javascript1.5',
+    //        'text/jscript',
+    //        'text/livescript',
+    //        'text/x-ecmascript',
+    //        'text/x-javascript',
+    //    ] as Set
 
     // TODO: Get rid of VBScript
 
@@ -72,16 +72,16 @@ class Rewriting {
     boolean isCSS(String mimeType) {
         mimeType?.equalsIgnoreCase('text/css')
     }
-    
-    boolean isSVG(String mimeType) {
-        mimeType?.equalsIgnoreCase('image/svg+xml')
-    }
-    
+
+    //    boolean isSVG(String mimeType) {
+    //        mimeType?.equalsIgnoreCase('image/svg+xml')
+    //    }
+
     // TODO: Look at Content-Disposition header to prevent downloads from being rewritten
     boolean canRewrite(HeaderElement contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
         rewriteConfig && (isHTML(mimeType) || isCSS(mimeType))
     }
-    
+
     void rewrite(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig, String mimeType) {
         if (isHTML(mimeType)) {
             rewriteHTML(inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
@@ -90,26 +90,33 @@ class Rewriting {
             rewriteCSS(inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
         }
     }
-    
+
     void rewriteHTML(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
-        XMLReader xmlReader = newXMLReader()
-        Collection<DefaultFilter> filters = [
-            new CSSRewritingContentHandler(),
-            new MetaRewritingContentHandler(),
-            new RemoveActiveContentContentHandler(),
-            new RemoveNoScriptElementsContentHandler(),
-            new ImgSrcsetRewritingContentHandler(),
-            new URIRewritingContentHandler(),
-            new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
-            ]
+        XMLReader xmlReader = newHTMLReader()
+        Collection<DefaultFilter> filters = []
+        if (rewriteConfig.removeActiveContent) {
+            filters << new RemoveActiveContentFilter()
+        }
+        if (rewriteConfig.removeNoScriptElements) {
+            filters << new RemoveNoScriptElementsFilter()
+        }
+        if (rewriteConfig.rewrite) {
+            filters.addAll([
+                new CSSRewritingFilter(),
+                new MetaRewritingFilter(),
+                new ImgSrcsetFilter(),
+                new URIRewritingFilter()
+            ])
+        }
+        filters << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
         // Dunno why I need this but the Map constructor doesn't seem to work.
         filters.each { DefaultFilter handler ->
-            if (handler instanceof RewritingContentHandler) {
-                ((RewritingContentHandler) handler).reEncoding = reEncoding
-                ((RewritingContentHandler) handler).baseURI = baseURI
-                ((RewritingContentHandler) handler).requestURI = requestURI
-                ((RewritingContentHandler) handler).rewriteConfig = rewriteConfig
+            if (handler instanceof RewritingFilter) {
+                ((RewritingFilter) handler).reEncoding = reEncoding
+                ((RewritingFilter) handler).baseURI = baseURI
+                ((RewritingFilter) handler).requestURI = requestURI
+                ((RewritingFilter) handler).rewriteConfig = rewriteConfig
             }
         }
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
@@ -123,7 +130,7 @@ class Rewriting {
             else {
                 // TODO
                 log.warn("While parsing {}@{}:{}: {}", requestURI, ''/*((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber*/,
-                    ''/*((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber*/, (ExceptionUtils.getRootCause(ex) ?: ex).message)
+                        ''/*((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber*/, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
         finally {
@@ -133,16 +140,16 @@ class Rewriting {
             catch (emall) {}
         }
     }
-    
+
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         try {
-            CSSRewritingContentHandler handler = new CSSRewritingContentHandler()
+            CSSRewritingFilter handler = new CSSRewritingFilter()
             // Dunno why I need this but the Map constructor doesn't seem to work.
-            ((RewritingContentHandler) handler).reEncoding = reEncoding
-            ((RewritingContentHandler) handler).baseURI = baseURI
-            ((RewritingContentHandler) handler).requestURI = requestURI
-            ((RewritingContentHandler) handler).rewriteConfig = rewriteConfig
+            ((RewritingFilter) handler).reEncoding = reEncoding
+            ((RewritingFilter) handler).baseURI = baseURI
+            ((RewritingFilter) handler).requestURI = requestURI
+            ((RewritingFilter) handler).rewriteConfig = rewriteConfig
             handler.rewriteCSS(newSACInputSource(inputStream, charset), outputWriter)
         }
         finally {
@@ -152,13 +159,13 @@ class Rewriting {
             catch (emall) {}
         }
     }
-    
-    XMLReader newXMLReader() {
+
+    XMLReader newHTMLReader() {
         SAXParser out = new SAXParser()
         out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
         out
     }
-    
+
     InputSource newSAXInputSource(InputStream inputStream, Charset charset) {
         InputSource out = new InputSource(byteStream: inputStream)
         if (charset) {
@@ -166,7 +173,7 @@ class Rewriting {
         }
         out
     }
-    
+
     org.w3c.css.sac.InputSource newSACInputSource(InputStream inputStream, Charset charset) {
         org.w3c.css.sac.InputSource out = new org.w3c.css.sac.InputSource(byteStream: inputStream)
         if (charset) {
@@ -174,5 +181,5 @@ class Rewriting {
         }
         out
     }
-    
+
 }

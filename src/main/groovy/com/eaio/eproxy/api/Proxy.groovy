@@ -4,6 +4,9 @@ import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 import javax.net.ssl.SSLException
 import javax.net.ssl.SSLHandshakeException
 import javax.servlet.http.HttpServletRequest
@@ -12,6 +15,7 @@ import javax.servlet.http.HttpServletResponse
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.*
+import org.apache.http.client.ClientProtocolException
 import org.apache.http.client.HttpClient
 import org.apache.http.client.cache.HttpCacheContext
 import org.apache.http.client.methods.*
@@ -33,6 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.*
 import com.eaio.eproxy.rewriting.html.*
+import com.eaio.io.RangeInputStream
 import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.ReEncoding
 import com.eaio.net.httpclient.TimingInterceptor
@@ -47,6 +52,10 @@ import com.google.apphosting.api.DeadlineExceededException
 @RestController
 @Slf4j
 class Proxy implements URLManipulation {
+    
+    // Note: Does not support multiple byte-range-sets.
+    @Lazy
+    private Pattern byte_ranges_specifier_1 = ~/(?i)^bytes=(\d+)-(\d*)$/, byte_ranges_specifier_2 = ~/(?i)^bytes=-(\d+)$/
     
     @Value('${http.totalTimeout}')
     Long totalTimeout
@@ -69,7 +78,7 @@ class Proxy implements URLManipulation {
     }
     
     @RequestMapping('/{rewriteConfig}-{scheme:https?}/**')
-    void proxy(@PathVariable('rewriteConfig') String rewriteConfig, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
+    void proxy(@PathVariable('rewriteConfig') String rewriteConfigString, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
         URI requestURI = buildRequestURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
         if (!requestURI.host) {
@@ -92,27 +101,56 @@ class Proxy implements URLManipulation {
             
             remoteResponse = httpClient.execute(uriRequest, context)
             
-            response.setStatus(remoteResponse.statusLine.statusCode)
+            response.status = remoteResponse.statusLine.statusCode
+            
+            ContentType contentType = ContentType.getLenient(remoteResponse.entity)
+            OutputStream outputStream = response.outputStream
+            HeaderElement contentDisposition = parseContentDispositionValue(request.getHeader('Content-Disposition'))
+            
+            RewriteConfig rewriteConfig = rewriteConfigString ? RewriteConfig.fromString('rnw') : null
+            
+            boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
             
             remoteResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
-                    response.setHeader(header.name, rewrite(baseURI, requestURI, header.value, rewriteConfig ? new RewriteConfig(rewrite: true) : null))
+                    response.setHeader(header.name, rewrite(baseURI, requestURI, header.value, rewriteConfig))
                 }
-                else if (!dropHeader(header.name)) {
+                else if (!dropHeader(header.name, canRewrite)) {
                     // TODO only drop Content-Length if not rewriting
                     response.setHeader(header.name, header.value)
                 }
             }
             
             if (remoteResponse.entity) {
-                ContentType contentType = ContentType.getLenient(remoteResponse.entity)
-                OutputStream outputStream = response.outputStream
-                HeaderElement contentDisposition = parseContentDispositionValue(request.getHeader('Content-Disposition'))
-                if (rewriting.canRewrite(contentDisposition, rewriteConfig ? new RewriteConfig(rewrite: true) : null, contentType?.mimeType)) {
-                    rewriting.rewrite(remoteResponse.entity.content, outputStream, contentType.charset, baseURI, requestURI, new RewriteConfig(rewrite: true), contentType.mimeType)
+                
+                long contentLength = remoteResponse.entity.contentLength
+                List<Long> range
+                if (contentLength >= 0L) {
+                    try {
+                        range = parseRange(contentLength, request.getHeader('Range'))
+                    }
+                    catch (IllegalArgumentException ex) {
+                        response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE)
+                        response.setHeader('Content-Range', "bytes 0-${contentLength - 1}/${contentLength}")
+                        return
+                    }
+                }
+                
+                if (canRewrite) {
+                    if (range) {
+                        response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE)
+                    }
+                    else {
+                        rewriting.rewrite(remoteResponse.entity.content, outputStream, contentType.charset, baseURI, requestURI, rewriteConfig, contentType.mimeType)
+                    }
                 }
                 else {
-                    IOUtils.copyLarge(remoteResponse.entity.content, outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+                    response.setHeader('Accept-Ranges', 'bytes')
+                    if (range) {
+                        response.status = HttpServletResponse.SC_PARTIAL_CONTENT
+                        response.setHeader('Content-Range', "bytes ${range[0]}-${range[1] - 1}/${contentLength}")
+                    }
+                    IOUtils.copyLarge(createRangeStream(remoteResponse.entity.content, range), outputStream) // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
                 }
             }
                         
@@ -125,6 +163,9 @@ class Proxy implements URLManipulation {
             }
             else if (ex.message?.contains('Resource temporarily unavailable')) { // Google App Engine
                 sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
+            }
+            else if (ex.message?.contains('connection reset by peer')) { // Google App Engine+
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
             else {
                 throw ex
@@ -143,7 +184,7 @@ class Proxy implements URLManipulation {
         }
         catch (IOException ex) {
             if (ex instanceof NoHttpResponseException || ex instanceof SocketTimeoutException || ex instanceof ConnectTimeoutException ||
-                ex instanceof UnknownHostException || ex instanceof HttpHostConnectException) {
+                ex instanceof UnknownHostException || ex instanceof HttpHostConnectException || ex instanceof ClientProtocolException) {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
             else if (ex.message == 'Connection reset by peer') {
@@ -191,11 +232,16 @@ class Proxy implements URLManipulation {
      */
     @CompileStatic
     URI buildRequestURI(String scheme, String requestURI, String queryString) {
-        String uriFromHost, path
-        uriFromHost = substringAfter(requestURI[1..-1], '/')
-        path = substringAfter(uriFromHost, '/') ?: '/'
-        // TODO: Support for Ports
-        UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(substringBefore(uriFromHost, '/')).path(path)
+        String uriFromHost = substringAfter(requestURI[1..-1], '/'), path = substringAfter(uriFromHost, '/') ?: '/',
+            hostAndPort = substringBefore(uriFromHost, '/'), host = hostAndPort, port
+        if (hostAndPort.contains(':')) {
+            host = substringBefore(hostAndPort, ':')
+            port = substringAfter(hostAndPort, ':')
+        }
+        UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(host).path(path)
+        if (port) {
+            builder.port(port)
+        }
         if (queryString) {
             reEncoding.reEncode(builder.build().toUriString() + '?' + queryString).toURI()
         }
@@ -237,9 +283,56 @@ class Proxy implements URLManipulation {
         }
     }
 
+    /**
+     * Returns whether a certain header (ignoring case) should be dropped. Drops <tt>Content-Length</tt> if rewriting.
+     */
     // TODO Header whitelist
-    boolean dropHeader(String name) {
-        [ 'Content-Security-Policy', 'Content-Length', 'Transfer-Encoding', 'Accept-Ranges', 'Date' ].any { it.equalsIgnoreCase(name) }
+    boolean dropHeader(String name, boolean canRewrite) {
+        (canRewrite ?
+            [ 'Content-Security-Policy', 'Transfer-Encoding', 'Accept-Ranges', 'Date', 'Pragma', 'Content-Length' ] :
+            [ 'Content-Security-Policy', 'Transfer-Encoding', 'Accept-Ranges', 'Date', 'Pragma' ]
+         ).any { it.equalsIgnoreCase(name) }
+    }
+    
+    /**
+     * Returns start and end offsets from <tt>Range</tt> request headers.
+     *
+     * @param contentLength the length of the entity in octets
+     * @param range the <tt>Range</tt> header, may be <code>null</code>
+     * @return a list of longs (start and end offset) or <code>null</code>
+     * @throws IllegalArgumentException on malformed range requests
+     */
+    private List<Long> parseRange(long contentLength, String range) {
+        Matcher m
+        if ((m = byte_ranges_specifier_1.matcher(range ?: '')).matches()) {
+            long start = m.group(1) as long
+            long end = m.group(2) ? m.group(2) as long : contentLength
+            
+            if (m.group(2)) {
+                long temp = start
+                start = Math.min(start, end)
+                end = Math.max(temp, end)
+            }
+            else {
+                start = Math.min(start, contentLength)
+            }
+                        
+            if (end > contentLength || start == end) {
+                throw new IllegalArgumentException("${range} does not match file length ${contentLength}")
+            }
+            
+            start = Math.min(start, contentLength)
+            end = Math.min(end + 1L, contentLength)
+            [ start, end ]
+        }
+        else if ((m = byte_ranges_specifier_2.matcher(range ?: '')).matches()) {
+            long end = Math.min((m.group(1) as long) + 1L, contentLength)
+            [ 0L, end ]
+        }
+    }
+    
+    private InputStream createRangeStream(InputStream stream, List<Long> range) throws IOException {
+        range ? new RangeInputStream(stream, range.get(0), range.get(1)) : stream 
     }
     
 }

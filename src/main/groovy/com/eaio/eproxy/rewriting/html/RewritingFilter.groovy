@@ -7,13 +7,13 @@ import com.eaio.net.httpclient.ReEncoding
 import com.eaio.stringsearch.BNDMCI
 
 /**
- * {@link ContentHandler} that knows where the document is coming from and decides whether attribute values should be rewritten.
+ * {@link BaseFilter} that knows where the document is coming from and decides whether attribute values should be rewritten.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
 @CompileStatic
-class RewritingContentHandler extends BaseContentHandler {
+class RewritingFilter extends BaseFilter {
     
     ReEncoding reEncoding
 

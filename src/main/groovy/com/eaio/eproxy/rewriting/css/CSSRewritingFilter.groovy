@@ -15,7 +15,7 @@ import org.w3c.css.sac.*
 import org.w3c.dom.css.*
 
 import com.eaio.eproxy.rewriting.URLManipulation
-import com.eaio.eproxy.rewriting.html.RewritingContentHandler
+import com.eaio.eproxy.rewriting.html.RewritingFilter
 import com.steadystate.css.dom.*
 import com.steadystate.css.parser.CSSOMParser
 import com.steadystate.css.parser.SACParserCSS3
@@ -27,12 +27,15 @@ import com.steadystate.css.parser.SACParserCSS3
  * @version $Id$
  */
 @Slf4j
-class CSSRewritingContentHandler extends RewritingContentHandler implements ErrorHandler, URLManipulation {
+class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URLManipulation {
     
     @Lazy
     private Pattern patternURL = ~/(?i)(\75 ?|u)(\72 ?|r)(\6C ?|l)/
+    
+    private final Stack<String> stack = new Stack<String>()
 
     @CompileStatic
+    @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         if (nameIs(qName, 'style')) {
             stack.push('style')
@@ -45,10 +48,11 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
                 log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length(), rewrittenCSS.length())
             }
         }
-        documentHandler.startElement(qName, atts, augs)
+        super.startElement(qName, atts, augs)
     }
 
     @CompileStatic
+    @Override
     void endElement(QName qName, Augmentations augs) {
         if (nameIs(qName, 'style')) {
             try {
@@ -56,13 +60,14 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
             }
             catch (EmptyStackException ex) {}
         }
-        documentHandler.endElement(qName, augs)
+        super.endElement(qName, augs)
     }
 
     /**
      * Rewrites <tt>&lt;style&gt;</tt> contents.
      */
     @CompileStatic
+    @Override
     void characters(XMLString xmlString, Augmentations augs) {
         String tag
         try {
@@ -73,11 +78,11 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
             DirectStrBuilder builder = new DirectStrBuilder(xmlString.length)
             Reader charArrayReader = new CharArrayReader(xmlString.ch, xmlString.offset, xmlString.length)
             rewriteCSS(new InputSource(characterStream: charArrayReader), builder.asWriter())
-            documentHandler.characters(new XMLString(builder.buffer, 0I, builder.length()), augs)
+            super.characters(new XMLString(builder.buffer, 0I, builder.length()), augs)
             log.debug('rewrote CSS {} chars to {} chars', xmlString.length, builder.length())
         }
         else {
-            documentHandler.characters(xmlString, augs)
+            super.characters(xmlString, augs)
         }
     }
 
@@ -129,7 +134,7 @@ class CSSRewritingContentHandler extends RewritingContentHandler implements Erro
             log.warn('unknown CSS rule type in {}: {}', requestURI, rule.getClass().name)
         }
     }
-    
+
     @CompileStatic
     void rewriteCSSStyleDeclaration(CSSStyleDeclarationImpl declaration) {
         declaration.properties*.value.each { CSSValue value ->

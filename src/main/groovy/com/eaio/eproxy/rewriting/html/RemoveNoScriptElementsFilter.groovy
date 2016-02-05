@@ -17,7 +17,7 @@ import org.apache.xerces.xni.XMLString
  * @version $Id$
  */
 @CompileStatic
-class RemoveNoScriptElementsContentHandler extends BaseContentHandler {
+class RemoveNoScriptElementsFilter extends BaseFilter {
     
     boolean inNoscriptBlock
 
@@ -27,7 +27,7 @@ class RemoveNoScriptElementsContentHandler extends BaseContentHandler {
             inNoscriptBlock = true
         }
         else if (!inNoscriptBlock) {
-            documentHandler.startElement(qName, atts, augs)
+            super.startElement(qName, atts, augs)
         }
     }
 
@@ -37,21 +37,21 @@ class RemoveNoScriptElementsContentHandler extends BaseContentHandler {
             inNoscriptBlock = false
         }
         else if (!inNoscriptBlock) {
-            documentHandler.endElement(qName, augs)
+            super.endElement(qName, augs)
         }
     }
     
     @Override
     void characters(XMLString xmlString, Augmentations augs) {
         if (!inNoscriptBlock) {
-            documentHandler.characters(xmlString, augs)
+            super.characters(xmlString, augs)
         }
     }
 
     @Override
     void emptyElement(QName element, XMLAttributes attributes, Augmentations augs) {
         if (!inNoscriptBlock) {
-            documentHandler.emptyElement(element, attributes, augs)
+            super.emptyElement(element, attributes, augs)
         }
     }
 

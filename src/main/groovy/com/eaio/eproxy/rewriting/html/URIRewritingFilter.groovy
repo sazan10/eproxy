@@ -15,18 +15,18 @@ import com.eaio.eproxy.rewriting.URLManipulation
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-class URIRewritingContentHandler extends RewritingContentHandler implements URLManipulation {
+class URIRewritingFilter extends RewritingFilter implements URLManipulation {
 
     @Override    
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         rewriteElement(qName, atts, augs)
-        documentHandler.startElement(qName, atts, augs)
+        super.startElement(qName, atts, augs)
     }
     
     @Override
     void emptyElement(QName element, XMLAttributes atts, Augmentations augs) {
         rewriteElement(element, atts, augs)
-        documentHandler.emptyElement(element, atts, augs)
+        super.emptyElement(element, atts, augs)
     }
     
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {

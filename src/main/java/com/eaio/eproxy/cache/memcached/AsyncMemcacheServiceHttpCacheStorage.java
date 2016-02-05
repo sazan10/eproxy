@@ -53,6 +53,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
         log.debug("putEntry {}", key);
         Future<Void> future = asyncMemcacheService.put(key, entry);
         awaitFutureUntilTimeout("put", key, future);
+        memcacheStatuses.set(new MemcacheStatus(key, entry != null));
     }
 
     /**
@@ -60,9 +61,9 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public HttpCacheEntry getEntry(String key) throws IOException {
-        MemcacheStatus getResult = memcacheStatuses.get();
+        MemcacheStatus keyStatus = memcacheStatuses.get();
         HttpCacheEntry out;
-        if (getResult != null && getResult.key.equals(key) && !getResult.cached) {
+        if (keyStatus != null && keyStatus.key.equals(key) && !keyStatus.cached) {
             out = null;
         }
         else {
@@ -82,6 +83,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
         log.debug("removeEntry {}", key);
         Future<Boolean> future = asyncMemcacheService.delete(key);
         awaitFutureUntilTimeout("delete", key, future);
+        memcacheStatuses.set(new MemcacheStatus(key, false));
     }
 
     /**
@@ -103,6 +105,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
                     Future<Void> putFuture = asyncMemcacheService.put(key, newEntry);
                     awaitFutureUntilTimeout("put", key, putFuture);
                 }
+                memcacheStatuses.set(new MemcacheStatus(key, newEntry != null));
                 return;
             }
             else {
@@ -112,6 +115,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
                     return;
                 }
                 else if (Boolean.TRUE.equals(stored)) {
+                    memcacheStatuses.set(new MemcacheStatus(key, true));
                     return;
                 }
             }

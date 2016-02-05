@@ -18,20 +18,17 @@ import com.eaio.net.httpclient.ReEncoding
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-class MetaRewritingContentHandlerTest {
+class MetaRewritingFilterTest {
     
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
     
-    @Lazy
-    MetaRewritingContentHandler contentHandler
-
     @Test
     void '<meta refresh> should be rewritten'() {
         StringWriter output = new StringWriter()
-        XMLReader xmlReader = new Rewriting().newXMLReader()
-        XMLDocumentFilter[] filters = [ new MetaRewritingContentHandler(reEncoding: new ReEncoding(), baseURI: 'http://rah.com/'.toURI(), requestURI: 'https://www.facebook.com/'.toURI(),
-            rewriteConfig: new RewriteConfig(rewrite: true)),
+        XMLReader xmlReader = new Rewriting().newHTMLReader()
+        XMLDocumentFilter[] filters = [ new MetaRewritingFilter(reEncoding: new ReEncoding(), baseURI: 'http://rah.com/'.toURI(), requestURI: 'https://www.facebook.com/'.toURI(),
+            rewriteConfig: RewriteConfig.fromString('rnw')),
             new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
@@ -41,9 +38,9 @@ class MetaRewritingContentHandlerTest {
     @Test
     void 'Baidu\'s <meta refresh> should be rewritten'() {
         StringWriter output = new StringWriter()
-        XMLReader xmlReader = new Rewriting().newXMLReader()
-        XMLDocumentFilter[] filters = [ new MetaRewritingContentHandler(reEncoding: new ReEncoding(), baseURI: 'http://rah.com/'.toURI(), requestURI: 'https://www.facebook.com/'.toURI(),
-            rewriteConfig: new RewriteConfig(rewrite: true)),
+        XMLReader xmlReader = new Rewriting().newHTMLReader()
+        XMLDocumentFilter[] filters = [ new MetaRewritingFilter(reEncoding: new ReEncoding(), baseURI: 'http://rah.com/'.toURI(), requestURI: 'https://www.facebook.com/'.toURI(),
+            rewriteConfig: RewriteConfig.fromString('rnw')),
             new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/baidu-redirect.html'))))

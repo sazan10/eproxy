@@ -7,8 +7,6 @@ import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
 import org.apache.xerces.xni.XMLString
-import org.xml.sax.Attributes
-import org.xml.sax.SAXException
 
 /**
  * Transforms HTML as follows:
@@ -21,8 +19,10 @@ import org.xml.sax.SAXException
  * @version $Id: TryEaioTransformer.java 7547 2015-07-01 20:02:47Z johann $
  */
 @CompileStatic
-class RemoveActiveContentContentHandler extends BaseContentHandler {
-    
+class RemoveActiveContentFilter extends BaseFilter {
+
+    private final Stack<String> stack = new Stack<String>()
+
     @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         if (nameIs(qName, 'script')) {
@@ -37,7 +37,7 @@ class RemoveActiveContentContentHandler extends BaseContentHandler {
                     ++i
                 }
             }
-            documentHandler.startElement(qName, atts, augs)
+            super.startElement(qName, atts, augs)
         }
     }
 
@@ -50,7 +50,7 @@ class RemoveActiveContentContentHandler extends BaseContentHandler {
             catch (EmptyStackException ex) {}
         }
         else {
-            documentHandler.endElement(qName, augs)
+            super.endElement(qName, augs)
         }
     }
 
@@ -65,7 +65,7 @@ class RemoveActiveContentContentHandler extends BaseContentHandler {
         }
         catch (EmptyStackException ex) {}
         if (tag != 'script') {
-            documentHandler.characters(xmlString, augs)
+            super.characters(xmlString, augs)
         }
     }
 

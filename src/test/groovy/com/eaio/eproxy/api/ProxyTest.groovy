@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.*
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 
+import org.apache.http.HeaderElement
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -65,7 +66,17 @@ class ProxyTest {
             [ 'http', 80I, -1I ],
             [ 'http', 8080I, 8080I ],
             [ 'https', 1234I, 1234I ],
+            [ 'http', 42I, 42I ],
+            [ 'https', 8443I, 8443I ]
         ].collect { it as Object[] }
     }
-
+    
+    @Test
+    void 'parseContentDispositionValue should find attachment'() {
+        assertThat(proxy.parseContentDispositionValue(null), is(null))
+        
+        HeaderElement element = proxy.parseContentDispositionValue('ATTACHMENT;filename=bla.jpg')
+        assertThat(element.name.toLowerCase(), is('attachment'))
+    }
+    
 }

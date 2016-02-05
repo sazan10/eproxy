@@ -20,7 +20,7 @@ import com.eaio.eproxy.Eproxy
 import com.eaio.net.httpclient.ReEncoding
 
 /**
- * Simulates disabled redirects.
+ * Simulates enabled redirects.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$

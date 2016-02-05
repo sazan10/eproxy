@@ -16,7 +16,7 @@ import com.eaio.eproxy.rewriting.Rewriting
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-class RemoveNoScriptElementsContentHandlerContentHandlerTest {
+class RemoveNoScriptElementsFilterTest {
     
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
@@ -24,8 +24,8 @@ class RemoveNoScriptElementsContentHandlerContentHandlerTest {
     @Test
     void '<noscript> elements should be removed'() {
         StringWriter output = new StringWriter()
-        XMLReader xmlReader = new Rewriting().newXMLReader()
-        XMLDocumentFilter[] filters = [ new RemoveNoScriptElementsContentHandler(),
+        XMLReader xmlReader = new Rewriting().newHTMLReader()
+        XMLDocumentFilter[] filters = [ new RemoveNoScriptElementsFilter(),
             new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))

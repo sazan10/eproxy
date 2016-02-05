@@ -13,12 +13,12 @@ import org.apache.xerces.xni.XMLAttributes
 import com.eaio.eproxy.rewriting.URLManipulation
 
 /**
- * Rewrites <tt>meta refresh</tt>. Should be placed after {@link RemoveNoScriptElementsContentHandler}.
+ * Rewrites <tt>meta refresh</tt>. Should be placed after {@link RemoveNoScriptElementsFilter}.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-class MetaRewritingContentHandler extends RewritingContentHandler implements URLManipulation {
+class MetaRewritingFilter extends RewritingFilter implements URLManipulation {
 
     @Lazy
     private transient Object patternRefresh = bndmci.processString('refresh'),
@@ -44,7 +44,7 @@ class MetaRewritingContentHandler extends RewritingContentHandler implements URL
                 }
             }
         }
-        documentHandler.startElement(qName, atts, augs)
+        super.startElement(qName, atts, augs)
     }
 
 }
