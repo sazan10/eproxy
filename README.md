@@ -9,6 +9,7 @@ Eproxy is a proxy that can also double as a cheap CDN, a proxy that
 * supports all HTTP methods 
 * supports HTTPS
 * supports HTTP Byte Serving using the ``Range`` header (if not rewriting)
+* supports cache validation using ``If-Modified-Since`` and ``If-None-Match``
 * caches content
 * lets you customize the socket and HTTP setup
 * uses a real parser for HTML, CSS and JavaScript (planned)
