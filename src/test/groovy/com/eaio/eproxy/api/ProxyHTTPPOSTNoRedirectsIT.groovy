@@ -2,6 +2,7 @@ package com.eaio.eproxy.api
 
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
+import static com.eaio.eproxy.RequestMocks.*
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -66,23 +67,15 @@ class ProxyHTTPPOSTNoRedirectsIT {
     
     @Test
     void 'POST requests to PayPal should return a new URL'() {
-        HttpServletRequest request = [
-            getRequestURI: { '/https/www.paypal.com/cgi-bin/webscr' },
-            getContextPath: { '' },
-            getQueryString: { null },
-            getMethod: { 'POST' },
-            getScheme: { 'http' },
-            getServerName: { 'fnuh.com' },
-            getServerPort: { 80I },
-            getHeader: { String name -> name == 'Content-Length' ? data.length as String : null },
-            getInputStream: { new DelegatingServletInputStream(new ByteArrayInputStream(data)) },
-        ] as HttpServletRequest
+        HttpServletRequest request = buildHttpServletRequest('https://www.paypal.com/cgi-bin/webscr', 'POST', { String name -> name == 'Content-Length' ? data.length as String : null },
+            new DelegatingServletInputStream(new ByteArrayInputStream(data)))
         boolean statusSet = false, redirected = false
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, startsWith('http://fnuh.com/https/www.paypal.com/de/cgi-bin/webscr?cmd=_flow&SESSION=')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('http', request, response)
         assertThat(statusSet, is(true))

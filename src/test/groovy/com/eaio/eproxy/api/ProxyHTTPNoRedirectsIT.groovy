@@ -2,6 +2,7 @@ package com.eaio.eproxy.api
 
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
+import static com.eaio.eproxy.RequestMocks.*
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -33,21 +34,13 @@ class ProxyHTTPNoRedirectsIT {
     
     @Test
     void 'redirect URLs should be rewritten'() {
-        HttpServletRequest request = [
-            getRequestURI: { '/http/n-tv.de' },
-            getContextPath: { '' },
-            getQueryString: { null },
-            getMethod: { 'GET' },
-            getScheme: { 'http' },
-            getServerName: { 'fnuh.com' },
-            getServerPort: { 80I },
-            getHeader: { String name -> null }
-        ] as HttpServletRequest
+        HttpServletRequest request = buildHttpServletRequest('http://n-tv.de', 'GET', { String name -> null }, null, null)
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/http/www.n-tv.de/')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
+            isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('http', request, response)
         assertThat(statusSet, is(true))
@@ -56,21 +49,13 @@ class ProxyHTTPNoRedirectsIT {
     
     @Test
     void 'rewriteConfig should be kept when redirecting'() {
-        HttpServletRequest request = [
-            getRequestURI: { '/ah-http/n-tv.de' },
-            getContextPath: { '' },
-            getQueryString: { null },
-            getMethod: { 'GET' },
-            getScheme: { 'http' },
-            getServerName: { 'fnuh.com' },
-            getServerPort: { 80I },
-            getHeader: { String name -> null }
-        ] as HttpServletRequest
+        HttpServletRequest request = buildHttpServletRequest('http://n-tv.de')
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/ah-http/www.n-tv.de/')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
+            isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('ah', 'http', request, response)
         assertThat(statusSet, is(true))
@@ -79,21 +64,13 @@ class ProxyHTTPNoRedirectsIT {
     
     @Test
     void 'relative redirects should be supported'() {
-        HttpServletRequest request = [
-            getRequestURI: { '/http/edition.cnn.com/guides' },
-            getContextPath: { '' },
-            getQueryString: { null },
-            getMethod: { 'GET' },
-            getScheme: { 'http' },
-            getServerName: { 'fnuh.com' },
-            getServerPort: { 80I },
-            getHeader: { String name -> null }
-        ] as HttpServletRequest
+        HttpServletRequest request = buildHttpServletRequest('http://edition.cnn.com/guides')
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/ah-http/edition.cnn.com/specials/travel/guides')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
+            isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('ah', 'http', request, response)
         assertThat(statusSet, is(true))

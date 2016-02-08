@@ -101,7 +101,10 @@ class Proxy implements URLManipulation {
             }
 
             remoteResponse = httpClient.execute(uriRequest, context)
-
+            
+            if (!response.committed) {
+                response.reset()
+            }
             response.status = remoteResponse.statusLine.statusCode
 
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
@@ -267,7 +270,7 @@ class Proxy implements URLManipulation {
     }
 
     void addRequestHeaders(HttpServletRequest request, HttpUriRequest uriRequest) {
-        [ 'Accept', 'Accept-Language' ].each {
+        [ 'Accept', 'Accept-Language', 'If-Modified-Since', 'If-None-Match' ].each {
             if (request.getHeader(it)) {
                 uriRequest.setHeader(it, request.getHeader(it))
             }
