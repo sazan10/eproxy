@@ -43,6 +43,7 @@ class URIRewritingFilter extends RewritingFilter implements URLManipulation {
 
     private boolean attributeNameShouldBeRewritten(String attributeName) {
         switch (attributeName) {
+            case 'to':
             case 'value':
             case 'object':
             case 'archive':
