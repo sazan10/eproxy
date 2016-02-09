@@ -31,17 +31,19 @@ class RewritingFilter extends BaseFilter {
         patternViewSource = bndmci.processString('view-source:')
 
     boolean attributeValueNeedsRewriting(String attributeValue) {
-        int colonIndex = attributeValue.indexOf((int) ((char) ':'))
-        if (colonIndex == -1I) {
-            colonIndex = Integer.MAX_VALUE
+        if (attributeValue) {
+            int colonIndex = attributeValue.indexOf((int) ((char) ':'))
+                    if (colonIndex == -1I) {
+                        colonIndex = Integer.MAX_VALUE
+                    }
+            [
+                { attributeValue.startsWith('/') },
+                { int index = bndmci.searchString(attributeValue, 'http:', patternHTTP); index >= 0I && index < colonIndex },
+                { int index = bndmci.searchString(attributeValue, 'https:', patternHTTPS); index >= 0I && index < colonIndex },
+                { int index = bndmci.searchString(attributeValue, ':/', patternColonSlash); index >= 0I && index < colonIndex },
+                { bndmci.searchString(attributeValue, 'view-source:', patternViewSource) == 0I },
+            ].any { it() }
         }
-        [
-            { attributeValue.startsWith('/') },
-            { int index = bndmci.searchString(attributeValue, 'http:', patternHTTP); index >= 0I && index < colonIndex },
-            { int index = bndmci.searchString(attributeValue, 'https:', patternHTTPS); index >= 0I && index < colonIndex },
-            { int index = bndmci.searchString(attributeValue, ':/', patternColonSlash); index >= 0I && index < colonIndex },
-            { bndmci.searchString(attributeValue, 'view-source:', patternViewSource) == 0I },
-        ].any { it() }
     }
 
 }

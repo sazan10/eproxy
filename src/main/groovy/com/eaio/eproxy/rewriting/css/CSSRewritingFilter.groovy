@@ -43,9 +43,9 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URLMan
         else {
             String styleAttribute = atts.getValue('style')
             if (styleAttribute && styleAttribute.length() > 8I) {
-                String rewrittenCSS = rewriteStyleAttribute(new InputSource(characterStream: new StringReader(styleAttribute)))
-                atts.setValue(atts.getIndex('style'), rewrittenCSS)
-                log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length(), rewrittenCSS.length())
+                String rewrittenStyleAttribute = rewriteStyleAttribute(new InputSource(characterStream: new StringReader(styleAttribute)))
+                atts.setValue(atts.getIndex('style'), rewrittenStyleAttribute)
+                log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length(), rewrittenStyleAttribute.length())
             }
         }
         super.startElement(qName, atts, augs)
@@ -152,11 +152,19 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URLMan
         else if (containsURILexicalUnit(value) && attributeValueNeedsRewriting(value.value.stringValue)) {
             value.value.stringValue = rewrite(baseURI, requestURI, value.value.stringValue, rewriteConfig)
         }
+        else if (containsFunctionLexicalUnit(value) && attributeValueNeedsRewriting(value.value.parameters.stringValue)) {
+            value.value.parameters.stringValue = rewrite(baseURI, requestURI, value.value.parameters.stringValue, rewriteConfig)
+        }
     }
 
     @CompileStatic
     boolean containsURILexicalUnit(CSSValueImpl value) {
         value.value instanceof LexicalUnit && ((LexicalUnit) value.value).lexicalUnitType == LexicalUnit.SAC_URI
+    }
+    
+    @CompileStatic
+    boolean containsFunctionLexicalUnit(CSSValueImpl value) {
+        value.value instanceof LexicalUnit && ((LexicalUnit) value.value).lexicalUnitType == LexicalUnit.SAC_FUNCTION
     }
 
     @CompileStatic

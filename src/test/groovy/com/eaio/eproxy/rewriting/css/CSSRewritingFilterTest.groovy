@@ -43,6 +43,7 @@ class CSSRewritingFilterTest {
             not(containsString('bla.jpg'))))
         errorCollector.checkThat(output as String, anyOf(containsString('url(http://rah.com/ah-https/plop.com/keks.jpg'),
             not(containsString('keks.jpg'))))
+        errorCollector.checkThat(output as String, containsString('background-image: image(&quot;http://rah.com/ah-http/creme.com/aha.jpg&quot;)'))
     }
 
     @Lazy

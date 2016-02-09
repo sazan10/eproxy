@@ -15,6 +15,7 @@ import com.eaio.eproxy.rewriting.URLManipulation
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 class URIRewritingFilter extends RewritingFilter implements URLManipulation {
 
     @Override    
@@ -40,7 +41,6 @@ class URIRewritingFilter extends RewritingFilter implements URLManipulation {
         }
     }
 
-    @CompileStatic
     private boolean attributeNameShouldBeRewritten(String attributeName) {
         switch (attributeName) {
             case 'value':

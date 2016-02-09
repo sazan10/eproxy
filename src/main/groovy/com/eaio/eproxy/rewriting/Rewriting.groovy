@@ -105,7 +105,7 @@ class Rewriting {
             filters.addAll([
                 new CSSRewritingFilter(),
                 new MetaRewritingFilter(),
-                new ImgSrcsetFilter(),
+                new SrcsetFilter(),
                 new URIRewritingFilter()
             ])
         }

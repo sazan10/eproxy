@@ -1,6 +1,7 @@
 package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
+import groovy.transform.CompileStatic
 
 import org.apache.http.HeaderElement
 import org.apache.http.message.BasicHeaderValueParser
@@ -18,6 +19,7 @@ import com.eaio.eproxy.rewriting.URLManipulation
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 class MetaRewritingFilter extends RewritingFilter implements URLManipulation {
 
     @Lazy

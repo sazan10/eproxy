@@ -18,7 +18,7 @@ import com.eaio.net.httpclient.ReEncoding
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-class ImgSrcsetRewritingFilterTest {
+class SrcsetRewritingFilterTest {
     
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
@@ -27,7 +27,7 @@ class ImgSrcsetRewritingFilterTest {
     void '<img srcset> should be rewritten'() {
         StringWriter output = new StringWriter()
         XMLReader xmlReader = new Rewriting().newHTMLReader()
-        XMLDocumentFilter[] filters = [ new ImgSrcsetFilter(reEncoding: new ReEncoding(), baseURI: 'http://rah.com'.toURI(),
+        XMLDocumentFilter[] filters = [ new SrcsetFilter(reEncoding: new ReEncoding(), baseURI: 'http://rah.com'.toURI(),
             requestURI: 'https://plop.com/ui.html?fnuh=guh'.toURI(), rewriteConfig: RewriteConfig.fromString('rnw')),
             new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
@@ -35,6 +35,7 @@ class ImgSrcsetRewritingFilterTest {
         errorCollector.checkThat(output as String, containsString('view-source:http://rah.com/ah-http/fnuh.com/creme.jpg'))
         errorCollector.checkThat(output as String, containsString(',http://rah.com/ah-https/plop.com/fnord.jpg 640w,'))
         errorCollector.checkThat(output as String, containsString('"http://rah.com/ah-https/plop.com/meetbefore.jpg"'))
+        errorCollector.checkThat(output as String, containsString('"http://rah.com/ah-http/creme.com/muh-kuh.jpg"'))
     }
 
 }
