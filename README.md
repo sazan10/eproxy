@@ -45,14 +45,33 @@ You'll need
 
 * [Java](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) (version 7 or greater)
 * [Maven](https://maven.apache.org)
+* [Git](http://www.git-scm.com/)
 
-### Stand-alone 
+### Clone the repository
 
-* Tomcat or Jetty
+``git clone https://github.com/johannburkard/eproxy.git``
+
+### Build it
+
+``cd eproxy && mvn package``
+
+### Stand-alone
+
+If you want to try out Eproxy, simply start the ``.war`` file in the ``target`` directory:
+
+``java -jar target/*##*.war``
+
+Go to http://127.0.0.1:8080/index.html and press Ctrl-C when you're done.
+
+### Tomcat or Jetty
+
+Deploy the ``Eproxy##....war`` file.
 
 ### On Google App Engine
 
-``mvn clean package verify appengine:update``
+``mvn appengine:update``
+
+## Configuration
 
 ## History
 
