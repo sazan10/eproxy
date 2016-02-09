@@ -101,7 +101,7 @@ class Proxy implements URLManipulation {
             }
 
             remoteResponse = httpClient.execute(uriRequest, context)
-            
+
             if (!response.committed) {
                 response.reset()
             }
@@ -202,6 +202,14 @@ class Proxy implements URLManipulation {
         }
         catch (DeadlineExceededException ex) {
             sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
+        }
+        catch (RuntimeException ex) {
+            if (ex.message?.endsWith('Resolver failure.')) { // Google App Engine
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else {
+                throw ex
+            }
         }
         finally {
             EntityUtils.consumeQuietly(remoteResponse?.entity)
