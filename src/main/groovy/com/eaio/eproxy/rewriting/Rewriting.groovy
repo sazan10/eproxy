@@ -103,13 +103,22 @@ class Rewriting {
         }
         if (rewriteConfig.rewrite) {
             filters.addAll([
-                new CSSRewritingFilter(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
-                new MetaRewritingFilter(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
-                new SrcsetFilter(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig),
-                new URIRewritingFilter(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
+                new CSSRewritingFilter(),
+                new MetaRewritingFilter(),
+                new SrcsetFilter(),
+                new URIRewritingFilter()
             ])
         }
         filters << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
+        // Dunno why I need this but the Map constructor doesn't seem to work.
+        filters.each { DefaultFilter handler ->
+            if (handler instanceof RewritingFilter) {
+                ((RewritingFilter) handler).reEncoding = reEncoding
+                ((RewritingFilter) handler).baseURI = baseURI
+                ((RewritingFilter) handler).requestURI = requestURI
+                ((RewritingFilter) handler).rewriteConfig = rewriteConfig
+            }
+        }
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset)) // TODO: BufferedInputStream?
@@ -135,7 +144,12 @@ class Rewriting {
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         try {
-            CSSRewritingFilter handler = new CSSRewritingFilter(reEncoding: reEncoding, baseURI: baseURI, requestURI: requestURI, rewriteConfig: rewriteConfig)
+            CSSRewritingFilter handler = new CSSRewritingFilter()
+            // Dunno why I need this but the Map constructor doesn't seem to work.
+            ((RewritingFilter) handler).reEncoding = reEncoding
+            ((RewritingFilter) handler).baseURI = baseURI
+            ((RewritingFilter) handler).requestURI = requestURI
+            ((RewritingFilter) handler).rewriteConfig = rewriteConfig
             handler.rewriteCSS(newSACInputSource(inputStream, charset), outputWriter)
         }
         finally {
