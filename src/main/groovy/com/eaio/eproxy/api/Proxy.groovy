@@ -109,7 +109,7 @@ class Proxy implements URLManipulation {
 
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
             OutputStream outputStream = response.outputStream
-            HeaderElement contentDisposition = parseContentDispositionValue(request.getHeader('Content-Disposition'))
+            HeaderElement contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
 
             RewriteConfig rewriteConfig = rewriteConfigString ? RewriteConfig.fromString('rnw') : null
 
@@ -163,7 +163,11 @@ class Proxy implements URLManipulation {
         }
         catch (IllegalStateException ignored) {}
         catch (SocketException ex) {
-            if (ex.message?.startsWith('Permission denied')) { // Google App Engine
+            if (ex instanceof NoHttpResponseException || ex instanceof SocketTimeoutException || ex instanceof ConnectTimeoutException ||
+                ex instanceof UnknownHostException || ex instanceof HttpHostConnectException || ex instanceof ClientProtocolException) {
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex) // TODO: Which exceptions are SocketExceptions?
+            }
+            else if (ex.message?.startsWith('Permission denied')) { // Google App Engine
                 sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex)
             }
             else if (ex.message?.contains('Resource temporarily unavailable')) { // Google App Engine
@@ -189,8 +193,8 @@ class Proxy implements URLManipulation {
         }
         catch (IOException ex) {
             if (ex instanceof NoHttpResponseException || ex instanceof SocketTimeoutException || ex instanceof ConnectTimeoutException ||
-            ex instanceof UnknownHostException || ex instanceof HttpHostConnectException || ex instanceof ClientProtocolException) {
-                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+                ex instanceof UnknownHostException || ex instanceof HttpHostConnectException || ex instanceof ClientProtocolException) {
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex) // TODO: Which exceptions are SocketExceptions?
             }
             else if (ex.message == 'Connection reset by peer') {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)

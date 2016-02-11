@@ -78,9 +78,8 @@ class Rewriting {
     //        mimeType?.equalsIgnoreCase('image/svg+xml')
     //    }
 
-    // TODO: Look at Content-Disposition header to prevent downloads from being rewritten
     boolean canRewrite(HeaderElement contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
-        rewriteConfig && (isHTML(mimeType) || isCSS(mimeType))
+        !(contentDisposition?.name?.equalsIgnoreCase('attachment')) && rewriteConfig && (isHTML(mimeType) || isCSS(mimeType))
     }
 
     void rewrite(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig, String mimeType) {
@@ -132,7 +131,7 @@ class Rewriting {
                 throw ExceptionUtils.getRootCause(ex)
             }
             else {
-                log.warn("While parsing {}}: {}", requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
+                log.warn("While parsing {}: {}", requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
         finally {
