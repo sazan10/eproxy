@@ -35,6 +35,7 @@ class URIRewritingFilterTest {
         errorCollector.checkThat(output as String, containsString('view-source:http://rah.com/ah-http/auer-ha.com'))
         errorCollector.checkThat(output as String, allOf(not(containsString('view-source:https://fonts.googleapis.com')), not(containsString('VIEW-SOURCE:https://fonts.googleapis.com'))))
         errorCollector.checkThat(output as String, containsString("http://rah.com/ah-HTTPS/blorb.com"))
+        errorCollector.checkThat(output as String, containsString('value="<input type=&quot;text&quot; value=&quot;http://rah.com&quot;>"'))
     }
 
 }

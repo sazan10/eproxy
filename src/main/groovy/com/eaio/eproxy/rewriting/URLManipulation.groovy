@@ -46,7 +46,7 @@ trait URLManipulation {
             builder.build().toUriString()
         }
         else {
-            baseURI
+            uri
         }
     }
 
