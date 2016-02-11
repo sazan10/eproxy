@@ -120,7 +120,6 @@ class Proxy implements URLManipulation {
                     response.setHeader(header.name, rewrite(baseURI, requestURI, header.value, rewriteConfig))
                 }
                 else if (!dropHeader(header.name, canRewrite)) {
-                    // TODO only drop Content-Length if not rewriting
                     response.setHeader(header.name, header.value)
                 }
             }
