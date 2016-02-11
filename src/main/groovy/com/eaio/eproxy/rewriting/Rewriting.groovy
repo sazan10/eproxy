@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
+import org.xml.sax.SAXParseException
 import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
@@ -123,14 +124,15 @@ class Rewriting {
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset)) // TODO: BufferedInputStream?
         }
+        catch (SAXParseException ex) {
+            log.warn("While parsing {}@{}:{}: {}", requestURI, ex.lineNumber, ex.columnNumber, (ExceptionUtils.getRootCause(ex) ?: ex).message)
+        }
         catch (SAXException ex) {
             if (ExceptionUtils.getRootCause(ex) instanceof IOException) {
                 throw ExceptionUtils.getRootCause(ex)
             }
             else {
-                // TODO
-                log.warn("While parsing {}@{}:{}: {}", requestURI, ''/*((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.lineNumber*/,
-                        ''/*((DelegatingContentHandler) xmlReader.contentHandler).documentLocator.columnNumber*/, (ExceptionUtils.getRootCause(ex) ?: ex).message)
+                log.warn("While parsing {}}: {}", requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
         finally {
