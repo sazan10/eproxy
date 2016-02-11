@@ -2,6 +2,7 @@ package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 
 import org.apache.http.HeaderElement
 import org.apache.http.message.BasicHeaderValueParser
@@ -20,6 +21,7 @@ import com.eaio.eproxy.rewriting.URLManipulation
  * @version $Id$
  */
 @CompileStatic
+@Slf4j
 class MetaRewritingFilter extends RewritingFilter implements URLManipulation {
 
     @Lazy
