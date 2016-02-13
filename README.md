@@ -2,42 +2,36 @@
 
 # Eproxy
 
-Eproxy is a proxy that can also double as a cheap CDN, a proxy that
+Eproxy is a proxy that
 
-* rewrites HTML, CSS and JavaScript (planned) so you'll always stay on the proxy
-* supports cookies (planned)
+* rewrites HTML, CSS, JavaScript``*`` and SVG``*``
+* supports cookies``*``
 * supports all HTTP methods 
 * supports HTTPS
 * supports HTTP Byte Serving using the ``Range`` header (if not rewriting)
 * supports cache validation using ``If-Modified-Since`` and ``If-None-Match``
 * caches content
-* lets you customize the socket and HTTP setup
-* uses a real parser for HTML, CSS and JavaScript (planned)
+* lets you customize the TCP/IP setup
+* uses real parsers for URL rewriting, not brittle regular expressions
 * attempts to be as secure as possible
+* supports SOCKS proxies for your hardcore tunneling needs
 
-In other words, something you can use in a company network to look at questionable sites without needing to install anything. Or a cheap accelerator for your static content.
+``*`` Planned
 
 ## Features
 
 * Caching in-memory, using Memcache or Infinispan (planned).
-* Support for stand-alone operation, inside a JEE container (Tomcat or Jetty) or on Google App Engine.
+* Runs stand-alone, in a JEE container (Tomcat or Jetty) and on Google App Engine.
 * Robust, parser-based HTML and CSS rewriting.
 
 ## Demo Site
 
 [Demo site here](https://weizentortillas.appspot.com)
 
-### Plans
-
-* Make JavaScript work securely by intercepting calls to ``new Image``, ``eval``, ``location`` and others.
-* Get rid of VBScript because I'm sure there is one website that still uses it.
-* Get rid of CSS behaviours.
- 
 ## Security status
 
-Not tested enough. Don't use this if you rely on security.
-
-## Configuration
+[Eproxy does pretty well](https://weizentortillas.appspot.com/ah-http/repo.eaio.com/leak.html) on the [HTTPLeaks](https://github.com/cure53/HTTPLeaks/) test.
+Still, it is not tested enough yet. Do not use Eproxy yet if you rely on security.
 
 ## Installation
 
@@ -72,6 +66,8 @@ Deploy the ``Eproxy##....war`` file.
 ``mvn appengine:update``
 
 ## Configuration
+
+The configuration can be found in ``src/main/resources/application.properties``. Most should be self-explanatory. The values have been tweaked for Google App Engine.
 
 ## History
 
