@@ -5,9 +5,13 @@ import groovy.util.logging.Slf4j
 
 import java.nio.charset.Charset
 
+import javax.xml.parsers.SAXParserFactory
+
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.HeaderElement
 import org.apache.xerces.xni.parser.XMLDocumentFilter
+import org.apache.xml.serialize.OutputFormat
+import org.apache.xml.serialize.XMLSerializer
 import org.cyberneko.html.filters.DefaultFilter
 import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
@@ -74,9 +78,9 @@ class Rewriting {
         mimeType?.equalsIgnoreCase('text/css')
     }
 
-    //    boolean isSVG(String mimeType) {
-    //        mimeType?.equalsIgnoreCase('image/svg+xml')
-    //    }
+    boolean isSVG(String mimeType) {
+        mimeType?.equalsIgnoreCase('image/svg+xml')
+    }
 
     boolean canRewrite(HeaderElement contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
         !(contentDisposition?.name?.equalsIgnoreCase('attachment')) && rewriteConfig && (isHTML(mimeType) || isCSS(mimeType))
@@ -88,6 +92,9 @@ class Rewriting {
         }
         else if (isCSS(mimeType)) {
             rewriteCSS(inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
+        }
+        else if (isSVG(mimeType)) {
+            rewriteSVG(inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
         }
     }
 
@@ -160,10 +167,30 @@ class Rewriting {
             catch (emall) {}
         }
     }
+    
+    void rewriteSVG(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+        Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
+        javax.xml.parsers.SAXParser saxParser = newSAXParser()
+        XMLSerializer serializer = new XMLSerializer(outputWriter, new OutputFormat('XML', charset.name(), true))
+        try {
+            saxParser.parse(newSAXInputSource(inputStream, charset), new DefaultHandlerContentHandlerAdapter(serializer));
+        }
+        finally {
+            try {
+                outputWriter.flush()
+            }
+            catch (emall) {}
+        }
+    }
 
     XMLReader newHTMLReader() {
         SAXParser out = new SAXParser()
         out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
+        out
+    }
+    
+    javax.xml.parsers.SAXParser newSAXParser() {
+        javax.xml.parsers.SAXParser out = SAXParserFactory.newInstance().newSAXParser()
         out
     }
 

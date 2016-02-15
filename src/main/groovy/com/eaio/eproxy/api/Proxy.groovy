@@ -111,7 +111,7 @@ class Proxy implements URLManipulation {
             OutputStream outputStream = response.outputStream
             HeaderElement contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
 
-            RewriteConfig rewriteConfig = rewriteConfigString ? RewriteConfig.fromString('rnw') : null
+            RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
 
             boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
 
@@ -125,7 +125,6 @@ class Proxy implements URLManipulation {
             }
 
             if (remoteResponse.entity) {
-
                 long contentLength = remoteResponse.entity.contentLength
                 List<Long> range
                 if (contentLength >= 0L) {
@@ -161,7 +160,7 @@ class Proxy implements URLManipulation {
 
             TimingInterceptor.log(context, log)
         }
-        catch (IllegalStateException ignored) {}
+        catch (IllegalStateException ex) {}
         catch (SocketException ex) {
             if (ex instanceof HttpHostConnectException) {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
@@ -238,41 +237,11 @@ class Proxy implements URLManipulation {
         }
     }
 
-    URI buildBaseURI(String scheme, String host, int port, String contextPath) {
-        new URI(scheme, null, host, getPort(scheme, port), contextPath, null, null)
-    }
-
-    /**
-     * Make sure to remove the context path before calling this method.
-     */
-    URI buildRequestURI(String scheme, String requestURI, String queryString) {
-        String uriFromHost = substringAfter(requestURI[1..-1], '/'), path = substringAfter(uriFromHost, '/') ?: '/',
-        hostAndPort = substringBefore(uriFromHost, '/'), host = hostAndPort, port
-        if (hostAndPort.contains(':')) {
-            host = substringBefore(hostAndPort, ':')
-            port = substringAfter(hostAndPort, ':')
-        }
-        UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(host).path(path)
-        if (port) {
-            builder.port(port)
-        }
-        if (queryString) {
-            reEncoding.reEncode(builder.build().toUriString() + '?' + queryString).toURI()
-        }
-        else {
-            reEncoding.reEncode(builder.build() as String).toURI()
-        }
-    }
-
     /**
      * Removes the context path prefix from <tt>requestURI</tt>.
      */
     String stripContextPathFromRequestURI(String contextPath, String requestURI) {
         contextPath ? substringAfter(requestURI, contextPath) : requestURI
-    }
-
-    int getPort(String scheme, int port) {
-        port == -1I || (scheme == 'http' && port == 80I) || (scheme == 'https' && port == 443I) ? -1I : port
     }
 
     void setRequestEntity(HttpEntityEnclosingRequest uriRequest, String contentLength, InputStream inputStream) {
