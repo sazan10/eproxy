@@ -30,7 +30,7 @@ Eproxy is a proxy that
 
 ## Security status
 
-[Eproxy does pretty well](https://weizentortillas.appspot.com/ah-http/repo.eaio.com/leak.html) on the [HTTPLeaks](https://github.com/cure53/HTTPLeaks/) test.
+[Eproxy does pretty well](https://weizentortillas.appspot.com/rnw-http/repo.eaio.com/leak.html) on the [HTTPLeaks](https://github.com/cure53/HTTPLeaks/) test.
 Still, it is not tested enough yet. Do not use Eproxy yet if you rely on security.
 
 ## Installation
