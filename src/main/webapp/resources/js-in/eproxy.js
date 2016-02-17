@@ -20,7 +20,7 @@ document.getElementById('submit').onclick=function() {
         }
         catch (e) {}
         var encodedURI = (uri['protocol'] || 'http') + '/' + uri['authority'] + (uri['relative'] ? uri['relative'] : '/')
-        location.href = parseUri(location.href)['directory'] + 'ah-' + encodedURI
+        location.href = parseUri(location.href)['directory'] + 'rwn-' + encodedURI
     }
     return false
 }

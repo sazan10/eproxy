@@ -1,5 +1,7 @@
 package com.eaio.eproxy.rewriting
 
+import static org.apache.commons.lang3.StringUtils.*
+
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.springframework.web.util.UriComponentsBuilder
 

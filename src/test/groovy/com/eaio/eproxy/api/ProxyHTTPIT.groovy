@@ -48,7 +48,7 @@ class ProxyHTTPIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'http', request, response)
+        proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), containsString('johannburkard/eproxy'))
     }
     
@@ -62,7 +62,7 @@ class ProxyHTTPIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'http', request, response)
+        proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toByteArray().encodeBase64() as String, is('/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDA=='))
     }
     
@@ -76,8 +76,8 @@ class ProxyHTTPIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'https', request, response)
-        assertThat(bOut.toString(0I), containsString('FORM action="http://fnuh.com/ah-https/www.google.com:443/search"'))
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('FORM action="http://fnuh.com/rnw-https/www.google.com:443/search"'))
     }
     
 }

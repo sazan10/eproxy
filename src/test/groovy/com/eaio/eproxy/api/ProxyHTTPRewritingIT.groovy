@@ -47,7 +47,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'http', request, response)
+        proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), not(containsString('<script')))
     }
     
@@ -61,8 +61,8 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('<LINK href="http://fnuh.com/ah-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic%7CProduct+Sans:400&lang=en"'))
+        proxy.proxy('rnw', 'http', request, response)
+        assertThat(bOut.toString(0I), containsString('<LINK href="http://fnuh.com/rnw-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic%7CProduct+Sans:400&lang=en"'))
     }
     
     @Test
@@ -89,8 +89,8 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('action="http://fnuh.com/ah-http/www.google.com/search"'))
+        proxy.proxy('rnw', 'http', request, response)
+        assertThat(bOut.toString(0I), containsString('action="http://fnuh.com/rnw-http/www.google.com/search"'))
     }
     
     @Test
@@ -103,7 +103,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'http', request, response)
+        proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), not(containsString(' on')))
     }
     
@@ -117,7 +117,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'https', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), not(containsString('http-equiv="refresh"')))
     }
     
@@ -131,7 +131,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'https', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         errorCollector.checkThat(bOut.toString(0I), containsString('<CODE>&lt;use xlink:href=&quot;sprite.svg#dog&quot;'))
         errorCollector.checkThat(bOut.toString(0I), containsString('<USE xlink:href="'))
     }
@@ -146,7 +146,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'https', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), anyOf(
             containsString('._4f7n{background-image:url(data:image/png;base64,iVBORw0KGgoAAAA'),
             containsString('._4f7n { background-image: url(data:image/png;base64,iVBORw0KGgoAAAA')))
@@ -162,7 +162,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'https', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), containsString('tiefontello'))
     }
     
@@ -176,7 +176,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'https', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), allOf(not(containsString('display:block')), not(containsString('display: block'))))
     }
     
@@ -190,7 +190,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'https', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), containsString('value="Sign in"'))
     }
     
@@ -204,7 +204,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'http', request, response)
+        proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), not(containsString('Sorry! We can\'t get to that page')))
     }
     
@@ -218,7 +218,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'https', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), containsString('Mobilit&auml;tsportal'))
     }
     
@@ -233,7 +233,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('ah', 'https', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), containsString('Datenschutzinfo'))
     }
     

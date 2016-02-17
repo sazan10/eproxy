@@ -12,7 +12,7 @@ class RequestMocks {
         URI uri = URI.create(uriString)
         
         HttpServletRequest request = [
-            getRequestURI: { (rewriteConfig ? '/ah-' : '/' ) + uri.scheme + '/' + (uri.host + (uri.port == -1I ? '' : ':' + uri.port)) + uri.rawPath },
+            getRequestURI: { (rewriteConfig ? '/rnw-' : '/' ) + uri.scheme + '/' + (uri.host + (uri.port == -1I ? '' : ':' + uri.port)) + uri.rawPath },
             getContextPath: { '' },
             getQueryString: { uri.rawQuery },
             getMethod: { method },

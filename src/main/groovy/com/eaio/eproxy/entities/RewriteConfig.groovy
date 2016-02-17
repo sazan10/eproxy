@@ -21,9 +21,8 @@ class RewriteConfig {
         removeActiveContent || rewrite || removeNoScriptElements
     }
     
-    // Temporary
     String toString() {
-        'ah-'
+        [ removeActiveContent ? 'r' : '', removeNoScriptElements ? 'n' : '', rewrite ? 'w' : '', '-' ].join('')
     }
 
 }
