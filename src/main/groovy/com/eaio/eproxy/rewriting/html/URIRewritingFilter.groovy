@@ -8,7 +8,7 @@ import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
 
-import com.eaio.eproxy.rewriting.URLManipulation
+import com.eaio.eproxy.rewriting.URIManipulation
 
 /**
  * Rewrites <tt>src</tt>, <tt>href</tt> and <tt>action</tt> attributes.
@@ -18,7 +18,7 @@ import com.eaio.eproxy.rewriting.URLManipulation
  */
 @CompileStatic
 @Slf4j
-class URIRewritingFilter extends RewritingFilter implements URLManipulation {
+class URIRewritingFilter extends RewritingFilter implements URIManipulation {
 
     @Override    
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {

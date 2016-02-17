@@ -10,8 +10,7 @@ import javax.xml.parsers.SAXParserFactory
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.HeaderElement
 import org.apache.xerces.xni.parser.XMLDocumentFilter
-import org.apache.xml.serialize.OutputFormat
-import org.apache.xml.serialize.XMLSerializer
+import org.apache.xml.serialize.*
 import org.cyberneko.html.filters.DefaultFilter
 import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +19,7 @@ import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import org.xml.sax.SAXParseException
 import org.xml.sax.XMLReader
+import org.xml.sax.helpers.XMLReaderFactory
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.css.*
@@ -110,22 +110,13 @@ class Rewriting {
         }
         if (rewriteConfig.rewrite) {
             filters.addAll([
-                new CSSRewritingFilter(),
-                new MetaRewritingFilter(),
-                new SrcsetFilter(),
-                new URIRewritingFilter()
+                configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig),
+                configure(new MetaRewritingFilter(), baseURI, requestURI, rewriteConfig),
+                configure(new SrcsetFilter(), baseURI, requestURI, rewriteConfig),
+                configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig)
             ])
         }
         filters << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
-        // Dunno why I need this but the Map constructor doesn't seem to work.
-        filters.each { DefaultFilter handler ->
-            if (handler instanceof RewritingFilter) {
-                ((RewritingFilter) handler).reEncoding = reEncoding
-                ((RewritingFilter) handler).baseURI = baseURI
-                ((RewritingFilter) handler).requestURI = requestURI
-                ((RewritingFilter) handler).rewriteConfig = rewriteConfig
-            }
-        }
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset)) // TODO: BufferedInputStream?
@@ -152,12 +143,7 @@ class Rewriting {
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         try {
-            CSSRewritingFilter handler = new CSSRewritingFilter()
-            // Dunno why I need this but the Map constructor doesn't seem to work.
-            ((RewritingFilter) handler).reEncoding = reEncoding
-            ((RewritingFilter) handler).baseURI = baseURI
-            ((RewritingFilter) handler).requestURI = requestURI
-            ((RewritingFilter) handler).rewriteConfig = rewriteConfig
+            CSSRewritingFilter handler = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
             handler.rewriteCSS(newSACInputSource(inputStream, charset), outputWriter)
         }
         finally {
@@ -170,10 +156,10 @@ class Rewriting {
     
     void rewriteSVG(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
-        javax.xml.parsers.SAXParser saxParser = newSAXParser()
-        XMLSerializer serializer = new XMLSerializer(outputWriter, new OutputFormat('XML', charset.name(), true))
+        XMLReader xmlReader = newXMLReader()
+        xmlReader.contentHandler = new XMLSerializer(outputWriter, new OutputFormat(Method.XML, charset.name(), true))
         try {
-            saxParser.parse(newSAXInputSource(inputStream, charset), new DefaultHandlerContentHandlerAdapter(serializer));
+            xmlReader.parse(newSAXInputSource(inputStream, charset)) // TODO: BufferedInputStream?
         }
         finally {
             try {
@@ -189,9 +175,8 @@ class Rewriting {
         out
     }
     
-    javax.xml.parsers.SAXParser newSAXParser() {
-        javax.xml.parsers.SAXParser out = SAXParserFactory.newInstance().newSAXParser()
-        out
+    XMLReader newXMLReader() {
+        XMLReaderFactory.newInstance().createXMLReader()
     }
 
     InputSource newSAXInputSource(InputStream inputStream, Charset charset) {
@@ -209,5 +194,13 @@ class Rewriting {
         }
         out
     }
-
+    
+    private <T extends RewritingFilter> T configure(T filter, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+        filter.reEncoding = reEncoding
+        filter.baseURI = baseURI
+        filter.requestURI = requestURI
+        filter.rewriteConfig = rewriteConfig
+        filter
+    }
+    
 }

@@ -8,7 +8,7 @@ import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
 
-import com.eaio.eproxy.rewriting.URLManipulation
+import com.eaio.eproxy.rewriting.URIManipulation
 
 /**
  * Rewrites <tt>&lt;img srcset&gt;</tt> and <tt>&lt;source srcset&gt;</tt>, which is slightly different due to being a comma-separated list.
@@ -18,7 +18,7 @@ import com.eaio.eproxy.rewriting.URLManipulation
  */
 @CompileStatic
 @Slf4j
-class SrcsetFilter extends RewritingFilter implements URLManipulation {
+class SrcsetFilter extends RewritingFilter implements URIManipulation {
 
     @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {

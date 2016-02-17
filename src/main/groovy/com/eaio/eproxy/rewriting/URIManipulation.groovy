@@ -19,7 +19,7 @@ import com.eaio.eproxy.entities.RewriteConfig
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-trait URLManipulation {
+trait URIManipulation {
 
     /**
      * Builds a URI that points to this web application.

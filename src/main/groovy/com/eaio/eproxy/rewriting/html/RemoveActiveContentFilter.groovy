@@ -21,12 +21,12 @@ import org.apache.xerces.xni.XMLString
 @CompileStatic
 class RemoveActiveContentFilter extends BaseFilter {
 
-    private final Stack<String> stack = new Stack<String>()
+    private boolean inScriptElement
 
     @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         if (nameIs(qName, 'script')) {
-            stack.push('script')
+            inScriptElement = true
         }
         else {
             for (int i = 0I; i < atts.length; ) {
@@ -44,10 +44,7 @@ class RemoveActiveContentFilter extends BaseFilter {
     @Override
     void endElement(QName qName, Augmentations augs) {
         if (nameIs(qName, 'script')) {
-            try {
-                stack.pop()
-            }
-            catch (EmptyStackException ex) {}
+            inScriptElement = false
         }
         else {
             super.endElement(qName, augs)
@@ -59,12 +56,7 @@ class RemoveActiveContentFilter extends BaseFilter {
      */
     @Override
     void characters(XMLString xmlString, Augmentations augs) {
-        String tag
-        try {
-            tag = stack.peek()
-        }
-        catch (EmptyStackException ex) {}
-        if (tag != 'script') {
+        if (!inScriptElement) {
             super.characters(xmlString, augs)
         }
     }

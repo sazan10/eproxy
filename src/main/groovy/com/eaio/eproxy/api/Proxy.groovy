@@ -53,7 +53,7 @@ import com.google.apphosting.api.DeadlineExceededException
 @CompileStatic
 @RestController
 @Slf4j
-class Proxy implements URLManipulation {
+class Proxy implements URIManipulation {
 
     // Note: Does not support multiple byte-range-sets.
     @Lazy

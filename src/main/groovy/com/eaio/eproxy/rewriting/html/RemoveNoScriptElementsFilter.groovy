@@ -19,14 +19,14 @@ import org.apache.xerces.xni.XMLString
 @CompileStatic
 class RemoveNoScriptElementsFilter extends BaseFilter {
     
-    boolean inNoscriptBlock
+    private boolean inNoscriptElement
 
     @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         if (nameIs(qName, 'noscript')) {
-            inNoscriptBlock = true
+            inNoscriptElement = true
         }
-        else if (!inNoscriptBlock) {
+        else if (!inNoscriptElement) {
             super.startElement(qName, atts, augs)
         }
     }
@@ -34,23 +34,23 @@ class RemoveNoScriptElementsFilter extends BaseFilter {
     @Override
     void endElement(QName qName, Augmentations augs) {
         if (nameIs(qName, 'noscript')) {
-            inNoscriptBlock = false
+            inNoscriptElement = false
         }
-        else if (!inNoscriptBlock) {
+        else if (!inNoscriptElement) {
             super.endElement(qName, augs)
         }
     }
     
     @Override
     void characters(XMLString xmlString, Augmentations augs) {
-        if (!inNoscriptBlock) {
+        if (!inNoscriptElement) {
             super.characters(xmlString, augs)
         }
     }
 
     @Override
     void emptyElement(QName element, XMLAttributes attributes, Augmentations augs) {
-        if (!inNoscriptBlock) {
+        if (!inNoscriptElement) {
             super.emptyElement(element, attributes, augs)
         }
     }

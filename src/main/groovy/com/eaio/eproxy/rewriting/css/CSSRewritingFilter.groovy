@@ -14,7 +14,7 @@ import org.apache.xerces.xni.XMLString
 import org.w3c.css.sac.*
 import org.w3c.dom.css.*
 
-import com.eaio.eproxy.rewriting.URLManipulation
+import com.eaio.eproxy.rewriting.URIManipulation
 import com.eaio.eproxy.rewriting.html.RewritingFilter
 import com.steadystate.css.dom.*
 import com.steadystate.css.parser.CSSOMParser
@@ -27,7 +27,7 @@ import com.steadystate.css.parser.SACParserCSS3
  * @version $Id$
  */
 @Slf4j
-class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URLManipulation {
+class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URIManipulation {
     
     @Lazy
     private Pattern patternURL = ~/(?i)(\75 ?|u)(\72 ?|r)(\6C ?|l)/

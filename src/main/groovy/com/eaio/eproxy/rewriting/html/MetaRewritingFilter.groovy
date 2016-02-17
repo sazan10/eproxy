@@ -12,7 +12,7 @@ import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
 
-import com.eaio.eproxy.rewriting.URLManipulation
+import com.eaio.eproxy.rewriting.URIManipulation
 
 /**
  * Rewrites <tt>meta refresh</tt>. Should be placed after {@link RemoveNoScriptElementsFilter}.
@@ -22,7 +22,7 @@ import com.eaio.eproxy.rewriting.URLManipulation
  */
 @CompileStatic
 @Slf4j
-class MetaRewritingFilter extends RewritingFilter implements URLManipulation {
+class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
 
     @Lazy
     private transient Object patternRefresh = bndmci.processString('refresh'),
