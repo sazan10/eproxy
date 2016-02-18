@@ -16,12 +16,10 @@ Eproxy is a proxy that
 * attempts to be as secure as possible
 * supports SOCKS proxies for your hardcore tunneling needs
 
-``*`` Planned
-
 ## Features
 
-* Caching in-memory, using Memcache or Infinispan (planned).
-* Runs stand-alone, in a JEE container (Tomcat or Jetty) and on Google App Engine.
+* Runs stand-alone, in a JEE container (Tomcat or Jetty) and on Google App Engine
+* Caches data in-memory, using Memcache (on Google App Engine) or Infinispan``*``
 * Robust, parser-based HTML and CSS rewriting.
 
 ## Demo Site
@@ -81,3 +79,5 @@ I have nothing against mirrorr but there are some problems with it:
 * Only GET requests are supported.
 * It (probably) doesn't support HTTPS.
 * It only runs on Google App Engine, using Memcache as the cache.
+
+``*`` Planned
