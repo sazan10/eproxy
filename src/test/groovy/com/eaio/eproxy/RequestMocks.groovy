@@ -2,7 +2,7 @@ package com.eaio.eproxy
 
 import javax.servlet.http.HttpServletRequest
 
-import com.eaio.eproxy.entities.RewriteConfig;
+import com.eaio.eproxy.entities.RewriteConfig
 
 class RequestMocks {
 

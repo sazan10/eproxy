@@ -8,6 +8,11 @@ import junitparams.Parameters
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ *
+ * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
+ * @version $Id$
+ */
 @RunWith(JUnitParamsRunner)
 class RewritingFilterTest {
     

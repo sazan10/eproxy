@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
 
 import java.util.concurrent.Future
+import java.util.concurrent.TimeoutException
 
 import org.apache.http.client.cache.HttpCacheEntry
 import org.junit.Before
@@ -51,5 +52,12 @@ class AsyncMemcacheServiceHttpCacheStorageTest {
         asyncMemcacheServiceHttpCacheStorage.@asyncMemcacheService = [ ] as AsyncMemcacheService
         asyncMemcacheServiceHttpCacheStorage.getEntry('http://foo.com/bar.html')
     }
-
+    
+    @Test
+    void 'InterruptedException should interrupt the thread'() {
+        asyncMemcacheServiceHttpCacheStorage.@asyncMemcacheService = [ get: { [ get: { throw new InterruptedException() } ] as Future<Object> } ] as AsyncMemcacheService
+        asyncMemcacheServiceHttpCacheStorage.getEntry('uiuiui')
+        assertThat(Thread.currentThread().isInterrupted(), is(true))
+    }
+    
 }

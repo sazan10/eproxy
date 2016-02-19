@@ -1,7 +1,7 @@
 package com.eaio.eproxy.rewriting.html
 
-import static org.hamcrest.Matchers.*
 import static org.hamcrest.MatcherAssert.*
+import static org.hamcrest.Matchers.*
 
 import org.apache.xerces.xni.parser.XMLDocumentFilter
 import org.junit.Rule
