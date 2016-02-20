@@ -44,6 +44,8 @@ class RewriteConfigTest {
     void 'equals and hashCode'() {
         RewriteConfig config = RewriteConfig.fromString('rn')
         errorCollector.checkThat(config.equals(config), is(true))
+        errorCollector.checkThat(config.equals(RewriteConfig.fromString('rn')), is(true))
+        errorCollector.checkThat(config.equals(RewriteConfig.fromString('rnw')), is(false))
         errorCollector.checkThat(config.equals(null), is(false))
         errorCollector.checkThat(config.hashCode(), is(config.hashCode()))
     }
