@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.util.UriComponentsBuilder
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.*
@@ -41,7 +40,6 @@ import com.eaio.io.RangeInputStream
 import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.ReEncoding
 import com.eaio.net.httpclient.TimingInterceptor
-import com.eaio.util.googleappengine.OnGoogleAppEngine
 import com.google.apphosting.api.DeadlineExceededException
 
 /**
@@ -103,12 +101,12 @@ class Proxy implements URIManipulation {
 
             remoteResponse = httpClient.execute(uriRequest, context)
 
-            if (!response.committed) {
-                response.reset()
-            }
-            response.status = remoteResponse.statusLine.statusCode
-            if (OnGoogleAppEngine.CONDITION) {
-                response.setHeader('Vary', 'Accept-Encoding')
+            response.with {
+                if (!committed) {
+                    reset()
+                }
+                status = remoteResponse.statusLine.statusCode
+                setHeader('Vary', 'Accept-Encoding')
             }
 
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
