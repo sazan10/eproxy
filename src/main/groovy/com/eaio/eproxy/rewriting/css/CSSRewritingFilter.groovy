@@ -117,7 +117,7 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URIMan
             rewriteCSSStyleDeclaration(rule.style)
         }
         else if (rule instanceof CSSImportRuleImpl) {
-            rule.href = rewrite(baseURI, requestURI, rule.href, rewriteConfig)
+            rule.href = encodeTargetURI(baseURI, requestURI, rule.href, rewriteConfig)
         }
         else if (rule instanceof CSSUnknownRuleImpl) {
             if (patternURL.matcher(rule.text).find()) {
@@ -150,10 +150,10 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URIMan
             }
         }
         else if (containsURILexicalUnit(value) && attributeValueNeedsRewriting(value.value.stringValue)) {
-            value.value.stringValue = rewrite(baseURI, requestURI, value.value.stringValue, rewriteConfig)
+            value.value.stringValue = encodeTargetURI(baseURI, requestURI, value.value.stringValue, rewriteConfig)
         }
         else if (containsFunctionLexicalUnit(value) && attributeValueNeedsRewriting(value.value.parameters.stringValue)) {
-            value.value.parameters.stringValue = rewrite(baseURI, requestURI, value.value.parameters.stringValue, rewriteConfig)
+            value.value.parameters.stringValue = encodeTargetURI(baseURI, requestURI, value.value.parameters.stringValue, rewriteConfig)
         }
     }
 

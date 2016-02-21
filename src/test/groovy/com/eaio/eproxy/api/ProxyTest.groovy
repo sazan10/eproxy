@@ -27,7 +27,7 @@ class ProxyTest {
     @Test
     @Parameters(method = 'buildRequestURIParameters')
     void 'buildRequestURI should match expectation'(String scheme, String uri, String queryString, String expectation) {
-        assertThat(proxy.buildRequestURI(scheme, uri, queryString), is(expectation.toURI()))
+        assertThat(proxy.decodeTargetURI(scheme, uri, queryString), is(expectation.toURI()))
     }
     
     Collection<Object[]> buildRequestURIParameters() {
@@ -77,6 +77,11 @@ class ProxyTest {
         
         HeaderElement element = proxy.parseContentDispositionValue('ATTACHMENT;filename=bla.jpg')
         assertThat(element.name.toLowerCase(), is('attachment'))
+    }
+    
+    @Test
+    void 'resolve should add scheme back'() {
+        assertThat(proxy.resolve('http://foo.com/ah/oh.html'.toURI(), '/ui.html'), is('http://foo.com/ui.html'.toURI()))
     }
     
 }

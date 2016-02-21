@@ -38,7 +38,7 @@ class URIRewritingFilter extends RewritingFilter implements URIManipulation {
             
             // Use local name
             if (attributeNameShouldBeRewritten(atts.getLocalName(i)) && attributeValueNeedsRewriting(attributeValue)) {
-                atts.setValue(i, rewrite(baseURI, requestURI, attributeValue, rewriteConfig))
+                atts.setValue(i, encodeTargetURI(baseURI, requestURI, attributeValue, rewriteConfig))
             }
         }
     }

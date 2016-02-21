@@ -42,9 +42,10 @@ html{box-sizing:border-box;font-size:62.5%}body{color:#606c76;font-family:"Robot
 <div class="row">
  <div class="column">
   <h1><label for="url" style="font-size: inherit">Free SSL Proxy Server</label></h1>
-  <form action="." accept-charset="UTF-8" method="post">
+  <form action="redir" accept-charset="UTF-8" method="post">
    <p>
     <input id="url" name="url" class="wide" type="text" placeholder="http://">
+    <input type="hidden" name="rewriteconfig" value="rnw">
     <button id="submit" class="button-grey button-large">Start Browsing &raquo;</button>
    </p>
   </form>

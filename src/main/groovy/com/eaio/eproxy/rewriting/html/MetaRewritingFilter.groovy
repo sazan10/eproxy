@@ -42,7 +42,7 @@ class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
                     HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
                     String url = elements[0I]?.getParameterByName('URL')?.value
                     if (url) {
-                        String rewrittenURL = rewrite(baseURI, requestURI, url.replaceFirst('^["\']', '').replaceFirst('["\']$', ''), rewriteConfig)
+                        String rewrittenURL = encodeTargetURI(baseURI, requestURI, url.replaceFirst('^["\']', '').replaceFirst('["\']$', ''), rewriteConfig)
                         atts.setValue(i, replaceOnce(content, url, rewrittenURL))
                     }
                 }

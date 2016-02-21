@@ -80,4 +80,62 @@ class ProxyHTTPIT {
         assertThat(bOut.toString(0I), containsString('FORM action="http://fnuh.com/rnw-https/www.google.com:443/search"'))
     }
     
+    // Test URLs from media.io, may still be broken or not
+    
+    @Test
+    void 'broken HTTPS should be supported 1'() {
+        HttpServletRequest request = buildHttpServletRequest('https://about.me/johannburkard')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('About.me makes it easy'))
+    }
+    
+    @Test
+    void 'broken HTTPS should be supported 2'() {
+        HttpServletRequest request = buildHttpServletRequest('https://archive.org/details/MainHoonSarkarEMadinaKaGada')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('Free Download'))
+    }
+    
+    @Test
+    void 'broken HTTPS should be supported 3'() {
+        HttpServletRequest request = buildHttpServletRequest('https://t.co/0fRMkR6AOo')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('https', request, response)
+        assertThat(bOut.toString(0I), containsString('The Red Line'))
+    }
+    
+    @Test
+    void 'broken redirects should be supported'() {
+        HttpServletRequest request = buildHttpServletRequest('http://bit.ly/19xbm5w')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('http', request, response)
+        assertThat(bOut.toString(0I), containsString('Star Wars'))
+    }
+
 }

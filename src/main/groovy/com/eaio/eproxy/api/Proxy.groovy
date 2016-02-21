@@ -1,7 +1,6 @@
 package com.eaio.eproxy.api
 
 import static org.apache.commons.lang3.StringUtils.*
-
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
@@ -82,7 +81,7 @@ class Proxy implements URIManipulation {
     @RequestMapping('/{rewriteConfig}-{scheme:https?}/**')
     void proxy(@PathVariable('rewriteConfig') String rewriteConfigString, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
-        URI requestURI = buildRequestURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
+        URI requestURI = decodeTargetURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
         if (!requestURI.host) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST)
             return
@@ -118,7 +117,7 @@ class Proxy implements URIManipulation {
 
             remoteResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
-                    response.setHeader(header.name, rewrite(baseURI, requestURI, header.value, rewriteConfig))
+                    response.setHeader(header.name, encodeTargetURI(baseURI, requestURI, header.value, rewriteConfig))
                 }
                 else if (!dropHeader(header.name, canRewrite)) {
                     response.setHeader(header.name, header.value)

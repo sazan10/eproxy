@@ -63,12 +63,27 @@ class ProxyHTTPNoRedirectsIT {
     }
     
     @Test
-    void 'relative redirects should be supported'() {
+    void 'relative redirects should be supported 1'() {
         HttpServletRequest request = buildHttpServletRequest('http://edition.cnn.com/guides')
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/rnw-http/edition.cnn.com/specials/travel/guides')); redirected = true } },
+            getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'http', request, response)
+        assertThat(statusSet, is(true))
+        assertThat(redirected, is(true))
+    }
+    
+    @Test
+    void 'relative redirects should be supported 2'() {
+        HttpServletRequest request = buildHttpServletRequest('http://www.3fm.nl/a/ug/263127')
+        boolean statusSet = false, redirected = false
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
+            setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/rnw-http/www.3fm.nl/gemist/uitzending#/ajax/overlay/gemist/uitzending/ug/263127')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
             isCommitted: { true },
         ] as HttpServletResponse

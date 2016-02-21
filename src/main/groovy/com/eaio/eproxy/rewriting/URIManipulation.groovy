@@ -31,7 +31,7 @@ trait URIManipulation {
     /**
      * Make sure to remove the context path before calling this method.
      */
-    URI buildRequestURI(String scheme, String requestURI, String queryString) {
+    URI decodeTargetURI(String scheme, String requestURI, String queryString) {
         String uriFromHost = substringAfter(requestURI[1..-1], '/'), path = substringAfter(uriFromHost, '/') ?: '/',
             hostAndPort = substringBefore(uriFromHost, '/'), host = hostAndPort, port
         if (hostAndPort.contains(':')) {
@@ -54,13 +54,13 @@ trait URIManipulation {
      * Returns <tt>-1</tt> if <tt>port</tt> is 80 (for the "HTTP" scheme) or 443 (for the "HTTPS" scheme).
      */
     int getPort(String scheme, int port) {
-        port == -1I || (scheme?.equalsIgnoreCase('http') && port == 80I) || (scheme?.equalsIgnoreCase('https') && port == 443I) ? -1I : port
+        (scheme?.equalsIgnoreCase('http') && port == 80I) || (scheme?.equalsIgnoreCase('https') && port == 443I) ? -1I : port
     }
 
     /**
      * Resolves <tt>uri</tt> relative to <tt>requestURI</tt>, then turns it all into Eproxy's URL scheme.
      */
-    String rewrite(URI baseURI, URI requestURI, String uri, RewriteConfig rewriteConfig = null) {
+    String encodeTargetURI(URI baseURI, URI requestURI, String uri, RewriteConfig rewriteConfig = null) {
         URI resolvedURI = resolve(requestURI, uri)
         if (resolvedURI) {
             UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI)
@@ -91,7 +91,7 @@ trait URIManipulation {
     /**
      * Resolves a potentially relative URI to a reference URI.
      * <p>
-     * Example: <code>resolve('http://foo.com/ah/oh.html'.toURI(), '/ui.html') = 'http://foo.com/oh.html'</code>
+     * Example: <code>resolve('http://foo.com/ah/oh.html'.toURI(), '/ui.html') = 'http://foo.com/ui.html'</code>
      */
     URI resolve(URI requestURI, String attributeValue) {
         try {
