@@ -41,6 +41,7 @@ import com.eaio.io.RangeInputStream
 import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.ReEncoding
 import com.eaio.net.httpclient.TimingInterceptor
+import com.eaio.util.googleappengine.OnGoogleAppEngine
 import com.google.apphosting.api.DeadlineExceededException
 
 /**
@@ -106,6 +107,9 @@ class Proxy implements URIManipulation {
                 response.reset()
             }
             response.status = remoteResponse.statusLine.statusCode
+            if (OnGoogleAppEngine.CONDITION) {
+                response.setHeader('Vary', 'Accept-Encoding')
+            }
 
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
             OutputStream outputStream = response.outputStream
