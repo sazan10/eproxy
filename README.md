@@ -8,23 +8,17 @@ Eproxy is a proxy that
 * supports cookies``*``
 * supports all HTTP methods 
 * supports HTTPS
-* supports HTTP Byte Serving using the ``Range`` header (if not rewriting)
+* supports HTTP Byte Serving using the ``Range`` header (unless rewriting)
 * supports cache validation using ``If-Modified-Since`` and ``If-None-Match``
-* caches content
-* lets you customize the TCP/IP setup
-* uses real parsers for URL rewriting, not brittle regular expressions
-* attempts to be as secure as possible
 * supports SOCKS proxies for your hardcore tunneling needs
+* supports users who have JavaScript disabled
+* caches content in-memory, using Memcache (on Google App Engine) or Infinispan``*``
+* lets you customize the TCP/IP setup
+* uses robust, parser-based rewriting of HTML (using [NekoHTML](http://nekohtml.sourceforge.net/)), CSS (using [CSS Parser](http://cssparser.sourceforge.net/)) and SVG
+* attempts to be as secure as possible
+* runs stand-alone, in a JEE container (Tomcat or Jetty) and on Google App Engine
 
-## Features
-
-* Runs stand-alone, in a JEE container (Tomcat or Jetty) and on Google App Engine
-* Caches data in-memory, using Memcache (on Google App Engine) or Infinispan``*``
-* Robust, parser-based HTML and CSS rewriting.
-
-## Demo Site
-
-[Demo site here](https://weizentortillas.appspot.com)
+## [Demo Site](https://weizentortillas.appspot.com)
 
 ## Security status
 
@@ -65,19 +59,10 @@ Deploy the ``Eproxy##....war`` file.
 
 ## Configuration
 
-The configuration can be found in ``src/main/resources/application.properties``. Most should be self-explanatory. The values have been tweaked for Google App Engine.
+The configuration can be found in ``src/main/resources/application.properties``.
 
 ## History
 
 The idea is based on [mirrorr](https://github.com/bslatkin/mirrorrr). Some of the code came from [media.io](http://media.io), a project called Delivrr (sadly gone) and [EAIO](http://eaio.com).
-
-## mirrorr disadvantages
-
-I have nothing against mirrorr but there are some problems with it:
-
-* HTML rewriting is based on regular expressions.
-* Only GET requests are supported.
-* It (probably) doesn't support HTTPS.
-* It only runs on Google App Engine, using Memcache as the cache.
 
 ``*`` Planned
