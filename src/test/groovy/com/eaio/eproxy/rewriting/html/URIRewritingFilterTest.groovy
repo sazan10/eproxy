@@ -33,7 +33,8 @@ class URIRewritingFilterTest {
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         errorCollector.checkThat(output as String, containsString('view-source:http://rah.com/rnw-http/auer-ha.com'))
-        errorCollector.checkThat(output as String, allOf(not(containsString('view-source:https://fonts.googleapis.com')), not(containsString('VIEW-SOURCE:https://fonts.googleapis.com'))))
+        errorCollector.checkThat(output as String, allOf(not(containsString('view-source:https://fonts.googleapis.com')),
+            not(containsString('VIEW-SOURCE:https://fonts.googleapis.com'))))
         errorCollector.checkThat(output as String, containsString("http://rah.com/rnw-HTTPS/blorb.com"))
         errorCollector.checkThat(output as String, containsString('value="<input type=&quot;text&quot; value=&quot;http://rah.com&quot;>"'))
     }

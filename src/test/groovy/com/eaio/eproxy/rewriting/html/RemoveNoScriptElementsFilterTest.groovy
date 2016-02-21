@@ -29,11 +29,11 @@ class RemoveNoScriptElementsFilterTest {
             new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
-        errorCollector.checkThat(output as String, containsString('''<IMG width="1" height="1" onerror="alert('oh')" src="dah.jpg">
+        errorCollector.checkThat(output as String, containsString('''<img width="1" height="1" onerror="alert('oh')" src="dah.jpg">
 
 
 
-</BODY>''')) // Some whitespace in the HTML. :(
+</body>''')) // Some whitespace in the HTML. :(
     }
 
 }

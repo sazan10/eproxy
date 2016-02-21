@@ -28,7 +28,7 @@ import com.eaio.net.httpclient.ReEncoding
  */
 @RunWith(SpringJUnit4ClassRunner)
 @SpringApplicationConfiguration(classes = Eproxy)
-@WebIntegrationTest(value = 'http.maxRedirects=1', randomPort = true)
+@WebIntegrationTest(value = [ 'http.maxRedirects=1', 'telemetry.enabled=false' ], randomPort = true)
 class ProxyHTTPRewritingIT {
     
     @Rule
@@ -62,7 +62,7 @@ class ProxyHTTPRewritingIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('<LINK href="http://fnuh.com/rnw-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic%7CProduct+Sans:400&lang=en"'))
+        assertThat(bOut.toString(0I), containsString('<link href="http://fnuh.com/rnw-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic%7CProduct+Sans:400&lang=en"'))
     }
     
     @Test
@@ -132,8 +132,8 @@ class ProxyHTTPRewritingIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'https', request, response)
-        errorCollector.checkThat(bOut.toString(0I), containsString('<CODE>&lt;use xlink:href=&quot;sprite.svg#dog&quot;'))
-        errorCollector.checkThat(bOut.toString(0I), containsString('<USE xlink:href="'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('<code>&lt;use xlink:href=&quot;sprite.svg#dog&quot;'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('<use xlink:href="'))
     }
     
     @Test

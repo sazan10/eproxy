@@ -30,8 +30,8 @@ class RemoveActiveContentFilterTest {
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         errorCollector.checkThat(output as String, allOf(not(containsString('<script')), not(containsString('<SCRIPT'))))
-        errorCollector.checkThat(output as String, containsString('<IMG src="fnuh.jpg">'))
-        errorCollector.checkThat(output as String, containsString('<IMG width="1" height="1" src="dah.jpg">'))
+        errorCollector.checkThat(output as String, containsString('<img src="fnuh.jpg">'))
+        errorCollector.checkThat(output as String, containsString('<img width="1" height="1" src="dah.jpg">'))
         errorCollector.checkThat(output as String, allOf(not(containsString('<rah ')), not(containsString('<RAH'))))
     }
 

@@ -77,7 +77,7 @@ class ProxyHTTPIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'https', request, response)
-        assertThat(bOut.toString(0I), containsString('FORM action="http://fnuh.com/rnw-https/www.google.com:443/search"'))
+        assertThat(bOut.toString(0I), containsString('form action="http://fnuh.com/rnw-https/www.google.com:443/search"'))
     }
     
     // Test URLs from media.io, may still be broken or not
