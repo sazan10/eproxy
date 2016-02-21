@@ -14,7 +14,8 @@
 	 * i.e. things that Eproxy didn't rewrite correctly.
 	 */
 	function scanDocumentForResourcesOnDifferentDomains() {
-		var resourceEntries = window.performance.getEntriesByType('resource'), i, r0, currentURL = decodeTargetURI(location.href)
+		var resourceEntries = window.performance.getEntriesByType('resource'),
+			i, r0, currentURL = decodeTargetURI(location.href)
 		for (i = 0; i < resourceEntries.length; ++i) {
 			r0 = resourceEntries[i]
 			if (!r0.name.startsWith(location.origin)) {
