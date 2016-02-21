@@ -137,5 +137,18 @@ class ProxyHTTPIT {
         proxy.proxy('http', request, response)
         assertThat(bOut.toString(0I), containsString('Star Wars'))
     }
+    
+    @Test
+    void 'non-existing domains should return a 404'() {
+        HttpServletRequest request = buildHttpServletRequest('http://das-ist-absolut-cla.com')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            sendError: { int status, String sc -> assertThat(status, is(404I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('http', request, response)
+    }
 
 }
