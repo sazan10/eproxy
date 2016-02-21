@@ -8,5 +8,5 @@ User-agent: heritrix
 Disallow: /
 
 User-agent: *
-Disallow: /http
-Disallow: /https
+Disallow: /*http/
+Disallow: /*https/
