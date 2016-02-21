@@ -106,6 +106,26 @@
                 </dependencies>
             </plugin>
             <plugin>
+                <groupId>ro.isdc.wro4j</groupId>
+                <artifactId>wro4j-maven-plugin</artifactId>
+                <version>1.7.9</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <cssDestinationFolder>${basedir}/src/main/webapp/resources/css</cssDestinationFolder>
+                    <jsDestinationFolder>${basedir}/src/main/webapp/resources/js</jsDestinationFolder>
+                    <contextFolder>${basedir}/src/main/webapp/</contextFolder>
+                    <wroFile>${basedir}/src/main/webapp/WEB-INF/wro.xml</wroFile>
+                    <wroManagerFactory>ro.isdc.wro.extensions.manager.standalone.GoogleStandaloneManagerFactory</wroManagerFactory>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.18.1</version>
@@ -244,6 +264,19 @@
                                         <execute>
                                             <runOnIncremental>false</runOnIncremental>
                                         </execute>
+                                    </action>
+                                </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>ro.isdc.wro4j</groupId>
+                                        <artifactId>wro4j-maven-plugin</artifactId>
+                                        <versionRange>[1.7.8,)</versionRange>
+                                        <goals>
+                                            <goal>run</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<groups xmlns="http://www.isdc.ro/wro">
+    <group name="eproxy">
+        <js>/resources/js-in/eproxy/*.js</js>
+    </group>
+    <group name="telemetry">
+        <js>/resources/js-in/telemetry/*.js</js>
+    </group>
+</groups>

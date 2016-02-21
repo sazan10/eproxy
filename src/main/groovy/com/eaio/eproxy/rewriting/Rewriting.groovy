@@ -14,6 +14,7 @@ import org.apache.xml.serialize.*
 import org.cyberneko.html.filters.DefaultFilter
 import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
@@ -39,6 +40,9 @@ class Rewriting {
 
     @Autowired
     ReEncoding reEncoding
+
+    @Autowired
+    TelemetryFilter telemetryFilter    
 
     @Lazy
     private Charset defaultCharset = Charset.forName('UTF-8')
@@ -116,7 +120,7 @@ class Rewriting {
                 configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig)
             ])
         }
-        filters << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
+        filters << telemetryFilter << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
@@ -172,6 +176,7 @@ class Rewriting {
     XMLReader newHTMLReader() {
         SAXParser out = new SAXParser()
         out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
+        out.setProperty('http://cyberneko.org/html/properties/names/elems', 'lower')
         out
     }
     
