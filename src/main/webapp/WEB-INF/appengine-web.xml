@@ -11,6 +11,7 @@
     <static-files>
         <include path="/favicon.ico" expiration="365d" />
         <include path="/index.html" expiration="1h"/>
+        <include path="/resources/**" expiration="1d" />
         <include path="/robots.txt" expiration="1d" />
     </static-files>
 
