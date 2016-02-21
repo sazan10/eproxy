@@ -1,7 +1,6 @@
 package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
-import static org.apache.commons.lang3.reflect.FieldUtils.*
 import groovy.transform.CompileStatic
 
 import org.apache.xerces.xni.QName
