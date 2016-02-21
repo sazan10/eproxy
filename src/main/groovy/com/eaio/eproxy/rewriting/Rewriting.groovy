@@ -119,7 +119,7 @@ class Rewriting {
         filters << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
         try {
-            xmlReader.parse(newSAXInputSource(inputStream, charset)) // TODO: BufferedInputStream?
+            xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
         catch (SAXParseException ex) {
             log.warn("While parsing {}@{}:{}: {}", requestURI, ex.lineNumber, ex.columnNumber, (ExceptionUtils.getRootCause(ex) ?: ex).message)
@@ -159,7 +159,7 @@ class Rewriting {
         XMLReader xmlReader = newXMLReader()
         xmlReader.contentHandler = new XMLSerializer(outputWriter, new OutputFormat(Method.XML, charset.name(), true))
         try {
-            xmlReader.parse(newSAXInputSource(inputStream, charset)) // TODO: BufferedInputStream?
+            xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
         finally {
             try {

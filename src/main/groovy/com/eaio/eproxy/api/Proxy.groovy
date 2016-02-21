@@ -145,7 +145,7 @@ class Proxy implements URIManipulation {
                         response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE)
                     }
                     else {
-                        rewriting.rewrite(remoteResponse.entity.content, outputStream, contentType.charset, baseURI, requestURI, rewriteConfig, contentType.mimeType)
+                        rewriting.rewrite(new BufferedInputStream(remoteResponse.entity.content), outputStream, contentType.charset, baseURI, requestURI, rewriteConfig, contentType.mimeType)
                     }
                 }
                 else {
