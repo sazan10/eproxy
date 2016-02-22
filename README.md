@@ -28,21 +28,25 @@ Still, it is not tested enough yet. Do not use Eproxy yet if you rely on securit
 
 ## Installation
 
+### 1. Prerequisites
+
 You'll need
 
 * [Java](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) (version 7 or greater)
 * [Maven](https://maven.apache.org)
 * [Git](http://www.git-scm.com/)
 
-### Clone the repository
+### 2. Clone
 
 ``git clone https://github.com/johannburkard/eproxy.git``
 
-### Build it
+### 3. Build
 
 ``cd eproxy && mvn package``
 
-### Stand-alone
+### 4. Run or Deploy
+
+#### Stand-alone
 
 If you want to try out Eproxy, simply start the ``.war`` file in the ``target`` directory:
 
@@ -50,11 +54,11 @@ If you want to try out Eproxy, simply start the ``.war`` file in the ``target`` 
 
 Go to http://127.0.0.1:8080/index.html and press Ctrl-C when you're done.
 
-### Tomcat or Jetty
+#### Tomcat or Jetty
 
 Deploy the ``Eproxy##....war`` file.
 
-### On Google App Engine
+#### Google App Engine
 
 ``mvn appengine:update``
 
