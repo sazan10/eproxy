@@ -1,5 +1,7 @@
 package com.eaio.eproxy.rewriting.html
 
+import groovy.transform.CompileStatic
+
 import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.xerces.util.XMLAttributesImpl
 import org.apache.xerces.xni.Augmentations
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component
  * @version $Id$
  */
 @Component
+@CompileStatic
 class TelemetryFilter extends BaseFilter {
     
     @Value('${telemetry.enabled}')
@@ -48,7 +51,7 @@ class TelemetryFilter extends BaseFilter {
     
     @Override
     void endElement(QName element, Augmentations augs) {
-        if (nameIs(element, 'body') && telemetryEnabled) {
+        if (telemetryEnabled && nameIs(element, 'body')) {
             writeJavaScript(trackingIDXMLString)
             if (hostName) {
                 writeJavaScript(hostNameConfigXMLString)
