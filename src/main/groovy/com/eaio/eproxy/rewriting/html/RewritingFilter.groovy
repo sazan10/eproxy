@@ -14,7 +14,7 @@ import com.eaio.stringsearch.BNDMCI
  */
 @CompileStatic
 class RewritingFilter extends BaseFilter {
-    
+
     ReEncoding reEncoding
 
     URI baseURI, requestURI
@@ -26,16 +26,16 @@ class RewritingFilter extends BaseFilter {
 
     @Lazy
     private def patternHTTP = bndmci.processString('http:'),
-        patternHTTPS = bndmci.processString('https:'),
-        patternColonSlash = bndmci.processString(':/'),
-        patternViewSource = bndmci.processString('view-source:')
+    patternHTTPS = bndmci.processString('https:'),
+    patternColonSlash = bndmci.processString(':/'),
+    patternViewSource = bndmci.processString('view-source:')
 
     boolean attributeValueNeedsRewriting(String attributeValue) {
         if (attributeValue) {
             int colonIndex = attributeValue.indexOf((int) ((char) ':'))
-                    if (colonIndex == -1I) {
-                        colonIndex = Integer.MAX_VALUE
-                    }
+            if (colonIndex == -1I) {
+                colonIndex = Integer.MAX_VALUE
+            }
             [
                 { attributeValue.startsWith('/') },
                 { int index = bndmci.searchString(attributeValue, 'http:', patternHTTP); index >= 0I && index < colonIndex },
