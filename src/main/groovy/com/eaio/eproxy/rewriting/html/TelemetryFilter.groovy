@@ -10,6 +10,8 @@ import org.apache.xerces.xni.XMLAttributes
 import org.apache.xerces.xni.XMLString
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 
 /**
  * Embeds the telemetry JavaScript on the page (if enabled).
@@ -70,7 +72,7 @@ class TelemetryFilter extends BaseFilter {
     private writeTelemetryJavaScript() {
         XMLAttributes atts = new XMLAttributesImpl(2I)
         atts.addAttribute(asyncAttribute, null, 'async')
-        atts.addAttribute(srcAttribute, null, '/resources/js/telemetry.js') // TODO context path
+        atts.addAttribute(srcAttribute, null, (((ServletRequestAttributes) RequestContextHolder.requestAttributes)?.request?.contextPath ?: '') + '/resources/js/telemetry.js')
         super.startElement(scriptElement, atts, null)
         super.endElement(scriptElement, null)
     }
