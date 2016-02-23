@@ -161,7 +161,7 @@ class Rewriting {
     void rewriteSVG(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         XMLReader xmlReader = newXMLReader()
-        xmlReader.contentHandler = new XMLSerializer(outputWriter, new OutputFormat(Method.XML, charset.name(), true))
+        xmlReader.contentHandler = new XMLSerializer(outputWriter, new OutputFormat(Method.XML, (charset ?: defaultCharset).name(), true))
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
@@ -181,7 +181,7 @@ class Rewriting {
     }
     
     XMLReader newXMLReader() {
-        XMLReaderFactory.newInstance().createXMLReader()
+        XMLReaderFactory.createXMLReader()
     }
 
     InputSource newSAXInputSource(InputStream inputStream, Charset charset) {

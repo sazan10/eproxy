@@ -250,4 +250,18 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), not(containsString('//upload.wikimedia.org/wikipedia/commons/thumb/5/56/Ketamine.svg/300px-Ketamine.svg.png')))
     }
     
+    @Test
+    void 'SVG rewriting should work'() {
+        HttpServletRequest request = buildHttpServletRequest('https://en.wikipedia.org/static/1.27.0-wmf.13/skins/Vector/images/user-icon.svg?7b5d5')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('<path fill="#777777"'))
+    }
+    
 }
