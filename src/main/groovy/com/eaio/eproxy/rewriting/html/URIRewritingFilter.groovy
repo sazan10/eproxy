@@ -34,40 +34,16 @@ class URIRewritingFilter extends RewritingFilter implements URIManipulation {
     
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         atts.length.times { int i ->
-            String attributeValue = trimToEmpty(atts.getValue(i))
+            String attributeValue = atts.getValue(i)
             
             // Use local name
-            if (attributeNameShouldBeRewritten(atts.getLocalName(i)) && attributeValueNeedsRewriting(attributeValue)) {
+            if (!equalsIgnoreCase(atts.getLocalName(i), 'style') && !startsWithIgnoreCase(atts.getLocalName(i), 'on') &&
+                !equalsIgnoreCase(atts.getLocalName(i), 'srcset') && !equalsIgnoreCase(atts.getLocalName(i), 'http-equiv') &&
+                !equalsIgnoreCase(atts.getLocalName(i), 'content') &&
+                attributeValueNeedsRewriting(attributeValue)) {
                 atts.setValue(i, encodeTargetURI(baseURI, requestURI, attributeValue, rewriteConfig))
             }
         }
-    }
-
-    private boolean attributeNameShouldBeRewritten(String attributeName) {
-        switch (attributeName) {
-            case 'to':
-            case 'value':
-            case 'object':
-            case 'archive':
-            case 'icon':
-            case 'code':
-            case 'codebase':
-            case 'movie':
-            case 'data':
-            case 'poster':
-            case 'formaction':
-            case 'longdesc':
-            case 'lowsrc':
-            case 'dynsrc':
-            case 'manifest':
-            case 'implementation':
-            case 'background':
-            case 'href':
-            case 'src':
-            case 'action':
-            case 'ping': return true
-        }
-        false
     }
 
 }
