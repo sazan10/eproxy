@@ -1,3 +1,4 @@
+
 package com.eaio.eproxy.rewriting.html
 
 import groovy.transform.CompileStatic
@@ -26,9 +27,9 @@ class RewritingFilter extends BaseFilter {
 
     @Lazy
     private def patternHTTP = bndmci.processString('http:'),
-    patternHTTPS = bndmci.processString('https:'),
-    patternColonSlash = bndmci.processString(':/'),
-    patternViewSource = bndmci.processString('view-source:')
+        patternHTTPS = bndmci.processString('https:'),
+        patternColonSlash = bndmci.processString(':/'),
+        patternViewSource = bndmci.processString('view-source:')
 
     boolean attributeValueNeedsRewriting(String attributeValue) {
         if (attributeValue) {
