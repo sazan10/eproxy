@@ -137,7 +137,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
             throw new IOException(ex.getCause());
         }
         catch (TimeoutException ex) {
-            log.warn("{} on key {} was interrupted after {} ms", operation, key, stopWatch.getTime());
+            log.warn("{} on key {} timed out after {} ms", operation, key, stopWatch.getTime());
         }
         return null;
     }
