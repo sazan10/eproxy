@@ -104,7 +104,7 @@ class ProxyHTTPRewritingIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
-        assertThat(bOut.toString(0I), not(containsString(' on')))
+        assertThat(bOut.toString(0I), allOf(not(containsString(' on')), not(containsString(' ON'))))
     }
     
     @Test
@@ -222,7 +222,6 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), containsString('Mobilit&auml;tsportal'))
     }
     
-    
     @Test
     void 'Transfer-Encoding header should not be sent'() {
         HttpServletRequest request = buildHttpServletRequest('http://www.ip.de/lp/datenschutzinfo_online-werbung.cfm')
@@ -235,6 +234,20 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletResponse
         proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), containsString('Datenschutzinfo'))
+    }
+    
+    @Test
+    void 'srcset attributes shold be rewritten correctly'() {
+        HttpServletRequest request = buildHttpServletRequest('https://en.wikipedia.org/wiki/Ketamine')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), not(containsString('//upload.wikimedia.org/wikipedia/commons/thumb/5/56/Ketamine.svg/300px-Ketamine.svg.png')))
     }
     
 }

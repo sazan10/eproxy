@@ -38,18 +38,18 @@ class SrcsetFilter extends RewritingFilter implements URIManipulation {
             if (attributeValue) {
                 int i = atts.getIndex('srcset')
                 if (attributeValue.contains(',')) {
-                    List<String> parts = attributeValue.tokenize(',')
+                    List<String> parts = attributeValue.tokenize(',').collect { it.trim() }
                     parts.size().times { int index ->
                         if (attributeValueNeedsRewriting(parts[index])) {
                             String imageURI = substringBefore(parts[index], ' ') ?: parts[index]
-                            parts[index] = replaceOnce(parts[index], imageURI, encodeTargetURI(baseURI, requestURI, imageURI, rewriteConfig))
+                            parts[index] = replace(parts[index], imageURI, encodeTargetURI(baseURI, requestURI, imageURI, rewriteConfig))
                         }
                     }
                     atts.setValue(i, parts.join(','))
                 }
                 else if (attributeValueNeedsRewriting(attributeValue)) {
                     String imageURI = substringBefore(attributeValue, ' ') ?: attributeValue
-                    atts.setValue(i, replaceOnce(attributeValue, imageURI, encodeTargetURI(baseURI, requestURI, imageURI, rewriteConfig)))
+                    atts.setValue(i, replace(attributeValue, imageURI, encodeTargetURI(baseURI, requestURI, imageURI, rewriteConfig)))
                 }
             }
         }
