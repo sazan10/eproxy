@@ -18,7 +18,7 @@
 			i, r0, currentURL = decodeTargetURI(location.href)
 		for (i = 0; i < resourceEntries.length; ++i) {
 			r0 = resourceEntries[i]
-			if (!r0.name.startsWith(location.origin)) {
+			if (!r0.name.startsWith(location.origin) && !r0.name.startsWith('https://www.google-analytics.com/collect')) {
 				eaio.track.event('ResourceOnDifferentDomains', currentURL, decodeTargetURI(r0.name))
 			}
 		}
