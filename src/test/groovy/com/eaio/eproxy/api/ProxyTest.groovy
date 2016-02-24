@@ -84,4 +84,10 @@ class ProxyTest {
         assertThat(proxy.resolve('http://foo.com/ah/oh.html'.toURI(), '/ui.html'), is('http://foo.com/ui.html'.toURI()))
     }
     
+    @Test
+    void 'broken URL encoding should be supported'() {
+        assertThat(proxy.resolve('http://www.kajianilmiah.com'.toURI(), 'http://www.kajianilmiah.com/search/label/Tabshirul%20khalaf%20%28Masih%20Ahlussunnahkah%20Kita%20%3F%2'),
+            is('http://www.kajianilmiah.com/search/label/Tabshirul%20khalaf%20%28Masih%20Ahlussunnahkah%20Kita%20%3F'.toURI()))
+    }
+    
 }

@@ -89,16 +89,23 @@ trait URIManipulation {
     }
 
     /**
-     * Resolves a potentially relative URI to a reference URI.
+     * Resolves a potentially relative URI to a reference URI. Also "repairs" incomplete URL encoding by using the "healthy" prefix.
      * <p>
      * Example: <code>resolve('http://foo.com/ah/oh.html'.toURI(), '/ui.html') = 'http://foo.com/ui.html'</code>
      */
     URI resolve(URI requestURI, String attributeValue) {
+        String reEncodedAttributeValue = reEncoding.reEncode(attributeValue)
         try {
-            requestURI.resolve(reEncoding.reEncode(attributeValue))
+            requestURI.resolve(reEncodedAttributeValue)
         }
         catch (IllegalArgumentException ex) {
-            log.warn('couldn\'t resolve {} relative to {}: {}', attributeValue, requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
+            if (ex.message?.startsWith('Malformed escape pair at index')) {
+                int index = (ex.message =~ /Malformed escape pair at index (\d+)/)[0I][1I] as int
+                requestURI.resolve(reEncodedAttributeValue.substring(0I, index))
+            }
+            else {
+                log.warn('couldn\'t resolve {} relative to {}: {}', attributeValue, requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
+            }
         }
     }
 

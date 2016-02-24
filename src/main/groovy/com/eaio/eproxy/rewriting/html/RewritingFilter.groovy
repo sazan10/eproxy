@@ -32,7 +32,8 @@ class RewritingFilter extends BaseFilter {
         patternViewSource = bndmci.processString('view-source:')
 
     boolean attributeValueNeedsRewriting(String attributeValue) {
-        if (attributeValue) {
+        // Exclude HTML attribute values
+        if (!attributeValue?.startsWith('<')) {
             int colonIndex = attributeValue.indexOf((int) ((char) ':'))
             if (colonIndex == -1I) {
                 colonIndex = Integer.MAX_VALUE
