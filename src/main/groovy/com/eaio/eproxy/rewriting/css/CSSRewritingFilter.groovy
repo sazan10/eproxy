@@ -41,7 +41,7 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URIMan
             stack.push('style')
         }
         else {
-            String styleAttribute = atts.getValue('style')
+            String styleAttribute = atts.getValue('style') // TODO: SVG attributes (mask, fill and others?)
             if (styleAttribute && styleAttribute.length() > 8I) {
                 String rewrittenStyleAttribute = rewriteStyleAttribute(new InputSource(characterStream: new StringReader(styleAttribute)))
                 atts.setValue(atts.getIndex('style'), rewrittenStyleAttribute)
@@ -149,10 +149,10 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URIMan
                 rewriteCSSValueImpl(item)
             }
         }
-        else if (containsURILexicalUnit(value) && attributeValueNeedsRewriting(value.value.stringValue)) {
+        else if (containsURILexicalUnit(value) && value.value?.stringValue && attributeValueNeedsRewriting(value.value.stringValue)) {
             value.value.stringValue = encodeTargetURI(baseURI, requestURI, value.value.stringValue, rewriteConfig)
         }
-        else if (containsFunctionLexicalUnit(value) && attributeValueNeedsRewriting(value.value.parameters.stringValue)) {
+        else if (containsFunctionLexicalUnit(value) && value.value?.parameters?.stringValue && attributeValueNeedsRewriting(value.value.parameters.stringValue)) {
             value.value.parameters.stringValue = encodeTargetURI(baseURI, requestURI, value.value.parameters.stringValue, rewriteConfig)
         }
     }

@@ -264,4 +264,19 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), containsString('<path fill="#777777"'))
     }
     
+    @Test
+    void 'CSS rewriting should work'() {
+        HttpServletRequest request = buildHttpServletRequest('https://bill.ccbill.com/jpost/jquery/css/smoothness/jquery-ui-1.7.2.custom.css')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('.ui-tabs .ui-tabs-hide'))
+    }
+    
+    
 }
