@@ -154,9 +154,11 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
             // Fix insufficient handling of not encoded redirect URLs
             .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy(reEncoding()) : new ReEncodingRedirectStrategy(reEncoding()))
             .setDefaultRequestConfig(requestConfig())
-            .setUserAgent(userAgent)
             .setHttpProcessor(httpProcessor())
-
+            
+        if (userAgent) {
+            builder.userAgent = userAgent
+        }
         if (asyncMemcacheServiceHttpCacheStorage) {
             builder.httpCacheStorage = asyncMemcacheServiceHttpCacheStorage
         }

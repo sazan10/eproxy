@@ -1,8 +1,8 @@
 package com.eaio.eproxy.api
 
-import static org.hamcrest.Matchers.*
-import static org.hamcrest.MatcherAssert.*
 import static com.eaio.eproxy.RequestMocks.*
+import static org.hamcrest.MatcherAssert.*
+import static org.hamcrest.Matchers.*
 
 import javax.servlet.http.HttpServletResponse
 

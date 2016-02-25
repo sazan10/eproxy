@@ -59,6 +59,9 @@ class Proxy implements URIManipulation {
 
     @Value('${http.totalTimeout}')
     Long totalTimeout
+    
+    @Value('${http.userAgent}')
+    String userAgent
 
     @Autowired
     HttpClient httpClient
@@ -255,6 +258,9 @@ class Proxy implements URIManipulation {
             if (request.getHeader(it)) {
                 uriRequest.setHeader(it, request.getHeader(it))
             }
+        }
+        if (!userAgent) {
+            uriRequest.setHeader('User-Agent', request.getHeader('User-Agent'))
         }
     }
 

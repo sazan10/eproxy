@@ -1,8 +1,8 @@
 package com.eaio.eproxy.api
 
+import static com.eaio.eproxy.RequestMocks.*
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
-import static com.eaio.eproxy.RequestMocks.*
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -17,7 +17,6 @@ import org.springframework.mock.web.DelegatingServletOutputStream
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.eaio.eproxy.Eproxy
-import com.eaio.net.httpclient.ReEncoding
 
 /**
  * Simulates a POST request. Also tests the {@link RedirectStrategy} setup because {@link DefaultRedirectStrategy}
