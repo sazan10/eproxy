@@ -66,8 +66,6 @@ class Rewriting {
     //        'text/x-javascript',
     //    ] as Set
 
-    // TODO: Get rid of VBScript
-
     private Set<String> html = [
         'text/html',
         'text/x-server-parsed-html',
