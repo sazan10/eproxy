@@ -108,7 +108,7 @@ class Proxy implements URIManipulation {
                 if (!committed) {
                     reset()
                 }
-                setStatus(remoteResponse.statusLine.statusCode, remoteResponse.statusLine.reasonPhrase)
+                status = remoteResponse.statusLine.statusCode
                 setHeader('Vary', 'Accept-Encoding')
             }
 

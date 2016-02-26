@@ -41,7 +41,7 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('https://github.com/johannburkard/eproxy')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> assertThat('Content-Security-Policy headers should be removed for now',
                 name?.toLowerCase() ?: '', not(is('content-security-policy'))) },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
@@ -56,7 +56,7 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('http://bilder1.n-tv.de/img/incoming/crop16474236/4269152083-cImg_17_6-w680/imago66342948h.jpg', 'GET', { String name -> name == 'Range' ? 'bytes=0-99' : null })
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, anyOf(is(200I), is(206I))) }, // setStatus(int) is called twice
+            setStatus: { int status -> assertThat(status, anyOf(is(200I), is(206I))) }, // setStatus(int) is called twice
             setHeader: { String name, String value -> if (name == 'Content-Range') { assertThat(value, is('bytes 0-99/48015')) } },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -70,7 +70,7 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('https://www.google.com:443/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -86,7 +86,7 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('https://about.me/johannburkard')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -100,7 +100,7 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('https://archive.org/details/MainHoonSarkarEMadinaKaGada')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -114,7 +114,7 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('https://t.co/0fRMkR6AOo')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -128,7 +128,7 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('http://bit.ly/19xbm5w')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -154,8 +154,10 @@ class ProxyHTTPIT {
     void 'invalid range requests should return a 416'() {
         HttpServletRequest request = buildHttpServletRequest('http://eaio.com/robots.txt', 'GET', { String name -> name == 'Range' ? 'bytes=5000-' : null })
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        int calls = 0I
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, is(416I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) }, // status is first set to 200...
+            sendError: { int status -> assertThat(status, is(416I)) }, // ...then to 416
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -168,12 +170,12 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com', 'TRACE')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, is(405I)) },
+            setStatus: { int status -> assertThat(status, is(405I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('http', request, response)
     }
-    
+
 }
