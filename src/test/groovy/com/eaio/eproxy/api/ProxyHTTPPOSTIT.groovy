@@ -71,7 +71,7 @@ class ProxyHTTPPOSTIT {
             new DelegatingServletInputStream(new ByteArrayInputStream(data)))
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
+            setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
