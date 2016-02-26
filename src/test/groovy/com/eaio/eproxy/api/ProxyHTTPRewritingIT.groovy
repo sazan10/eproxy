@@ -41,7 +41,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('http://www.n-tv.de')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -55,7 +55,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('http://www.google.com/intl/en/policies/privacy/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -69,7 +69,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('http://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic%7CProduct+Sans:400&lang=en')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -83,7 +83,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('http://www.google.com')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -97,7 +97,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://www.google.de/url?q=http://fnuh.com')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -111,7 +111,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://www.facebook.com/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -125,7 +125,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/Testing%20Cascade%20of%20SVG%20fill%20with%20external%20resource.html') // Originally from https://css-tricks.com/examples/svg-external-cascade/
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -140,7 +140,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://static.xx.fbcdn.net/rsrc.php/v2/yL/r/EZnQqgEpw9Z.css')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -156,7 +156,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://www.deepdotweb.com/wp-content/themes/sahifa-child/style.css?ver=20150710')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -170,7 +170,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://twitter.com/intent/user?screen_name=johannburkard')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -184,7 +184,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://github.com/login?return_to=%2Fjohannburkard%2Ftinymeasurement')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -198,7 +198,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('http://read-able.com/check.php?uri=https%3A%2F%2Fgithub.com%2Fjohannburkard%2Feproxy')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -212,7 +212,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://www.bahn.de/p/view/index.shtml')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -226,7 +226,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('http://www.ip.de/lp/datenschutzinfo_online-werbung.cfm')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> assertThat(name?.toLowerCase(), not(is('transfer-encoding'))) },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -240,7 +240,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://en.wikipedia.org/wiki/Ketamine')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -254,7 +254,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://en.wikipedia.org/static/1.27.0-wmf.13/skins/Vector/images/user-icon.svg?7b5d5')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -268,7 +268,7 @@ class ProxyHTTPRewritingIT {
         HttpServletRequest request = buildHttpServletRequest('https://bill.ccbill.com/jpost/jquery/css/smoothness/jquery-ui-1.7.2.custom.css')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },

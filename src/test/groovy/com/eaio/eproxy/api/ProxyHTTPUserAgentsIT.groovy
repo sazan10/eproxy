@@ -36,7 +36,7 @@ class ProxyHTTPUserAgentsIT {
         HttpServletRequest request = buildHttpServletRequest('http://browserspy.dk/headers.php', 'GET', { String name -> name == 'User-Agent' ? 'Der Wurz' : null }, null, null)
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
+            setStatus: { int status, String sc -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },

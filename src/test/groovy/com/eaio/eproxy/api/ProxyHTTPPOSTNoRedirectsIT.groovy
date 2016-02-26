@@ -71,7 +71,7 @@ class ProxyHTTPPOSTNoRedirectsIT {
         boolean statusSet = false, redirected = false
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
+            setStatus: { int status, String sc -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
             setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, startsWith('http://fnuh.com/https/www.paypal.com/de/cgi-bin/webscr?cmd=_flow&SESSION=')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },

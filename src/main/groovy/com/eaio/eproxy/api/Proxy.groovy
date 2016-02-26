@@ -108,7 +108,7 @@ class Proxy implements URIManipulation {
                 if (!committed) {
                     reset()
                 }
-                status = remoteResponse.statusLine.statusCode
+                setStatus(remoteResponse.statusLine.statusCode, remoteResponse.statusLine.reasonPhrase)
                 setHeader('Vary', 'Accept-Encoding')
             }
 
@@ -288,7 +288,7 @@ class Proxy implements URIManipulation {
         }
         out
     }
-
+    
     /**
      * Returns start and end offsets from <tt>Range</tt> request headers.
      *
