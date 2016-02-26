@@ -122,7 +122,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'SVG elements should be rewritten'() {
-        HttpServletRequest request = buildHttpServletRequest('https://css-tricks.com/examples/svg-external-cascade/')
+        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/Testing%20Cascade%20of%20SVG%20fill%20with%20external%20resource.html') // Originally from https://css-tricks.com/examples/svg-external-cascade/
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -130,7 +130,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'https', request, response)
+        proxy.proxy('rnw', 'http', request, response)
         errorCollector.checkThat(bOut.toString(0I), containsString('<code>&lt;use xlink:href=&quot;sprite.svg#dog&quot;'))
         errorCollector.checkThat(bOut.toString(0I), containsString('<use xlink:href="'))
     }
