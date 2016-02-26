@@ -2,15 +2,7 @@ package com.eaio.eproxy.rewriting.html;
 
 import org.apache.xerces.util.AttributesProxy;
 import org.apache.xerces.util.LocatorProxy;
-import org.apache.xerces.xni.Augmentations;
-import org.apache.xerces.xni.NamespaceContext;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLDocumentHandler;
-import org.apache.xerces.xni.XMLLocator;
-import org.apache.xerces.xni.XMLResourceIdentifier;
-import org.apache.xerces.xni.XMLString;
-import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.*;
 import org.apache.xerces.xni.parser.XMLDocumentSource;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;

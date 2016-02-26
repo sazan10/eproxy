@@ -1,17 +1,11 @@
 package com.eaio.eproxy.rewriting.html;
 
 import org.apache.xerces.impl.xs.util.SimpleLocator;
-import org.apache.xerces.util.LocatorProxy;
 import org.apache.xerces.util.NamespaceSupport;
 import org.apache.xerces.util.SAXLocatorWrapper;
 import org.apache.xerces.util.SymbolTable;
 import org.apache.xerces.util.XMLAttributesImpl;
-import org.apache.xerces.xni.QName;
-import org.apache.xerces.xni.XMLAttributes;
-import org.apache.xerces.xni.XMLDocumentHandler;
-import org.apache.xerces.xni.XMLLocator;
-import org.apache.xerces.xni.XMLString;
-import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.*;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
