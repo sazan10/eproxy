@@ -4,7 +4,7 @@
 
 Eproxy is a proxy that
 
-* rewrites HTML, CSS, JavaScript``*`` and SVG``*``
+* rewrites HTML, CSS, SVG and JavaScript``*``
 * supports cookies``*``
 * supports all HTTP methods 
 * supports HTTPS
