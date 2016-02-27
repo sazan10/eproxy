@@ -50,7 +50,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public void putEntry(String key, HttpCacheEntry entry) throws IOException {
-        log.debug("putEntry {}", key);
+        log.trace("putEntry {}", key);
         Future<Void> future = asyncMemcacheService.put(key, entry);
         awaitFutureUntilTimeout("put", key, future);
         memcacheStatuses.set(new MemcacheStatus(key, entry != null));
@@ -67,7 +67,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
             out = null;
         }
         else {
-            log.debug("getEntry {}", key);
+            log.trace("getEntry {}", key);
             Future<Object> future = asyncMemcacheService.get(key);
             out = (HttpCacheEntry) awaitFutureUntilTimeout("get", key, future);
             memcacheStatuses.set(new MemcacheStatus(key, out != null));
@@ -80,7 +80,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public void removeEntry(String key) throws IOException {
-        log.debug("removeEntry {}", key);
+        log.trace("removeEntry {}", key);
         Future<Boolean> future = asyncMemcacheService.delete(key);
         awaitFutureUntilTimeout("delete", key, future);
         memcacheStatuses.set(new MemcacheStatus(key, false));
@@ -94,7 +94,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
         for (int i = 0; i < maxUpdateRetries; ++i) {
             log.debug("updateEntry {} (try {}/{})", key, i, maxUpdateRetries);
             Future<IdentifiableValue> identifiableFuture = asyncMemcacheService.getIdentifiable(key);
-            IdentifiableValue identifiable = awaitFutureUntilTimeout("getIdentifiable", key, identifiableFuture);
+            IdentifiableValue identifiable = awaitFutureUntilTimeout("updateEntry > getIdentifiable", key, identifiableFuture);
             if (identifiable == null && Thread.currentThread().isInterrupted()) {
                 return;
             }
@@ -103,14 +103,14 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
             if (identifiable == null) {
                 if (newEntry != null) {
                     Future<Void> putFuture = asyncMemcacheService.put(key, newEntry);
-                    awaitFutureUntilTimeout("put", key, putFuture);
+                    awaitFutureUntilTimeout("updateEntry > put", key, putFuture);
                 }
                 memcacheStatuses.set(new MemcacheStatus(key, newEntry != null));
                 return;
             }
             else {
                 Future<Boolean> putFuture = asyncMemcacheService.putIfUntouched(key, identifiable, newEntry);
-                Boolean stored = awaitFutureUntilTimeout("putIfUntouched", key, putFuture);
+                Boolean stored = awaitFutureUntilTimeout("updateEntry > putIfUntouched", key, putFuture);
                 if (stored == null && Thread.currentThread().isInterrupted()) {
                     return;
                 }
@@ -124,10 +124,12 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
     }
 
     private <T> T awaitFutureUntilTimeout(String operation, String key, Future<T> future) throws IOException {
+        T out = null;
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         try {
-            return memcacheTimeout == null ? future.get() : future.get(memcacheTimeout, TimeUnit.MILLISECONDS);
+            out = memcacheTimeout == null ? future.get() : future.get(memcacheTimeout, TimeUnit.MILLISECONDS);
+            log.debug("{} on key {} took {} ms", operation, key, stopWatch.getTime());
         }
         catch (InterruptedException ex) {
             log.warn("{} on key {} was interrupted after {} ms", operation, key, stopWatch.getTime());
@@ -139,7 +141,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
         catch (TimeoutException ex) {
             log.warn("{} on key {} timed out after {} ms", operation, key, stopWatch.getTime());
         }
-        return null;
+        return out;
     }
     
     /**
