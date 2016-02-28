@@ -6,6 +6,7 @@ import groovy.util.logging.Slf4j
 
 import java.util.regex.Pattern
 
+import org.apache.batik.css.parser.*
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
@@ -16,12 +17,9 @@ import org.w3c.dom.css.*
 
 import com.eaio.eproxy.rewriting.URIManipulation
 import com.eaio.eproxy.rewriting.html.RewritingFilter
-import com.steadystate.css.dom.*
-import com.steadystate.css.parser.CSSOMParser
-import com.steadystate.css.parser.SACParserCSS3
 
 /**
- * Rewrites CSS using <a href="http://cssparser.sourceforge.net/">CSS Parser</a>
+ * Rewrites CSS using <a href="https://xmlgraphics.apache.org/batik/">Batik</a>
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
@@ -87,24 +85,24 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URIMan
     }
 
     @CompileStatic
-    CSSOMParser newCSSOMParser() {
-        CSSOMParser out = new CSSOMParser(new SACParserCSS3())
-        out.errorHandler = this
-        out
+    Parser newParser() {
+        new Parser(errorHandler: this)
     }
 
     @CompileStatic
     String rewriteStyleAttribute(InputSource source) {
-        CSSOMParser parser = newCSSOMParser()
-        CSSStyleDeclarationImpl declaration = (CSSStyleDeclarationImpl) parser.parseStyleDeclaration(source)
+        Parser parser = newParser()
+        parser.parseStyleDeclaration(source)
+        CSSStyleDeclarationImpl declaration = null 
         rewriteCSSStyleDeclaration(declaration)
         declaration as String
     }
 
     @CompileStatic
     void rewriteCSS(InputSource inputSource, Writer writer) {
-        CSSOMParser parser = newCSSOMParser()
-        CSSStyleSheet sheet = parser.parseStyleSheet(inputSource, null, null)
+        Parser parser = newParser()
+        parser.parseStyleSheet(inputSource)
+        CSSStyleSheet sheet = null
         sheet.cssRules.length.times { int i ->
             CSSRule rule = sheet.cssRules.item(i)
             rewriteCSSRule(rule)

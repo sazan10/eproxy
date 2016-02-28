@@ -432,9 +432,9 @@
             <version>2.2</version>
         </dependency>
         <dependency>
-            <groupId>net.sourceforge.cssparser</groupId>
-            <artifactId>cssparser</artifactId>
-            <version>0.9.18</version>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-css</artifactId>
+            <version>1.8</version>
         </dependency>
     </dependencies>
     <reporting>
