@@ -28,7 +28,7 @@ import com.eaio.eproxy.rewriting.html.*
 import com.eaio.net.httpclient.ReEncoding
 
 /**
- * Rewriting code for different MIME types.
+ * Rewrites links in different MIME types.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
