@@ -28,10 +28,6 @@ class CSSRewritingFilterTest {
     
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
-    
-    @Lazy
-    CSSRewritingFilter cssRewritingFilter = new CSSRewritingFilter(reEncoding: new ReEncoding(), baseURI: 'http://fnuh.com/'.toURI(),
-                    requestURI: 'https://www.google.com/'.toURI(), rewriteConfig: RewriteConfig.fromString('rnw'))
 
     @Test
     void 'escaped CSS attributes should be rewritten'() {
@@ -49,6 +45,10 @@ class CSSRewritingFilterTest {
             not(containsString('keks.jpg'))))
         errorCollector.checkThat(output as String, containsString('background-image: image(&quot;http://rah.com/rnw-http/creme.com/aha.jpg&quot;)'))
     }
+
+    @Lazy
+    CSSRewritingFilter cssRewritingFilter = new CSSRewritingFilter(reEncoding: new ReEncoding(), baseURI: 'http://fnuh.com/'.toURI(),
+        requestURI: 'https://www.google.com/'.toURI(), rewriteConfig: RewriteConfig.fromString('rnw'))
     
     @Test
     void 'should rewrite inline style sheet'() {
@@ -70,7 +70,7 @@ class CSSRewritingFilterTest {
     }
 
     Collection<Object[]> cssFiles() {
-        new File('src/test/resources/com/eaio/eproxy/rewriting/css').listFiles().findAll { it.file }.collect { [ it ] as Object[] }
+        new File('src/test/resources/com/eaio/eproxy/rewriting/css').listFiles().collect { [ it ] as Object[] }
     }
 
 }
