@@ -25,9 +25,11 @@ public class ContentHandlerXMLDocumentHandlerAdapter extends DefaultHandler {
     
     private final XMLDocumentHandler xmlDocumentHandler;
     
-    private XMLLocator locator = new SimpleLocator(null, null, -1, -1);
-    
     private final NamespaceSupport namespaceSupport = new NamespaceSupport();
+    
+    private final SymbolTable symbolTable = new SymbolTable(); // TODO: There's a soft ref version, too.
+    
+    private XMLLocator locator = new SimpleLocator(null, null, -1, -1);
 
     public ContentHandlerXMLDocumentHandlerAdapter(
             XMLDocumentHandler xmlDocumentHandler) {
@@ -175,8 +177,6 @@ public class ContentHandlerXMLDocumentHandlerAdapter extends DefaultHandler {
     }
 
     // Code stolen from JAXPValidatorComponent$SAX2XNI. Apache license.
-
-    private SymbolTable fSymbolTable = new SymbolTable(); // TODO: There's a soft ref version, too.
     
     /**
      * Converts the {@link XNIException} received from a downstream
@@ -208,7 +208,7 @@ public class ContentHandlerXMLDocumentHandlerAdapter extends DefaultHandler {
     }
 
     private String symbolize( String s ) {
-        return fSymbolTable.addSymbol(s);
+        return symbolTable.addSymbol(s);
     }
 
 }

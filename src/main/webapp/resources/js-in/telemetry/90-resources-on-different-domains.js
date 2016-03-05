@@ -1,17 +1,18 @@
 (function() {
 
 	function decodeTargetURI(uri) {
+		var out = uri
 		try {
-			return /(https?\/.+)/i.exec(uri)[1].replace(/^(https?)\//i, "$1://")
+			out = /(https?\/.+)/i.exec(uri)[1].replace(/^(https?)\//i, "$1://")
 		}
 		catch (e) {}
-		return uri
+		return out
 	}
 	
 	/**
 	 * Scans the document (via the Resource Timing API
 	 * https://www.w3.org/TR/resource-timing/) for resources on another domain,
-	 * i.e. things that Eproxy didn't rewrite correctly.
+	 * i.e. things that eproxy didn't rewrite correctly.
 	 */
 	function scanDocumentForResourcesOnDifferentDomains() {
 		var resourceEntries = window.performance.getEntriesByType('resource'),
