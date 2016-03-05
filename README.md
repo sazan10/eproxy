@@ -1,8 +1,8 @@
-[![Coverage Status](https://coveralls.io/repos/johannburkard/eproxy/badge.svg?branch=master&service=github)](https://coveralls.io/github/johannburkard/eproxy?branch=master) [![Analytics](https://ga-beacon.appspot.com/UA-7427410-88/eproxy/README.md?pixel)](https://github.com/igrigorik/ga-beacon)
+[![Coverage Status](https://coveralls.io/repos/johannburkard/eproxy/badge.svg?branch=master&service=github)](https://coveralls.io/github/johannburkard/eproxy?branch=master) [![Analytics](https://ga-beacon.appspot.com/UA-7427410-89/eproxy/README.md?pixel)](https://github.com/igrigorik/ga-beacon)
 
-# Eproxy
+# eproxy
 
-Eproxy is a proxy that
+eproxy is a proxy that
 
 * rewrites HTML, CSS, SVG and JavaScript``*``
 * supports cookies``*``
@@ -23,8 +23,8 @@ Eproxy is a proxy that
 
 ## Security status
 
-[Eproxy does pretty well](https://weizentortillas.appspot.com/rnw-http/repo.eaio.com/leak.html) on the [HTTPLeaks](https://github.com/cure53/HTTPLeaks/) test.
-Still, it is not tested enough yet. Do not use Eproxy yet if you rely on security.
+[eproxy does pretty well](https://weizentortillas.appspot.com/rnw-http/repo.eaio.com/leak.html) on the [HTTPLeaks](https://github.com/cure53/HTTPLeaks/) test.
+Still, it is not tested enough yet. Do not use eproxy yet if you rely on security.
 
 ## Installation
 
@@ -48,7 +48,7 @@ You'll need
 
 #### Stand-alone
 
-If you want to try out Eproxy, simply start the ``.war`` file in the ``target`` directory:
+If you want to try out eproxy, simply start the ``.war`` file in the ``target`` directory:
 
 ``java -jar target/*##*.war``
 
@@ -56,7 +56,7 @@ Go to http://127.0.0.1:8080/index.html and press Ctrl-C when you're done.
 
 #### Tomcat or Jetty
 
-Deploy the ``Eproxy##....war`` file.
+Deploy the ``eproxy##....war`` file.
 
 #### Google App Engine
 

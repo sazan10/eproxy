@@ -255,7 +255,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Conditional(NotOnGoogleAppEngineOrDevserver)
     @Lazy
     Timer timer() {
-        new Timer('Eproxy', true)
+        new Timer('eproxy', true)
     }
 
     static main(args) {

@@ -58,7 +58,7 @@ trait URIManipulation {
     }
 
     /**
-     * Resolves <tt>uri</tt> relative to <tt>requestURI</tt>, then turns it all into Eproxy's URL scheme.
+     * Resolves <tt>uri</tt> relative to <tt>requestURI</tt>, then turns it all into eproxy's URL scheme.
      */
     String encodeTargetURI(URI baseURI, URI requestURI, String uri, RewriteConfig rewriteConfig = null) {
         URI resolvedURI = resolve(requestURI, uri)

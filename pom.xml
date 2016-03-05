@@ -6,7 +6,7 @@
     <artifactId>eproxy</artifactId>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>Eproxy</name>
+    <name>eproxy</name>
     <description>A secure web proxy</description>
     <url>https://github.com/johannburkard/eproxy</url>
     <inceptionYear>2015</inceptionYear>
