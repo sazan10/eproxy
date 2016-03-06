@@ -53,7 +53,9 @@ class CSSRewritingFilterTest {
     @Test
     void 'should rewrite inline style sheet'() {
         String style = 'height:110px;width:276px;background:url(/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png) no-repeat'
-        assertThat(cssRewritingFilter.rewriteStyleAttribute(new InputSource(characterStream: new StringReader(style))),
+        Writer out = new StringWriter()
+        cssRewritingFilter.rewriteStyleAttribute(new InputSource(characterStream: new StringReader(style)), out)
+        assertThat(out as String,
             anyOf(containsString('background:url(http://fnuh.com/rnw-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png'),
                 containsString('background: url(http://fnuh.com/rnw-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png')))
     }

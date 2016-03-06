@@ -43,9 +43,10 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URIMan
         else {
             String styleAttribute = atts.getValue('style') // TODO: SVG attributes (mask, fill and others?)
             if (styleAttribute && styleAttribute.length() > 8I) {
-                String rewrittenStyleAttribute = rewriteStyleAttribute(new InputSource(characterStream: new StringReader(styleAttribute)))
-                atts.setValue(atts.getIndex('style'), rewrittenStyleAttribute)
-                log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length(), rewrittenStyleAttribute.length())
+                DirectStrBuilder builder = new DirectStrBuilder(styleAttribute.length())
+                rewriteStyleAttribute(new InputSource(characterStream: new StringReader(styleAttribute)), builder.asWriter())
+                atts.setValue(atts.getIndex('style'), builder.toString())
+                log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length(), builder.length())
             }
         }
         super.startElement(qName, atts, augs)
@@ -94,11 +95,11 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URIMan
     }
 
     @CompileStatic
-    String rewriteStyleAttribute(InputSource source) {
+    void rewriteStyleAttribute(InputSource source, Writer writer) {
         CSSOMParser parser = newCSSOMParser()
         CSSStyleDeclarationImpl declaration = (CSSStyleDeclarationImpl) parser.parseStyleDeclaration(source)
         rewriteCSSStyleDeclaration(declaration)
-        declaration as String
+        writer.write(declaration as String) // TODO #performance
     }
 
     @CompileStatic
@@ -109,7 +110,7 @@ class CSSRewritingFilter extends RewritingFilter implements ErrorHandler, URIMan
             CSSRule rule = sheet.cssRules.item(i)
             rewriteCSSRule(rule)
         }
-        writer.write(sheet as String) // TODO
+        writer.write(sheet as String) // TODO #performance
     }
 
     void rewriteCSSRule(CSSRule rule) {
