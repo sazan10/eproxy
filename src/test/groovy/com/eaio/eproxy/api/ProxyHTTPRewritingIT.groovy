@@ -277,5 +277,26 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), containsString('.ui-tabs .ui-tabs-hide'))
     }
     
+    @Test
+    void 'SVG elements should be closed if necessary'() {
+        HttpServletRequest request = buildHttpServletRequest('http://tutorials.jenkov.com/svg/image-element.html')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'http', request, response)
+        errorCollector.checkThat(bOut.toString(0I), anyOf(
+            containsString('<rect x="10" y="10" height="130" width="500" style="fill: #000000"/>'),
+            containsString('<rect x="10" y="10" height="130" width="500" style="fill: #000000"></rect>')))
+        errorCollector.checkThat(bOut.toString(0I), anyOf(
+            containsString('<image x="20" y="20" width="300" height="80" xlink:href="http://fnuh.com/rnw-http/jenkov.com/images/layout/top-bar-logo.png" />'),
+            containsString('<image x="20" y="20" width="300" height="80" xlink:href="http://fnuh.com/rnw-http/jenkov.com/images/layout/top-bar-logo.png"></image>')))
+        errorCollector.checkThat(bOut.toString(0I), anyOf(
+            containsString('<line x1="25" y1="80" x2="350" y2="80" style="stroke: #ffffff; stroke-width: 3;"/>'),
+            containsString('<line x1="25" y1="80" x2="350" y2="80" style="stroke: #ffffff; stroke-width: 3;"></line>')))
+    }
     
 }

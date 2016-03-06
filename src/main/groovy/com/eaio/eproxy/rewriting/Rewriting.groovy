@@ -25,6 +25,7 @@ import org.xml.sax.helpers.XMLReaderFactory
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.css.*
 import com.eaio.eproxy.rewriting.html.*
+import com.eaio.eproxy.rewriting.svg.SVGFilter
 import com.eaio.net.httpclient.ReEncoding
 
 /**
@@ -118,7 +119,8 @@ class Rewriting {
                 configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig)
             ])
         }
-        filters << telemetryFilter << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
+        filters << telemetryFilter << new SVGFilter() <<
+            new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
@@ -134,6 +136,7 @@ class Rewriting {
                 log.warn("While parsing {}: {}", requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
+        catch (NullPointerException ignored) {}
         finally {
             try {
                 outputWriter.flush()
@@ -148,6 +151,7 @@ class Rewriting {
             CSSRewritingFilter handler = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
             handler.rewriteCSS(newSACInputSource(inputStream, charset), outputWriter)
         }
+        catch (NullPointerException ignored) {}
         finally {
             try {
                 outputWriter.flush()
@@ -160,11 +164,13 @@ class Rewriting {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         XMLReader xmlReader = newXMLReader()
         DefaultFilter filter = new BaseFilter() // No-op for now
-        filter.documentHandler = new XMLDocumentHandlerDocumentHandlerAdapter(new XMLSerializer(outputWriter, new OutputFormat(Method.XML, (charset ?: defaultCharset).name(), true)))
+        filter.documentHandler = new XMLDocumentHandlerDocumentHandlerAdapter(
+            new XMLSerializer(outputWriter, new OutputFormat(Method.XML, (charset ?: defaultCharset).name(), true)))
         xmlReader.contentHandler = new ContentHandlerXMLDocumentHandlerAdapter(filter)
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
+        catch (NullPointerException ignored) {}
         finally {
             try {
                 outputWriter.flush()
