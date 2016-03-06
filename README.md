@@ -68,6 +68,6 @@ The configuration can be found in ``src/main/resources/application.properties``.
 
 ## History
 
-The idea is based on [mirrorr](https://github.com/bslatkin/mirrorrr). Some of the code came from [media.io](http://media.io), a project called Delivrr (sadly gone) and [EAIO](http://eaio.com).
+The idea is based on [mirrorr](https://github.com/bslatkin/mirrorrr). Some of the code came from [media.io](http://media.io), a project called Delivrr (sadly gone) and [EAIO](http://eaio.com/?utm_source=github&utm_medium=open-source&utm_campaign=eproxy).
 
 ``*`` Planned
