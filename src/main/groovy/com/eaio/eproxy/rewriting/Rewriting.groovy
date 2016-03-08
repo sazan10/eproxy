@@ -1,11 +1,10 @@
 package com.eaio.eproxy.rewriting
 
+import static org.apache.commons.io.IOUtils.*
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import java.nio.charset.Charset
-
-import javax.xml.parsers.SAXParserFactory
 
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.HeaderElement
@@ -14,7 +13,6 @@ import org.apache.xml.serialize.*
 import org.cyberneko.html.filters.DefaultFilter
 import org.cyberneko.html.parsers.SAXParser
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
@@ -149,7 +147,7 @@ class Rewriting {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         try {
             CSSRewritingFilter handler = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
-            handler.rewriteCSS(newSACInputSource(inputStream, charset), outputWriter)
+            handler.rewriteCSS(toString(inputStream, charset ?: defaultCharset), outputWriter)
         }
         catch (NullPointerException ignored) {}
         finally {
@@ -192,14 +190,6 @@ class Rewriting {
 
     InputSource newSAXInputSource(InputStream inputStream, Charset charset) {
         InputSource out = new InputSource(byteStream: inputStream)
-        if (charset) {
-            out.encoding = charset.displayName()
-        }
-        out
-    }
-
-    org.w3c.css.sac.InputSource newSACInputSource(InputStream inputStream, Charset charset) {
-        org.w3c.css.sac.InputSource out = new org.w3c.css.sac.InputSource(byteStream: inputStream)
         if (charset) {
             out.encoding = charset.displayName()
         }

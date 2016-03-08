@@ -299,4 +299,18 @@ class ProxyHTTPRewritingIT {
             containsString('<line x1="25" y1="80" x2="350" y2="80" style="stroke: #ffffff; stroke-width: 3;"></line>')))
     }
     
+    @Test
+    void 'CSS rewriting should unescape HTML'() {
+        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/leak.html')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'http', request, response)
+        assertThat(bOut.toString(0I), containsString('url(http://fnuh.com/rnw-https/leaking.via/inline-css-background-image)'))
+    }
+    
 }
