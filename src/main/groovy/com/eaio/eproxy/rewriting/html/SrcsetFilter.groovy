@@ -11,7 +11,7 @@ import org.apache.xerces.xni.XMLAttributes
 import com.eaio.eproxy.rewriting.URIManipulation
 
 /**
- * Rewrites <tt>&lt;img srcset&gt;</tt> and <tt>&lt;source srcset&gt;</tt>, which is slightly different due to being a comma-separated list.
+ * Rewrites <tt>&lt;img srcset&gt;</tt> and <tt>&lt;source srcset&gt;</tt>, which is rewritten differently due to being a comma-separated list.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$

@@ -11,8 +11,8 @@ import org.apache.xerces.xni.XMLString
 /**
  * Transforms HTML as follows:
  * <ul>
- * <li>Any script elements are removed.
- * <li>Any on* handlers are removed.
+ * <li>Any <tt>&lt;script&gt;</tt> elements are removed.
+ * <li>Any <tt>on*</tt> handlers are removed.
  * </ul>
  *
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>

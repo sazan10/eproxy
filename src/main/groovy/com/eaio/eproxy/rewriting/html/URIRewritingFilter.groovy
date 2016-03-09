@@ -11,7 +11,7 @@ import org.apache.xerces.xni.XMLAttributes
 import com.eaio.eproxy.rewriting.URIManipulation
 
 /**
- * Rewrites <tt>src</tt>, <tt>href</tt> and <tt>action</tt> attributes.
+ * Rewrites all attributes except those already covered by other {@link BaseFilter filters}.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$

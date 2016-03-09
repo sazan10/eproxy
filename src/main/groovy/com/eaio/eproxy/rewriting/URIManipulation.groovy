@@ -29,6 +29,8 @@ trait URIManipulation {
     }
 
     /**
+     * Decodes a URI from eproxy's scheme.
+     * <p> 
      * Make sure to remove the context path before calling this method.
      */
     URI decodeTargetURI(String scheme, String requestURI, String queryString) {
@@ -58,7 +60,7 @@ trait URIManipulation {
     }
 
     /**
-     * Resolves <tt>uri</tt> relative to <tt>requestURI</tt>, then turns it all into eproxy's URL scheme.
+     * Resolves <tt>uri</tt> relative to <tt>requestURI</tt>, then turns it all into eproxy's scheme.
      */
     String encodeTargetURI(URI baseURI, URI requestURI, String uri, RewriteConfig rewriteConfig = null) {
         URI resolvedURI = resolve(requestURI, uri)

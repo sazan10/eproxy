@@ -28,7 +28,7 @@ import com.steadystate.css.dom.*
 class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     
     @Lazy
-    private Collection<Pattern> replacements = [
+    private static Collection<Pattern> replacements = [
         ~/(?i)(?:(?:\\75 ?|u)(?:\\72 ?|r)(?:\\6C ?|l)|image)\s*\(\s*(["']([^#][^"']+)["']|([^#][^\s)]+))/, // TODO: Escape
         ~/(?i)@import\s*(?:["']([^#][^"']+)["']|([^#][^\s;]+))/,
         ~/(?i)\W(?:src|colorSpace)\s*=\s*(?:["']([^#][^"']+)["']|([^#][^\s)]+))/
@@ -36,6 +36,11 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     
     private boolean inStyleElement
 
+    /**
+     * Rewrites any style attributes, too.
+     * 
+     * @see org.cyberneko.html.filters.DefaultFilter#startElement(org.apache.xerces.xni.QName, org.apache.xerces.xni.XMLAttributes, org.apache.xerces.xni.Augmentations)
+     */
     @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         if (nameIs(qName, 'style')) {
@@ -64,6 +69,8 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
 
     /**
      * Rewrites <tt>&lt;style&gt;</tt> contents.
+     * 
+     * @see org.cyberneko.html.filters.DefaultFilter#characters(org.apache.xerces.xni.XMLString, org.apache.xerces.xni.Augmentations)
      */
     @Override
     void characters(XMLString xmlString, Augmentations augs) {

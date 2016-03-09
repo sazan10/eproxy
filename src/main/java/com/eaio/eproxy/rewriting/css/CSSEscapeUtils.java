@@ -6,7 +6,7 @@ import org.apache.commons.lang3.text.translate.EntityArrays;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
 
 /**
- * <del>Stolen from</del><ins>Loosely following</ins> {@link StringEscapeUtils}.
+ * <del>Stolen from</del> <ins>Loosely following</ins> {@link StringEscapeUtils}.
  * (Un)escapes some things that NekoHTML apparently doesn't.
  * <p>
  * Not really well tested.

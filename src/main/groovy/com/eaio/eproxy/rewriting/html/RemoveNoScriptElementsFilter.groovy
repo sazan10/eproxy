@@ -10,7 +10,7 @@ import org.apache.xerces.xni.XMLString
 /**
  * Transforms HTML as follows:
  * <ul>
- * <li>Any noscript elements and their child nodes are removed.
+ * <li>Any <tt>&lt;noscript&gt;</tt> elements and their child nodes are removed.
  * </ul>
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>

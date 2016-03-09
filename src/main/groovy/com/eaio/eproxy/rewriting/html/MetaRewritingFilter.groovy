@@ -15,7 +15,7 @@ import org.apache.xerces.xni.XMLAttributes
 import com.eaio.eproxy.rewriting.URIManipulation
 
 /**
- * Rewrites <tt>meta refresh</tt>. Should be placed after {@link RemoveNoScriptElementsFilter}.
+ * Rewrites <tt>&lt;meta refresh&gt;</tt>. Should be placed after {@link RemoveNoScriptElementsFilter}.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
