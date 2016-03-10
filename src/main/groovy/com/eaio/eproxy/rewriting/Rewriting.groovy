@@ -114,11 +114,11 @@ class Rewriting {
                 configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig),
                 configure(new MetaRewritingFilter(), baseURI, requestURI, rewriteConfig),
                 configure(new SrcsetFilter(), baseURI, requestURI, rewriteConfig),
-                configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig)
+                configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig),
+                telemetryFilter
             ])
         }
-        filters << telemetryFilter << new SVGFilter() <<
-            new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
+        filters << new SVGFilter() << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))

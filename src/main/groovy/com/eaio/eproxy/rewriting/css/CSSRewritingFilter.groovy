@@ -28,11 +28,11 @@ import com.steadystate.css.dom.*
 class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     
     @Lazy
-    private static Collection<Pattern> replacements = [
+    private static final List<Pattern> replacements = Collections.unmodifiableList([
         ~/(?i)(?:(?:\\75 ?|u)(?:\\72 ?|r)(?:\\6C ?|l)|image)\s*\(\s*(["']([^#][^"']+)["']|([^#][^\s)]+))/, // TODO: Escape
         ~/(?i)@import\s*(?:["']([^#][^"']+)["']|([^#][^\s;]+))/,
         ~/(?i)\W(?:src|colorSpace)\s*=\s*(?:["']([^#][^"']+)["']|([^#][^\s)]+))/
-        ]
+        ])
     
     private boolean inStyleElement
 
