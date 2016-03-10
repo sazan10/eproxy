@@ -13,7 +13,7 @@ import org.apache.commons.lang3.text.translate.LookupTranslator;
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-public class CSSEscapeUtils {
+public class CSSEscapingUtils {
 
     private static final String[][] CSS_UNESCAPE = new String[][] {
         { "&lpar;", "(" },
@@ -23,7 +23,7 @@ public class CSSEscapeUtils {
     public static final CharSequenceTranslator UNESCAPE_CSS = 
             new LookupTranslator(CSS_UNESCAPE);
 
-    public static final String unescapeCSS(final String input) {
+    public static final CharSequence unescapeCSS(CharSequence input) {
         return UNESCAPE_CSS.translate(input);
     }
 

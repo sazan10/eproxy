@@ -51,9 +51,8 @@ class CSSRewritingFilterTest {
     @Test
     void 'should rewrite inline style sheet'() {
         String style = 'height:110px;width:276px;background:url(/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png) no-repeat'
-        Writer out = new StringWriter()
-        cssRewritingFilter.rewriteCSS(style, out)
-        assertThat(out as String,
+        String out = cssRewritingFilter.rewriteCSS(style)
+        assertThat(out,
             anyOf(containsString('background:url(http://fnuh.com/rnw-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png'),
                 containsString('background: url(http://fnuh.com/rnw-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png')))
     }
@@ -61,12 +60,10 @@ class CSSRewritingFilterTest {
     @Test
     @Parameters(method = 'cssFiles')
     void 'should rewrite CSS file'(File cssFile) {
-        StrBuilder builder = new StrBuilder()
-        cssRewritingFilter.rewriteCSS(cssFile.text, builder.asWriter())
-        String rewritten = builder as String
-        assertThat(cssFile.name, trimToNull(rewritten), notNullValue())
-        assertThat(cssFile.name, rewritten, allOf(containsString('http://fnuh.com/rnw-'),
-            not(containsString('/rnw-data')), not(containsString('url(/rsrc.php')), not(containsString('https://leaking.via'))))
+        String rewritten = cssRewritingFilter.rewriteCSS(cssFile.text)
+        errorCollector.checkThat(cssFile.name, trimToNull(rewritten), notNullValue())
+        errorCollector.checkThat(cssFile.name, rewritten, allOf(containsString('http://fnuh.com/rnw-'),
+            not(containsString('/rnw-data:')), not(containsString('url(/rsrc.php')), not(containsString('//leaking.via'))))
     }
 
     Collection<Object[]> cssFiles() {

@@ -47,13 +47,11 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
             inStyleElement = true
         }
         else {
-            String styleAttribute = atts.getValue('style') // TODO: SVG attributes (mask, fill and others?)
-            if (isNotBlank(styleAttribute)) {
-                styleAttribute = CSSEscapeUtils.unescapeCSS(styleAttribute)
-                DirectStrBuilder builder = new DirectStrBuilder(styleAttribute.length())
-                rewriteCSS(styleAttribute, builder.asWriter())
-                atts.setValue(atts.getIndex('style'), builder.toString())
-                log.debug('rewrote style attribute {} chars to {} chars', styleAttribute.length(), builder.length())
+            String css = atts.getValue('style') // TODO: SVG attributes (mask, fill and others?)
+            if (isNotBlank(css)) {
+                String rewritten = rewriteCSS(css)
+                atts.setValue(atts.getIndex('style'), rewritten)
+                log.debug('rewrote style attribute {} chars to {} chars', css.length(), rewritten.length())
             }
         }
         super.startElement(qName, atts, augs)
@@ -77,10 +75,9 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         if (inStyleElement) {
             String css = new String(xmlString.ch, xmlString.offset, xmlString.length) // TODO: performance
             if (isNotBlank(css)) {
-                DirectStrBuilder builder = new DirectStrBuilder(xmlString.length)
-                rewriteCSS(css, builder.asWriter())
-                super.characters(new XMLString(builder.buffer, 0I, builder.length()), augs)
-                log.debug('rewrote CSS {} chars to {} chars', xmlString.length, builder.length())
+                String rewritten = rewriteCSS(css)
+                super.characters(new XMLString(rewritten.toCharArray(), 0I, rewritten.length()), augs) // TODO: performance
+                log.debug('rewrote CSS {} chars to {} chars', xmlString.length, rewritten.length())
             }
         }
         else {
@@ -88,8 +85,8 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         }
     }
 
-    void rewriteCSS(String css, Writer writer) {
-        String out = replacements.inject(css, { String s, Pattern p ->
+    String rewriteCSS(String css) {
+        replacements.inject(CSSEscapingUtils.unescapeCSS(css) as String, { String s, Pattern p ->
             s.replaceAll(p, { List<String> matches ->
                 String out = matches[0I]
                 String uri = matches[2I] ?: matches[1I]
@@ -100,7 +97,6 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
                 out
             })
         })
-        writer.write(out)
     }
 
 }
