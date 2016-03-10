@@ -168,6 +168,9 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <append>false</append>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>default-prepare-agent-integration</id>
@@ -175,6 +178,7 @@
                             <goal>prepare-agent-integration</goal>
                         </goals>
                         <configuration>
+                            <append>true</append>
                             <destFile>${project.build.directory}/jacoco.exec</destFile>
                         </configuration>
                     </execution>
