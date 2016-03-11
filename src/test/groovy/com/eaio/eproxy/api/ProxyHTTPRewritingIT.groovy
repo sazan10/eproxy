@@ -121,7 +121,7 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
-    void 'SVG elements should be rewritten'() {
+    void 'SVG should be rewritten 1'() {
         HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/Testing%20Cascade%20of%20SVG%20fill%20with%20external%20resource.html') // Originally from https://css-tricks.com/examples/svg-external-cascade/
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -136,7 +136,7 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
-    void 'CSS should be rewritten'() {
+    void 'CSS should be rewritten 2'() {
         HttpServletRequest request = buildHttpServletRequest('https://static.xx.fbcdn.net/rsrc.php/v2/yL/r/EZnQqgEpw9Z.css')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -236,7 +236,7 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
-    void 'srcset attributes shold be rewritten correctly'() {
+    void 'srcset attributes shold be rewritten'() {
         HttpServletRequest request = buildHttpServletRequest('https://en.wikipedia.org/wiki/Ketamine')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -250,7 +250,7 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
-    void 'SVG rewriting should work'() {
+    void 'SVG should be rewriting 2'() {
         HttpServletRequest request = buildHttpServletRequest('https://en.wikipedia.org/static/1.27.0-wmf.13/skins/Vector/images/user-icon.svg?7b5d5')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -264,7 +264,7 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
-    void 'CSS rewriting should work'() {
+    void 'CSS should be rewritten 1'() {
         HttpServletRequest request = buildHttpServletRequest('https://bill.ccbill.com/jpost/jquery/css/smoothness/jquery-ui-1.7.2.custom.css')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -311,6 +311,20 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), containsString('url(http://fnuh.com/rnw-https/leaking.via/inline-css-background-image)'))
+    }
+    
+    @Test
+    void 'all style attributes should be rewritten'() {
+        HttpServletRequest request = buildHttpServletRequest('http://www.hidayahsunnah.com/blog/2014/10/01/ceramah-singkat-islam-dan-kesimbangan-alam-ustadz-riyadh-bin-badr-bajrey/')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'http', request, response)
+        assertThat(bOut.toString(0I), not(containsString('url(http://www.hidayahsunnah.com/wp-content/plugins/wp-socializer/public/social-icons/wp-socializer-sprite-32px.png?v1)')))
     }
     
 }

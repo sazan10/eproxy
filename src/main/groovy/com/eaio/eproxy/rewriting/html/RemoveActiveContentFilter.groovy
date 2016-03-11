@@ -29,15 +29,25 @@ class RemoveActiveContentFilter extends BaseFilter {
             inScriptElement = true
         }
         else {
-            for (int i = 0I; i < atts.length; ) {
-                if (startsWithIgnoreCase(atts.getLocalName(i) ?: atts.getQName(i), 'on')) {
-                    atts.removeAttributeAt(i)
-                }
-                else {
-                    ++i
-                }
-            }
+            rewriteElement(qName, atts, augs)
             super.startElement(qName, atts, augs)
+        }
+    }
+
+    @Override
+    void emptyElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        rewriteElement(qName, atts, augs)
+        super.emptyElement(qName, atts, augs)
+    }
+
+    private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        for (int i = 0I; i < atts.length; ) {
+            if (startsWithIgnoreCase(atts.getLocalName(i) ?: atts.getQName(i), 'on')) {
+                atts.removeAttributeAt(i)
+            }
+            else {
+                ++i
+            }
         }
     }
 

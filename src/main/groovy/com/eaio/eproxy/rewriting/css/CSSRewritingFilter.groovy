@@ -46,23 +46,31 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         if (nameIs(qName, 'style')) {
             inStyleElement = true
         }
-        else {
-            String css = atts.getValue('style') // TODO: SVG attributes (mask, fill and others?)
-            if (isNotBlank(css)) {
-                String rewritten = rewriteCSS(css)
-                atts.setValue(atts.getIndex('style'), rewritten)
-                log.debug('rewrote style attribute {} chars to {} chars', css.length(), rewritten.length())
-            }
-        }
+        rewriteElement(qName, atts, augs)
         super.startElement(qName, atts, augs)
     }
-
+    
+    @Override
+    void emptyElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        rewriteElement(qName, atts, augs)
+        super.emptyElement(qName, atts, augs)
+    }
+    
     @Override
     void endElement(QName qName, Augmentations augs) {
         if (nameIs(qName, 'style')) {
             inStyleElement = false
         }
         super.endElement(qName, augs)
+    }
+    
+    private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        String css = atts.getValue('style') // TODO: SVG attributes (mask, fill and others?)
+        if (isNotBlank(css)) {
+            String rewritten = rewriteCSS(css)
+            atts.setValue(atts.getIndex('style'), rewritten)
+            log.debug('rewrote style attribute {} chars to {} chars', css.length(), rewritten.length())
+        }
     }
 
     /**
@@ -85,6 +93,11 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         }
     }
 
+    /**
+     * Repeatedly applies the regular expressions in {@link #replacements}.
+     * <p>
+     * Check if <tt>css</tt> is blank before calling this.
+     */
     String rewriteCSS(String css) {
         replacements.inject(CSSEscapingUtils.unescapeCSS(css) as String, { String s, Pattern p ->
             s.replaceAll(p, { List<String> matches ->

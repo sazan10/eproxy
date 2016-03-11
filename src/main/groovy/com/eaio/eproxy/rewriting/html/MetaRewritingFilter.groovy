@@ -30,6 +30,17 @@ class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
 
     @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        rewriteElement(qName, atts, augs)
+        super.startElement(qName, atts, augs)
+    }
+
+    @Override
+    void emptyElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        rewriteElement(qName, atts, augs)
+        super.emptyElement(qName, atts, augs)
+    }
+    
+    private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         if (nameIs(qName, 'meta')) {
             String httpEquiv = atts.getValue('http-equiv')
             if (httpEquiv) {
@@ -52,7 +63,6 @@ class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
                 }
             }
         }
-        super.startElement(qName, atts, augs)
     }
 
 }

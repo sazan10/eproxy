@@ -33,6 +33,7 @@ class MetaRewritingFilterTest {
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         errorCollector.checkThat(output as String, containsString('<meta http-equiv="refresh" content="5; url=http://rah.com/rnw-https/www.facebook.com/blorb.html"'))
+        errorCollector.checkThat(output as String, not(containsString('url=ratte.html')))
     }
     
     @Test

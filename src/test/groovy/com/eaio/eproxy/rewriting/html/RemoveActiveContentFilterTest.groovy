@@ -33,6 +33,7 @@ class RemoveActiveContentFilterTest {
         errorCollector.checkThat(output as String, containsString('<img src="fnuh.jpg">'))
         errorCollector.checkThat(output as String, containsString('<img width="1" height="1" src="dah.jpg">'))
         errorCollector.checkThat(output as String, allOf(not(containsString('<rah ')), not(containsString('<RAH'))))
+        errorCollector.checkThat(output as String, not(containsString('alert(\'uh\')')))
     }
 
 }

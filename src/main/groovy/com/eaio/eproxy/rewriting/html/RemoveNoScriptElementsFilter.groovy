@@ -30,6 +30,13 @@ class RemoveNoScriptElementsFilter extends BaseFilter {
             super.startElement(qName, atts, augs)
         }
     }
+    
+    @Override
+    void emptyElement(QName element, XMLAttributes attributes, Augmentations augs) {
+        if (!inNoscriptElement) {
+            super.emptyElement(element, attributes, augs)
+        }
+    }
 
     @Override
     void endElement(QName qName, Augmentations augs) {
@@ -45,13 +52,6 @@ class RemoveNoScriptElementsFilter extends BaseFilter {
     void characters(XMLString xmlString, Augmentations augs) {
         if (!inNoscriptElement) {
             super.characters(xmlString, augs)
-        }
-    }
-
-    @Override
-    void emptyElement(QName element, XMLAttributes attributes, Augmentations augs) {
-        if (!inNoscriptElement) {
-            super.emptyElement(element, attributes, augs)
         }
     }
 
