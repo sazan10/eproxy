@@ -8,7 +8,7 @@ eproxy is a proxy that
 * supports cookies``*``
 * supports all HTTP methods 
 * supports HTTPS
-* supports HTTP Byte Serving using the ``Range`` header (unless rewriting)
+* supports HTTP Byte Serving independent of the origin server using the ``Range`` header (unless rewriting)
 * supports cache validation using ``If-Modified-Since`` and ``If-None-Match``
 * supports SOCKS proxies for your hardcore tunneling needs
 * supports users who have JavaScript disabled
