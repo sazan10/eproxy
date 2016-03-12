@@ -16,6 +16,8 @@ import org.springframework.web.context.request.ServletRequestAttributes
 /**
  * Embeds the telemetry JavaScript on the page (if enabled).
  * <p>
+ * Needs to be placed after {@link RemoveActiveContentFilter} obviously.
+ * <p>
  * This class is a also good example of why every XML/SGML API is shit.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
