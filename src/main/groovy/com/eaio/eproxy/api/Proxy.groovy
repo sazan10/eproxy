@@ -59,7 +59,7 @@ class Proxy implements URIManipulation {
 
     @Value('${http.totalTimeout}')
     Long totalTimeout
-    
+
     @Value('${http.userAgent}')
     String userAgent
 
@@ -116,7 +116,7 @@ class Proxy implements URIManipulation {
             OutputStream outputStream = response.outputStream
             HeaderElement contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
 
-            RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
+            RewriteConfig rewriteConfig = rewriteConfigString ? RewriteConfig.fromString(rewriteConfigString) : null
 
             boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
 
@@ -196,7 +196,7 @@ class Proxy implements URIManipulation {
         }
         catch (IOException ex) {
             if (ex instanceof NoHttpResponseException || ex instanceof SocketTimeoutException || ex instanceof ConnectTimeoutException ||
-                ex instanceof UnknownHostException || ex instanceof ClientProtocolException) {
+            ex instanceof UnknownHostException || ex instanceof ClientProtocolException) {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
             else if (ex.message == 'Connection reset by peer') {
@@ -218,7 +218,10 @@ class Proxy implements URIManipulation {
             }
         }
         finally {
-            EntityUtils.consumeQuietly(remoteResponse?.entity)
+            try {
+                EntityUtils.consumeQuietly(remoteResponse?.entity)
+            }
+            catch (emall) {}
         }
     }
 
@@ -280,7 +283,7 @@ class Proxy implements URIManipulation {
     // TODO Header whitelist
     boolean dropHeader(String name, boolean canRewrite) {
         boolean out = false
-        if ([ 'Content-Security-Policy', 'Transfer-Encoding', 'Accept-Ranges', 'Date', 'Pragma', 'Set-Cookie', 'Age' ].any { it.equalsIgnoreCase(name) }) {
+        if ([ 'Content-Security-Policy', 'Transfer-Encoding', 'Date', 'Pragma', 'Set-Cookie', 'Age' ].any { it.equalsIgnoreCase(name) }) {
             out = true
         }
         if (!out && canRewrite) {
@@ -288,7 +291,7 @@ class Proxy implements URIManipulation {
         }
         out
     }
-    
+
     /**
      * Returns start and end offsets from <tt>Range</tt> request headers.
      *
