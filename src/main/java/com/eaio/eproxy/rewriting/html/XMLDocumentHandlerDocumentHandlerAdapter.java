@@ -78,7 +78,12 @@ public class XMLDocumentHandlerDocumentHandlerAdapter implements
     @Override
     public void processingInstruction(String target, XMLString data,
             Augmentations augs) throws XNIException {
-        throw new UnsupportedOperationException();
+        try {
+            contentHandler.processingInstruction(target, data.toString());
+        }
+        catch (SAXException ex) {
+            throw new XNIException(ex);
+        }
     }
 
     /**
