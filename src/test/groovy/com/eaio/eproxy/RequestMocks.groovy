@@ -4,6 +4,12 @@ import javax.servlet.http.HttpServletRequest
 
 import com.eaio.eproxy.entities.RewriteConfig
 
+/**
+ * Builds fake {@link HttpServletRequest requests}.
+ * 
+ * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
+ * @version $Id$
+ */
 class RequestMocks {
 
     static HttpServletRequest buildHttpServletRequest(String uriString, String method = 'GET', Closure getHeaderClosure = { String name -> null },
