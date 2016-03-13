@@ -27,7 +27,7 @@ class SrcsetFilter extends RewritingFilter implements URIManipulation {
     }
 
     @Override
-    public void emptyElement(QName qName, XMLAttributes atts, Augmentations augs) {
+    void emptyElement(QName qName, XMLAttributes atts, Augmentations augs) {
         rewriteElement(qName, atts, augs)
         super.emptyElement(qName, atts, augs)
     }

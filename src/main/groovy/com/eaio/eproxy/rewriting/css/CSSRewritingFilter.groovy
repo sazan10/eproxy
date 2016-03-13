@@ -29,13 +29,16 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     
     @Lazy
     private static final List<Pattern> replacements = Collections.unmodifiableList([
-        ~/(?i)(?:(?:\\75 ?|u)(?:\\72 ?|r)(?:\\6C ?|l)|image)\s*\(\s*(["']([^#][^"']+)["']|([^#][^\s)]+))/, // TODO: Escape
+        ~/(?i)(?:url|image)\s*\(\s*(["']([^#][^"']+)["']|([^#][^\s)]+))/,
         ~/(?i)@import\s*(?:["']([^#][^"']+)["']|([^#][^\s;]+))/,
         ~/(?i)\W(?:src|colorSpace)\s*=\s*(?:["']([^#][^"']+)["']|([^#][^\s)]+))/
         ])
     
+    @Lazy
+    CSSEscapingUtils cssEscapingUtils
+    
     private boolean inStyleElement
-
+    
     /**
      * Rewrites any style attributes, too.
      * 
@@ -99,7 +102,7 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
      * Check if <tt>css</tt> is blank before calling this.
      */
     String rewriteCSS(String css) {
-        replacements.inject(CSSEscapingUtils.unescapeCSS(css) as String, { String s, Pattern p ->
+        replacements.inject(cssEscapingUtils.unescapeCSS(css) as String, { String s, Pattern p ->
             s.replaceAll(p, { List<String> matches ->
                 String out = matches[0I]
                 String uri = matches[2I] ?: matches[1I]

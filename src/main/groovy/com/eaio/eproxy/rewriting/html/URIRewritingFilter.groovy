@@ -4,9 +4,7 @@ import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
-import org.apache.xerces.xni.Augmentations
-import org.apache.xerces.xni.QName
-import org.apache.xerces.xni.XMLAttributes
+import org.apache.xerces.xni.*
 
 import com.eaio.eproxy.rewriting.URIManipulation
 
@@ -19,6 +17,26 @@ import com.eaio.eproxy.rewriting.URIManipulation
 @CompileStatic
 @Slf4j
 class URIRewritingFilter extends RewritingFilter implements URIManipulation {
+
+    @Override
+    void processingInstruction(String target, XMLString data,
+                    Augmentations augs) {
+        XMLString xmlString = data
+        String s = data as String
+        if (s?.toLowerCase()?.contains("href=")) {
+            s = s.replaceAll(~/href=["']([^#][^"']+)["']/, { List<String> matches ->
+                String out = matches[0I]
+                String uri = matches[1I]
+                if (attributeValueNeedsRewriting(uri)) {
+                    String rewritten = encodeTargetURI(baseURI, requestURI, uri, rewriteConfig)
+                    out = replace(matches[0I], uri, rewritten)
+                }
+                out
+            })
+            xmlString = new XMLString(s.toCharArray(), 0I, s.length())
+        }
+        super.processingInstruction(target, xmlString, augs);
+    }
 
     @Override    
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
