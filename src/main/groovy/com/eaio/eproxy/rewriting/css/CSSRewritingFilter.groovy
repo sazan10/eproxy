@@ -27,16 +27,6 @@ import com.steadystate.css.dom.*
 @Slf4j
 class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     
-    @Lazy
-    private static final List<Pattern> replacements = Collections.unmodifiableList([
-        ~/(?i)(?:url|image)\s*\(\s*(["']([^#][^"']+)["']|([^#][^\s)]+))/,
-        ~/(?i)@import\s*(?:["']([^#][^"']+)["']|([^#][^\s;]+))/,
-        ~/(?i)\W(?:src|colorSpace)\s*=\s*(?:["']([^#][^"']+)["']|([^#][^\s)]+))/
-        ])
-    
-    @Lazy
-    CSSEscapingUtils cssEscapingUtils
-    
     private boolean inStyleElement
     
     /**
@@ -102,13 +92,13 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
      * Check if <tt>css</tt> is blank before calling this.
      */
     String rewriteCSS(String css) {
-        String unescapedCSS = cssEscapingUtils.unescapeCSS(css) as String
-        replacements.inject(unescapedCSS, { String s, Pattern p ->
+        String unescapedCSS = CSSEscapeUtils.unescapeCSS(css) as String
+        CSSEscapeUtils.PATTERNS.inject(unescapedCSS, { String s, Pattern p ->
             s.replaceAll(p, { List<String> matches ->
                 String out = matches[0I]
-                String uri = matches[2I] ?: matches[1I]
-                if (attributeValueNeedsRewriting(uri)) {
-                    String rewritten = encodeTargetURI(baseURI, requestURI, uri, rewriteConfig)
+                String uri = matches[2I] ?: matches[1I], unescapedURI = new CSSUnescaper().translate(uri)
+                if (attributeValueNeedsRewriting(unescapedURI)) {
+                    String rewritten = encodeTargetURI(baseURI, requestURI, unescapedURI, rewriteConfig)
                     out = replace(matches[0I], uri, rewritten)
                 }
                 out

@@ -44,7 +44,7 @@ class CSSRewritingFilterTest {
         errorCollector.checkThat(output as String, anyOf(
             containsString('background-image: image(http://fnuh.com/rnw-http/creme.com/aha.jpg)'),
             containsString('background-image: image(\'http://fnuh.com/rnw-http/creme.com/aha.jpg\')')))
-        errorCollector.checkThat(output as String, containsString('background-image: url(http://fnuh.com/rnw-https/www.google.com/bla.jpg)'))
+        errorCollector.checkThat(output as String, containsString('background-image: \\000075\\00072\\006C(http://fnuh.com/rnw-https/www.google.com/bla.jpg)'))
     }
 
     @Test
@@ -68,5 +68,5 @@ class CSSRewritingFilterTest {
     Collection<Object[]> cssFiles() {
         new File('src/test/resources/com/eaio/eproxy/rewriting/css').listFiles().collect { [ it ] as Object[] }
     }
-
+    
 }

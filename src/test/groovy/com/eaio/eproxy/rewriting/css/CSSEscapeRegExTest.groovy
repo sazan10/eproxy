@@ -13,17 +13,17 @@ import org.junit.rules.ErrorCollector
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-class CSSRegExpEscapingTest {
+class CSSEscapeRegExTest {
     
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
 
     /**
-     * Test method for {@link com.eaio.eproxy.rewriting.css.CSSRegExpEscaping#appendPattern(java.lang.Appendable, java.lang.Object)}.
+     * Test method for {@link com.eaio.eproxy.rewriting.css.CSSEscapeRegEx#appendPattern(java.lang.Appendable, java.lang.Object)}.
      */
     @Test
     void 'toPattern should be compilable'() {
-        String regexp = CSSRegExpEscaping.toPattern('é'), expected = '(?:\\\\0{0,4}e9[ \\t\\n]?|é)'
+        String regexp = CSSEscapeRegEx.toPattern('é'), expected = '(?:\\\\0{0,4}e9[ \\t\\n]?|é)'
         errorCollector.checkThat("${URLEncoder.encode(regexp)} should be ${URLEncoder.encode(expected)}", regexp, is(expected))
         errorCollector.checkThat(Pattern.compile(regexp), isA(Pattern))
         errorCollector.checkThat(Pattern.compile(regexp).matcher('é').matches(), is(true))

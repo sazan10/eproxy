@@ -33,7 +33,7 @@ class RewritingFilter extends BaseFilter {
 
     boolean attributeValueNeedsRewriting(String attributeValue) {
         // Exclude HTML attribute values
-        if (!attributeValue?.startsWith('<')) {
+        if (!attributeValue?.startsWith('<') && !attributeValue?.startsWith('#')) {
             int colonIndex = attributeValue.indexOf((int) ((char) ':'))
             if (colonIndex == -1I) {
                 colonIndex = Integer.MAX_VALUE
