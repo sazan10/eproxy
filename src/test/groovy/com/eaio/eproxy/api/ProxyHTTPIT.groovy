@@ -92,7 +92,7 @@ class ProxyHTTPIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'https', request, response)
-        assertThat(bOut.toString(0I), containsString('About.me makes it easy'))
+        assertThat(bOut.toString(0I), containsString('Johann Burkard'))
     }
     
     @Test
