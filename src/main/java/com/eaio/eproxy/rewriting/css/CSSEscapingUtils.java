@@ -1,7 +1,6 @@
 package com.eaio.eproxy.rewriting.css;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.text.translate.AggregateTranslator;
 import org.apache.commons.lang3.text.translate.CharSequenceTranslator;
 import org.apache.commons.lang3.text.translate.LookupTranslator;
 
@@ -21,10 +20,9 @@ public class CSSEscapingUtils {
         { "&rpar;", ")" }
     };
     
-    public CharSequenceTranslator UNESCAPE_CSS = new AggregateTranslator(new LookupTranslator(CSS_UNESCAPE),
-         new CSSUnescaper());
+    public static CharSequenceTranslator UNESCAPE_CSS = new LookupTranslator(CSS_UNESCAPE);
 
-    public CharSequence unescapeCSS(CharSequence input) {
+    public static CharSequence unescapeCSS(CharSequence input) {
         return UNESCAPE_CSS.translate(input);
     }
 
