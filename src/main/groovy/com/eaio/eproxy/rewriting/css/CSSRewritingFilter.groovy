@@ -102,7 +102,8 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
      * Check if <tt>css</tt> is blank before calling this.
      */
     String rewriteCSS(String css) {
-        replacements.inject(cssEscapingUtils.unescapeCSS(css) as String, { String s, Pattern p ->
+        String unescapedCSS = cssEscapingUtils.unescapeCSS(css) as String
+        replacements.inject(unescapedCSS, { String s, Pattern p ->
             s.replaceAll(p, { List<String> matches ->
                 String out = matches[0I]
                 String uri = matches[2I] ?: matches[1I]
