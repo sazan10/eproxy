@@ -13,18 +13,22 @@ import org.apache.commons.lang3.text.translate.LookupTranslator;
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-public class CSSEscapingUtils {
+public class CSSEscapeUtils {
 
-    private static final String[][] CSS_UNESCAPE = new String[][] {
+    private static final String[][] HTML_UNESCAPE = new String[][] {
         { "&lpar;", "(" },
         { "&rpar;", ")" }
     };
-    
-    public static final CharSequenceTranslator UNESCAPE_CSS = 
-            new LookupTranslator(CSS_UNESCAPE);
 
-    public static final CharSequence unescapeCSS(CharSequence input) {
-        return UNESCAPE_CSS.translate(input);
+    private static CharSequenceTranslator UNESCAPE_HTML = new LookupTranslator(HTML_UNESCAPE);
+
+    /**
+     * Unescapes HTML that NekoHTML doesn't.
+     * 
+     * @param input may be <code>null</code>
+     */
+    public static CharSequence unescapeHTML(CharSequence input) {
+        return UNESCAPE_HTML.translate(input);
     }
 
 }

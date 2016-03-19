@@ -1,6 +1,7 @@
 package com.eaio.eproxy.rewriting
 
 import static org.apache.commons.lang3.StringUtils.*
+import groovy.transform.CompileStatic
 
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.springframework.web.util.UriComponentsBuilder
@@ -24,6 +25,7 @@ trait URIManipulation {
     /**
      * Builds a URI that points to this web application.
      */
+    @CompileStatic
     URI buildBaseURI(String scheme, String host, int port, String contextPath) {
         new URI(scheme, null, host, getPort(scheme, port), contextPath, null, null)
     }
@@ -45,16 +47,17 @@ trait URIManipulation {
             builder.port(port)
         }
         if (queryString) {
-            reEncoding.reEncode(builder.build().toUriString() + '?' + queryString).toURI()
+            reEncoding.reEncode(builder.build().toString() + '?' + queryString).toURI()
         }
         else {
-            reEncoding.reEncode(builder.build() as String).toURI()
+            reEncoding.reEncode(builder.build().toString()).toURI()
         }
     }
 
     /**    
      * Returns <tt>-1</tt> if <tt>port</tt> is 80 (for the "HTTP" scheme) or 443 (for the "HTTPS" scheme).
      */
+    @CompileStatic
     int getPort(String scheme, int port) {
         (scheme?.equalsIgnoreCase('http') && port == 80I) || (scheme?.equalsIgnoreCase('https') && port == 443I) ? -1I : port
     }
@@ -83,7 +86,7 @@ trait URIManipulation {
             if (resolvedURI.rawFragment) {
                 builder.fragment(resolvedURI.rawFragment)
             }
-            builder.build().toUriString()
+            builder.build().toString()
         }
         else {
             uri

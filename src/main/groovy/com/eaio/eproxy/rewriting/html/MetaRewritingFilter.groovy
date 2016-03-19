@@ -25,7 +25,7 @@ import com.eaio.eproxy.rewriting.URIManipulation
 class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
 
     @Lazy
-    private transient Object patternRefresh = bndmci.processString('refresh'),
+    private Object patternRefresh = bndmci.processString('refresh'),
         patternURL = bndmci.processString('url')
 
     @Override
@@ -46,22 +46,33 @@ class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
             if (httpEquiv) {
                 String content = atts.getValue('content')
                 if (content && bndmci.searchString(httpEquiv, 'refresh', patternRefresh) >= 0I && bndmci.searchString(content, 'url', patternURL) >= 0I) {
-                    int i = atts.getIndex('content')
-                    CharArrayBuffer buf = new CharArrayBuffer(content.length())
-                    buf.append(content)
-                    ParserCursor cursor = new ParserCursor(0I, content.length())
-                    HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
-                    String url = elements[0I]?.getParameterByName('URL')?.value
-                    if (url) {
-                        url = removeStart(url, '"')
-                        url = removeStart(url, '\'')
-                        url = removeEnd(url, '"')
-                        url = removeEnd(url, '\'')
-                        String rewrittenURL = encodeTargetURI(baseURI, requestURI, url, rewriteConfig)
-                        atts.setValue(i, replace(content, url, rewrittenURL))
-                    }
+                    String rewritten = rewriteMetaRefresh(content)
+                    atts.setValue(atts.getIndex('content'), rewritten)
                 }
             }
+        }
+    }
+    
+    /**
+     * @param metaRefresh something like <tt>0; url=http://pruh.com</tt>
+     * @return the same string with the URL rewritten
+     * @see URIManipulation#encodeTargetURI(URI, URI, String, RewriteConfig)
+     */
+    String rewriteMetaRefresh(String metaRefresh) {
+        CharArrayBuffer buf = new CharArrayBuffer(metaRefresh.length())
+        buf.append(metaRefresh)
+        ParserCursor cursor = new ParserCursor(0I, metaRefresh.length())
+        HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
+        String url = elements[0I]?.getParameterByName('URL')?.value
+        if (url) {
+            url = removeStart(url, '"')
+            url = removeStart(url, '\'')
+            url = removeEnd(url, '"')
+            url = removeEnd(url, '\'')
+            replace(metaRefresh, url, encodeTargetURI(baseURI, requestURI, url, rewriteConfig))
+        }
+        else {
+            metaRefresh
         }
     }
 

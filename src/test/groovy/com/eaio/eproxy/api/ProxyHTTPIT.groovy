@@ -177,5 +177,19 @@ class ProxyHTTPIT {
         ] as HttpServletResponse
         proxy.proxy('http', request, response)
     }
+    
+    @Test
+    void 'uppercase protocol should be supported'() {
+        HttpServletRequest request = buildHttpServletRequest('HTTP://www.n-tv.de')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('HTTP', request, response)
+        assertThat(bOut.toString(0I), containsString('Nachrichten'))
+    }
 
 }

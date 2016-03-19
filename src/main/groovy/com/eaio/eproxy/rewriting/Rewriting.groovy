@@ -41,8 +41,8 @@ class Rewriting {
     ReEncoding reEncoding
 
     @Autowired
-    TelemetryFilter telemetryFilter    
-
+    TelemetryFilter telemetryFilter
+    
     @Lazy
     private Charset defaultCharset = Charset.forName('UTF-8')
 
@@ -147,7 +147,7 @@ class Rewriting {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         try {
             CSSRewritingFilter handler = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
-            outputWriter.write(handler.rewriteCSS(toString(inputStream, charset ?: defaultCharset)))
+            outputWriter.write(handler.rewriteCSS(toString(inputStream, charset ?: defaultCharset))) // TODO Performance
         }
         catch (NullPointerException ignored) {}
         finally {
@@ -161,10 +161,15 @@ class Rewriting {
     void rewriteSVG(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         XMLReader xmlReader = newXMLReader()
-        DefaultFilter filter = new BaseFilter() // No-op for now
-        filter.documentHandler = new XMLDocumentHandlerDocumentHandlerAdapter(
+        // 1st in chain
+        DefaultFilter cssRewritingFilter = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
+        xmlReader.contentHandler = new ContentHandlerXMLDocumentHandlerAdapter(cssRewritingFilter)
+        // 2nd in chain
+        DefaultFilter uriRewritingFilter = configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig)
+        cssRewritingFilter.documentHandler = uriRewritingFilter
+        // 3rd in chain
+        uriRewritingFilter.documentHandler = new XMLDocumentHandlerDocumentHandlerAdapter(
             new XMLSerializer(outputWriter, new OutputFormat(Method.XML, (charset ?: defaultCharset).name(), true)))
-        xmlReader.contentHandler = new ContentHandlerXMLDocumentHandlerAdapter(filter)
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
         }

@@ -28,26 +28,25 @@ class CSSRewritingFilterTest {
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
 
-    @Test
-    void 'escaped CSS attributes should be rewritten'() {
-        StringWriter output = new StringWriter()
-        XMLReader xmlReader = new Rewriting().newHTMLReader()
-        XMLDocumentFilter[] filters = [ new CSSRewritingFilter(reEncoding: new ReEncoding(), baseURI: 'http://rah.com'.toURI(),
-            requestURI: 'https://plop.com/ui.html?fnuh=guh'.toURI(), rewriteConfig: RewriteConfig.fromString('rnw')),
-            new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
-        xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
-        xmlReader.parse(new org.xml.sax.InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
-        // Either rewrite or drop the escaped rules.
-        errorCollector.checkThat(output as String, containsString('http://rah.com/rnw-https/plop.com/keks.jpg'))
-        errorCollector.checkThat(output as String, anyOf(
-            containsString('background-image: image(http://rah.com/rnw-http/creme.com/aha.jpg)'),
-            containsString('background-image: image(\'http://rah.com/rnw-http/creme.com/aha.jpg\')')))
-    }
-
     @Lazy
     CSSRewritingFilter cssRewritingFilter = new CSSRewritingFilter(reEncoding: new ReEncoding(), baseURI: 'http://fnuh.com/'.toURI(),
         requestURI: 'https://www.google.com/'.toURI(), rewriteConfig: RewriteConfig.fromString('rnw'))
     
+    @Test
+    void 'escaped CSS attributes should be rewritten'() {
+        StringWriter output = new StringWriter()
+        XMLReader xmlReader = new Rewriting().newHTMLReader()
+        XMLDocumentFilter[] filters = [ cssRewritingFilter, new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
+        xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
+        xmlReader.parse(new org.xml.sax.InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
+        // Either rewrite or drop the escaped rules.
+        errorCollector.checkThat(output as String, containsString('http://fnuh.com/rnw-https/www.google.com/keks.jpg'))
+        errorCollector.checkThat(output as String, anyOf(
+            containsString('background-image: image(http://fnuh.com/rnw-http/creme.com/aha.jpg)'),
+            containsString('background-image: image(\'http://fnuh.com/rnw-http/creme.com/aha.jpg\')')))
+        errorCollector.checkThat(output as String, containsString('background-image: \\75\\72\\6C\\28http://fnuh.com/rnw-https/www.google.com/bla.jpg\\29'))
+    }
+
     @Test
     void 'should rewrite inline style sheet'() {
         String style = 'height:110px;width:276px;background:url(/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png) no-repeat'
@@ -69,5 +68,5 @@ class CSSRewritingFilterTest {
     Collection<Object[]> cssFiles() {
         new File('src/test/resources/com/eaio/eproxy/rewriting/css').listFiles().collect { [ it ] as Object[] }
     }
-
+    
 }

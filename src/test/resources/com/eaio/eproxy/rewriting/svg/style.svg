@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    
+    <style type="text/css" >
+      <![CDATA[
+
+        #rah {
+           background-image: url(/fnuh.png);
+        }
+
+      ]]>
+    </style>
+    
+    <circle id="rah" cx="40" cy="40" r="24"/>
+    <circle id="wah" cx="40" cy="40" r="24" style="background-image: url(http://keks.org/plop.png)"/>
+</svg>
+<!-- Via http://tutorials.jenkov.com/svg/svg-and-css.html -->

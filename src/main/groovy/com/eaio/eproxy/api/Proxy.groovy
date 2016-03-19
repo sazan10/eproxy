@@ -75,12 +75,12 @@ class Proxy implements URIManipulation {
     @Autowired(required = false)
     Timer timer
 
-    @RequestMapping('/{scheme:https?}/**')
+    @RequestMapping('/{scheme:(?i)https?}/**')
     void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
         proxy(null, scheme, request, response)
     }
 
-    @RequestMapping('/{rewriteConfig}-{scheme:https?}/**')
+    @RequestMapping('/{rewriteConfig:[a-z]+}-{scheme:(?i)https?}/**')
     void proxy(@PathVariable('rewriteConfig') String rewriteConfigString, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
         URI requestURI = decodeTargetURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
@@ -116,9 +116,9 @@ class Proxy implements URIManipulation {
             OutputStream outputStream = response.outputStream
             HeaderElement contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
 
-            RewriteConfig rewriteConfig = rewriteConfigString ? RewriteConfig.fromString(rewriteConfigString) : null
+            RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
 
-            boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
+            boolean canRewrite = rewriteConfig && rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
 
             remoteResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
@@ -196,7 +196,7 @@ class Proxy implements URIManipulation {
         }
         catch (IOException ex) {
             if (ex instanceof NoHttpResponseException || ex instanceof SocketTimeoutException || ex instanceof ConnectTimeoutException ||
-            ex instanceof UnknownHostException || ex instanceof ClientProtocolException) {
+                ex instanceof UnknownHostException || ex instanceof ClientProtocolException) {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
             else if (ex.message == 'Connection reset by peer') {

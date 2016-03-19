@@ -23,24 +23,54 @@ import com.steadystate.css.dom.*
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@CompileStatic
 @Slf4j
 class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     
     @Lazy
-    private static final List<Pattern> replacements = Collections.unmodifiableList([
-        ~/(?i)(?:(?:\\75 ?|u)(?:\\72 ?|r)(?:\\6C ?|l)|image)\s*\(\s*(["']([^#][^"']+)["']|([^#][^\s)]+))/, // TODO: Escape
-        ~/(?i)@import\s*(?:["']([^#][^"']+)["']|([^#][^\s;]+))/,
-        ~/(?i)\W(?:src|colorSpace)\s*=\s*(?:["']([^#][^"']+)["']|([^#][^\s)]+))/
-        ])
+    private static Pattern patternURLImage = {
+        //  Pattern.compile("(?:url|image)\\s*\\(\\s*(.*?)\\s*\\)", Pattern.CASE_INSENSITIVE)
+        use (CSSEscapeRegEx) {
+            StringBuilder builder = new StringBuilder()
+            builder.append('(?:').appendPattern('url').append('|').appendPattern('image')
+                .append(')\\s*').appendPattern('(', true).append('\\s*(.*?)\\s*').appendPattern(')', true)
+            Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
+        }
+    }()
+    
+    @Lazy
+    private static Pattern patternImport = {
+        //  Pattern.compile("@import\\s*(.*?)\\s*(;|$)", Pattern.CASE_INSENSITIVE)
+        use (CSSEscapeRegEx) {
+            StringBuilder builder = new StringBuilder()
+            builder.appendPattern('@import').append('\\s*(.*?)\\s*(').appendPattern(';').append('|$)')
+
+            Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
+        }
+    }()
+    
+    @Lazy
+    private static Pattern patternSrcColorSpace = {
+        //  Pattern.compile("\\W(?:src|colorSpace)\\s*=\\s*(.*?)\\s*(;|$)", Pattern.CASE_INSENSITIVE)
+        use (CSSEscapeRegEx) {
+            StringBuilder builder = new StringBuilder()
+            builder.append('\\W(?:').appendPattern('src').append('|').appendPattern('colorSpace')
+                .append(')\\s*=\\s*(.*?)\\s*(').appendPattern(';').append('|$)')
+
+            Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
+        }
+    }()
+    
+    @Lazy
+    private CSSUnescaper cssUnescaper
     
     private boolean inStyleElement
-
+    
     /**
      * Rewrites any style attributes, too.
      * 
      * @see org.cyberneko.html.filters.DefaultFilter#startElement(org.apache.xerces.xni.QName, org.apache.xerces.xni.XMLAttributes, org.apache.xerces.xni.Augmentations)
      */
+    @CompileStatic
     @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         if (nameIs(qName, 'style')) {
@@ -50,12 +80,14 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         super.startElement(qName, atts, augs)
     }
     
+    @CompileStatic
     @Override
     void emptyElement(QName qName, XMLAttributes atts, Augmentations augs) {
         rewriteElement(qName, atts, augs)
         super.emptyElement(qName, atts, augs)
     }
     
+    @CompileStatic
     @Override
     void endElement(QName qName, Augmentations augs) {
         if (nameIs(qName, 'style')) {
@@ -64,6 +96,7 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         super.endElement(qName, augs)
     }
     
+    @CompileStatic
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         String css = atts.getValue('style') // TODO: SVG attributes (mask, fill and others?)
         if (isNotBlank(css)) {
@@ -78,6 +111,7 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
      * 
      * @see org.cyberneko.html.filters.DefaultFilter#characters(org.apache.xerces.xni.XMLString, org.apache.xerces.xni.Augmentations)
      */
+    @CompileStatic
     @Override
     void characters(XMLString xmlString, Augmentations augs) {
         if (inStyleElement) {
@@ -94,17 +128,35 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     }
 
     /**
-     * Repeatedly applies the regular expressions in {@link #replacements}.
+     * Rewrites CSS by unescaping any HTML remains and scanning for certain patterns by regular expression.
      * <p>
      * Check if <tt>css</tt> is blank before calling this.
+     * 
+     * @return never <code>null</code>
      */
+    @CompileStatic
     String rewriteCSS(String css) {
-        replacements.inject(CSSEscapingUtils.unescapeCSS(css) as String, { String s, Pattern p ->
+        String unescapedCSS = unescapeHTML(css) ?: ''
+        replacePatterns(unescapedCSS)
+    }
+    
+    @CompileStatic
+    String unescapeHTML(String css) {
+        CSSEscapeUtils.unescapeHTML(css)
+    }
+    
+    @CompileStatic
+    String replacePatterns(String css) {
+        [ patternURLImage, patternImport, patternSrcColorSpace ].inject(css, { String s, Pattern p ->
             s.replaceAll(p, { List<String> matches ->
                 String out = matches[0I]
-                String uri = matches[2I] ?: matches[1I]
-                if (attributeValueNeedsRewriting(uri)) {
-                    String rewritten = encodeTargetURI(baseURI, requestURI, uri, rewriteConfig)
+                String uri = matches[1I], unescapedURI = cssUnescaper.translate(uri)
+                unescapedURI = removeStart(unescapedURI, '"')
+                unescapedURI = removeStart(unescapedURI, '\'')
+                unescapedURI = removeEnd(unescapedURI, '"')
+                unescapedURI = removeEnd(unescapedURI, '\'')
+                if (attributeValueNeedsRewriting(unescapedURI)) {
+                    String rewritten = encodeTargetURI(baseURI, requestURI, unescapedURI, rewriteConfig)
                     out = replace(matches[0I], uri, rewritten)
                 }
                 out
