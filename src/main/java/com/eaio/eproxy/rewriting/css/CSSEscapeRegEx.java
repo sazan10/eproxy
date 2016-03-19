@@ -15,6 +15,9 @@ public class CSSEscapeRegEx {
     }
     
     public static Appendable appendCharacter(Appendable self, Character o, boolean escape) throws IOException {
+        if (self == null) {
+            self = new StringBuilder();
+        }
         self.append("(?:\\\\");
         int c = (int) o.charValue();
         int zeroes = c < 256 ? 4 : c < 65536 ? 2 : 0;
@@ -34,18 +37,28 @@ public class CSSEscapeRegEx {
     }
     
     public static Appendable appendPattern(Appendable self, Object o) throws IOException {
+        return appendPattern(self, o, false);
+    }
+    
+    public static Appendable appendPattern(Appendable self, Object o, boolean escape) throws IOException {
+        if (self == null) {
+            self = new StringBuilder();
+        }
         if (o instanceof Character) {
-            appendCharacter(self, ((Character) o));
+            appendCharacter(self, ((Character) o), escape);
         }
         else if (o instanceof CharSequence) {
             for (int i = 0; i < ((CharSequence) o).length(); ++i) {
-                appendCharacter(self, ((CharSequence) o).charAt(i));
+                appendCharacter(self, ((CharSequence) o).charAt(i), escape);
             }
         }
         return self;
     }
     
     public static Appendable appendPattern(Appendable self, Object... data) throws IOException {
+        if (self == null) {
+            self = new StringBuilder();
+        }
         if (data != null) {
             for (Object o : data) {
                 appendPattern(self, o);
@@ -59,7 +72,7 @@ public class CSSEscapeRegEx {
      * @return never <code>null</code>
      */
     public static String toPattern(Object... data) throws IOException {
-        return appendPattern(new StringBuilder(), data).toString();
+        return appendPattern(null, data).toString();
     }
 
 }
