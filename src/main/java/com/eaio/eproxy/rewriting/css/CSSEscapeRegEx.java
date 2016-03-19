@@ -10,10 +10,16 @@ import java.io.IOException;
  */
 public class CSSEscapeRegEx {
     
+    /**
+     * @return never <code>null</code>
+     */
     public static Appendable appendCharacter(Appendable self, Character o) throws IOException {
         return appendCharacter(self, o, false);
     }
     
+    /**
+     * @return never <code>null</code>
+     */
     public static Appendable appendCharacter(Appendable self, Character o, boolean escape) throws IOException {
         if (self == null) {
             self = new StringBuilder();
@@ -36,10 +42,16 @@ public class CSSEscapeRegEx {
         return self;
     }
     
+    /**
+     * @return never <code>null</code>
+     */
     public static Appendable appendPattern(Appendable self, Object o) throws IOException {
         return appendPattern(self, o, false);
     }
     
+    /**
+     * @return never <code>null</code>
+     */
     public static Appendable appendPattern(Appendable self, Object o, boolean escape) throws IOException {
         if (self == null) {
             self = new StringBuilder();
@@ -55,6 +67,9 @@ public class CSSEscapeRegEx {
         return self;
     }
     
+    /**
+     * @return never <code>null</code>
+     */
     public static Appendable appendPattern(Appendable self, Object... data) throws IOException {
         if (self == null) {
             self = new StringBuilder();
