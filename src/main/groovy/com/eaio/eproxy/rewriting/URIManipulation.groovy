@@ -47,10 +47,10 @@ trait URIManipulation {
             builder.port(port)
         }
         if (queryString) {
-            reEncoding.reEncode(builder.build().toUriString() + '?' + queryString).toURI()
+            reEncoding.reEncode(builder.build().toString() + '?' + queryString).toURI()
         }
         else {
-            reEncoding.reEncode(builder.build() as String).toURI()
+            reEncoding.reEncode(builder.build().toString()).toURI()
         }
     }
 
@@ -86,7 +86,7 @@ trait URIManipulation {
             if (resolvedURI.rawFragment) {
                 builder.fragment(resolvedURI.rawFragment)
             }
-            builder.build().toUriString()
+            builder.build().toString()
         }
         else {
             uri
