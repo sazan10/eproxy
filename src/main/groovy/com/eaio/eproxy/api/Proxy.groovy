@@ -118,7 +118,7 @@ class Proxy implements URIManipulation {
 
             RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
 
-            boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
+            boolean canRewrite = rewriteConfig && rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
 
             remoteResponse.headerIterator().each { Header header ->
                 if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
