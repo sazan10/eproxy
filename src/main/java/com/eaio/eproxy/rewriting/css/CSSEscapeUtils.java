@@ -43,10 +43,7 @@ public class CSSEscapeUtils {
         patternImport,
         patternSrcColorSpace;
 
-    //  Pattern.compile("(?:url|image)\\s*\\(\\s*([\"']([^#][^\"']+)[\"']|([^#][^\\s)]+))", Pattern.CASE_INSENSITIVE),
-    //  Pattern.compile("(?:url|image)\\s*\\(\\s*([\"']([^\"']+)[\"']|([^\\s)]+))", Pattern.CASE_INSENSITIVE),
-    
-    //  Pattern.compile("(?:url|image)\\s*\\(\\s*((?:\"|').*?(?:\"|')|.*?)\\s*\\)", Pattern.CASE_INSENSITIVE),
+    //  Pattern.compile("(?:url|image)\\s*\\(\\s*(.*?)\\s*\\)", Pattern.CASE_INSENSITIVE),
     static {
         try {
             StringBuilder builder = new StringBuilder();
@@ -56,21 +53,8 @@ public class CSSEscapeUtils {
             CSSEscapeRegEx.appendPattern(builder, "image");
             builder.append(")\\s*");
             CSSEscapeRegEx.appendCharacter(builder, '(', true);
-            builder.append("\\s*(");
-
-            builder.append("(?:");
-            CSSEscapeRegEx.appendPattern(builder, "\"");
-            builder.append("|");
-            CSSEscapeRegEx.appendPattern(builder, "'");
-            builder.append(")");
-
-            builder.append("([^\"']+)");
-
-            builder.append("(?:");
-            CSSEscapeRegEx.appendPattern(builder, "\"");
-            builder.append("|");
-            CSSEscapeRegEx.appendPattern(builder, "'");
-            builder.append(")|([^\\s)]+))");
+            builder.append("\\s*(.*?)\\s*");
+            CSSEscapeRegEx.appendCharacter(builder, ')', true);
 
             patternURLImage = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
         }
@@ -78,28 +62,15 @@ public class CSSEscapeUtils {
             throw new RuntimeException(ex);
         }
     }
-
-    //  Pattern.compile("@import\\s*(?:[\"']([^#][^\"']+)[\"']|([^#][^\\s;]+))", Pattern.CASE_INSENSITIVE),
-    //  Pattern.compile("@import\\s*(?:[\"']([^\"']+)[\"']|([^\\s;]+))", Pattern.CASE_INSENSITIVE),
+    
+    //  Pattern.compile("@import\\s*(.*?)\\s*(;|$)", Pattern.CASE_INSENSITIVE),
     static {
         try {
             StringBuilder builder = new StringBuilder();
             CSSEscapeRegEx.appendPattern(builder, "@import");
-            builder.append("\\s(?:");
-
-            builder.append("(?:");
-            CSSEscapeRegEx.appendPattern(builder, "\"");
-            builder.append("|");
-            CSSEscapeRegEx.appendPattern(builder, "'");
-            builder.append(")");
-
-            builder.append("([^\"']+)");
-
-            builder.append("(?:");
-            CSSEscapeRegEx.appendPattern(builder, "\"");
-            builder.append("|");
-            CSSEscapeRegEx.appendPattern(builder, "'");
-            builder.append(")|([^\\s;]+))");
+            builder.append("\\s*(.*?)\\s*(");
+            CSSEscapeRegEx.appendPattern(builder, ";");
+            builder.append("|$)");
 
             patternImport = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
         }
@@ -108,8 +79,7 @@ public class CSSEscapeUtils {
         }
     }
 
-    //  Pattern.compile("\\W(?:src|colorSpace)\\s*=\\s*(?:[\"']([^#][^\"']+)[\"']|([^#][^\\s)]+))", Pattern.CASE_INSENSITIVE)),
-    //  Pattern.compile("\\W(?:src|colorSpace)\\s*=\\s*(?:[\"']([^\"']+)[\"']|([^\\s)]+))", Pattern.CASE_INSENSITIVE))
+    //  Pattern.compile("\\W(?:src|colorSpace)\\s*=\\s*(.*?)\\s*(;|$)", Pattern.CASE_INSENSITIVE),
     static {
         try {
             StringBuilder builder = new StringBuilder();
@@ -117,23 +87,9 @@ public class CSSEscapeUtils {
             CSSEscapeRegEx.appendPattern(builder, "src");
             builder.append("|");
             CSSEscapeRegEx.appendPattern(builder, "colorSpace");
-            builder.append(")\\s*=\\s*(?:");
-
-            builder.append("(?:");
-            CSSEscapeRegEx.appendPattern(builder, "\"");
-            builder.append("|");
-            CSSEscapeRegEx.appendPattern(builder, "'");
-            builder.append(")");
-
-            builder.append("([^\"']+)");
-
-            builder.append("(?:");
-            CSSEscapeRegEx.appendPattern(builder, "\"");
-            builder.append("|");
-            CSSEscapeRegEx.appendPattern(builder, "'");
-            builder.append(")");
-
-            builder.append("|([^\\s)]+))");
+            builder.append(")\\s*=\\s*(.*?)\\s*(");
+            CSSEscapeRegEx.appendPattern(builder, ";");
+            builder.append("|$)");
 
             patternSrcColorSpace = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
         }

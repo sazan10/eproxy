@@ -99,7 +99,11 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         CSSEscapeUtils.PATTERNS.inject(unescapedCSS, { String s, Pattern p ->
             s.replaceAll(p, { List<String> matches ->
                 String out = matches[0I]
-                String uri = matches[2I] ?: matches[1I], unescapedURI = cssUnescaper.translate(uri)
+                String uri = matches[1I], unescapedURI = cssUnescaper.translate(uri)
+                unescapedURI = removeStart(unescapedURI, '"')
+                unescapedURI = removeStart(unescapedURI, '\'')
+                unescapedURI = removeEnd(unescapedURI, '"')
+                unescapedURI = removeEnd(unescapedURI, '\'')
                 if (attributeValueNeedsRewriting(unescapedURI)) {
                     String rewritten = encodeTargetURI(baseURI, requestURI, unescapedURI, rewriteConfig)
                     out = replace(matches[0I], uri, rewritten)
