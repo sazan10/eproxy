@@ -33,7 +33,7 @@ class URIRewritingFilter extends RewritingFilter implements URIManipulation {
                 }
                 out
             })
-            xmlString = new XMLString(s.toCharArray(), 0I, s.length())
+            xmlString = new XMLString(s.toCharArray(), 0I, s.length()) // TODO performance
         }
         super.processingInstruction(target, xmlString, augs);
     }

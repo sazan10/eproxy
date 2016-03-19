@@ -1,5 +1,7 @@
 package com.eaio.eproxy.rewriting.svg
 
+import groovy.transform.CompileStatic
+
 import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
@@ -14,6 +16,7 @@ import com.eaio.eproxy.rewriting.html.BaseFilter
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 class SVGFilter extends BaseFilter {
     
     private boolean inSVGElement

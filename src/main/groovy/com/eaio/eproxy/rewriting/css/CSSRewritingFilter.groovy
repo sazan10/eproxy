@@ -27,6 +27,9 @@ import com.steadystate.css.dom.*
 @Slf4j
 class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     
+    @Lazy
+    private CSSUnescaper cssUnescaper
+    
     private boolean inStyleElement
     
     /**
@@ -92,11 +95,11 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
      * Check if <tt>css</tt> is blank before calling this.
      */
     String rewriteCSS(String css) {
-        String unescapedCSS = CSSEscapeUtils.unescapeCSS(css) as String
+        String unescapedCSS = CSSEscapeUtils.unescapeHTML(css) as String
         CSSEscapeUtils.PATTERNS.inject(unescapedCSS, { String s, Pattern p ->
             s.replaceAll(p, { List<String> matches ->
                 String out = matches[0I]
-                String uri = matches[2I] ?: matches[1I], unescapedURI = new CSSUnescaper().translate(uri)
+                String uri = matches[2I] ?: matches[1I], unescapedURI = cssUnescaper.translate(uri)
                 if (attributeValueNeedsRewriting(unescapedURI)) {
                     String rewritten = encodeTargetURI(baseURI, requestURI, unescapedURI, rewriteConfig)
                     out = replace(matches[0I], uri, rewritten)

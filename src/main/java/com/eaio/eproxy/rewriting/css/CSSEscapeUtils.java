@@ -21,15 +21,20 @@ import org.apache.commons.lang3.text.translate.LookupTranslator;
  */
 public class CSSEscapeUtils {
 
-    private static final String[][] CSS_UNESCAPE = new String[][] {
+    private static final String[][] HTML_UNESCAPE = new String[][] {
         { "&lpar;", "(" },
         { "&rpar;", ")" }
     };
 
-    public static CharSequenceTranslator UNESCAPE_CSS = new LookupTranslator(CSS_UNESCAPE);
+    private static CharSequenceTranslator UNESCAPE_HTML = new LookupTranslator(HTML_UNESCAPE);
 
-    public static CharSequence unescapeCSS(CharSequence input) {
-        return UNESCAPE_CSS.translate(input);
+    /**
+     * Unescapes HTML that NekoHTML doesn't.
+     * 
+     * @param input may be <code>null</code>
+     */
+    public static CharSequence unescapeHTML(CharSequence input) {
+        return UNESCAPE_HTML.translate(input);
     }
 
     public static Collection<Pattern> PATTERNS;
@@ -40,6 +45,8 @@ public class CSSEscapeUtils {
 
     //  Pattern.compile("(?:url|image)\\s*\\(\\s*([\"']([^#][^\"']+)[\"']|([^#][^\\s)]+))", Pattern.CASE_INSENSITIVE),
     //  Pattern.compile("(?:url|image)\\s*\\(\\s*([\"']([^\"']+)[\"']|([^\\s)]+))", Pattern.CASE_INSENSITIVE),
+    
+    //  Pattern.compile("(?:url|image)\\s*\\(\\s*((?:\"|').*?(?:\"|')|.*?)\\s*\\)", Pattern.CASE_INSENSITIVE),
     static {
         try {
             StringBuilder builder = new StringBuilder();
