@@ -26,7 +26,8 @@ class RequestMocks {
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
             getHeader: getHeaderClosure,
-            getInputStream: { stream }
+            getInputStream: { stream },
+            getCookies: { null },
         ] as HttpServletRequest
     }
 

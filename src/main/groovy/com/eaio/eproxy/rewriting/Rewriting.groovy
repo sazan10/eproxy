@@ -84,7 +84,7 @@ class Rewriting {
     }
 
     boolean canRewrite(HeaderElement contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
-        !(contentDisposition?.name?.equalsIgnoreCase('attachment')) && rewriteConfig && (isHTML(mimeType) || isCSS(mimeType) || isSVG(mimeType))
+        rewriteConfig && !(contentDisposition?.name?.equalsIgnoreCase('attachment')) && (isHTML(mimeType) || isCSS(mimeType) || isSVG(mimeType))
     }
 
     void rewrite(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig, String mimeType) {

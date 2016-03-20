@@ -60,6 +60,7 @@ class ProxyHTTPIT {
             setHeader: { String name, String value -> if (name == 'Content-Range') { assertThat(value, is('bytes 0-99/48015')) } },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
+            setContentLength: { int length -> assertThat(length, is(100I)) },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toByteArray().encodeBase64() as String, is('/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDA=='))

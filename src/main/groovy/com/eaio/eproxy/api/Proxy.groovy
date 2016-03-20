@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+import com.eaio.eproxy.cookies.CookieTranslator
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.*
 import com.eaio.eproxy.rewriting.html.*
@@ -74,6 +75,9 @@ class Proxy implements URIManipulation {
 
     @Autowired(required = false)
     Timer timer
+    
+    @Autowired(required = false)
+    CookieTranslator cookieTranslator
 
     @RequestMapping('/{scheme:(?i)https?}/**')
     void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
@@ -94,6 +98,7 @@ class Proxy implements URIManipulation {
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
             addRequestHeaders(request, uriRequest)
+            cookieTranslator?.addToRequest(request.cookies, baseURI, requestURI, uriRequest)
             if (uriRequest instanceof HttpEntityEnclosingRequest) {
                 setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
             }
@@ -112,22 +117,14 @@ class Proxy implements URIManipulation {
                 setHeader('Vary', 'Accept-Encoding')
             }
 
-            ContentType contentType = ContentType.getLenient(remoteResponse.entity)
-            OutputStream outputStream = response.outputStream
             HeaderElement contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
-
             RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
+            ContentType contentType = ContentType.getLenient(remoteResponse.entity)
 
-            boolean canRewrite = rewriteConfig && rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
-
-            remoteResponse.headerIterator().each { Header header ->
-                if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
-                    response.setHeader(header.name, encodeTargetURI(baseURI, requestURI, header.value, rewriteConfig))
-                }
-                else if (!dropHeader(header.name, canRewrite)) {
-                    response.setHeader(header.name, header.value)
-                }
-            }
+            boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
+            
+            copyRemoteResponseHeadersToResponse(remoteResponse.headerIterator(), response, canRewrite, baseURI, requestURI, rewriteConfig)
+            cookieTranslator?.addToResponse(remoteResponse.allHeaders, baseURI, requestURI, response)
 
             if (remoteResponse.entity) {
                 long contentLength = remoteResponse.entity.contentLength
@@ -143,8 +140,10 @@ class Proxy implements URIManipulation {
                     }
                 }
 
+                OutputStream outputStream = response.outputStream
                 if (canRewrite) {
                     if (range) {
+                        // Don't allow range requests for rewritten content for now -- too unpredictable.
                         response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE)
                     }
                     else {
@@ -156,6 +155,7 @@ class Proxy implements URIManipulation {
                     if (range) {
                         response.status = HttpServletResponse.SC_PARTIAL_CONTENT
                         response.setHeader('Content-Range', "bytes ${range[0]}-${range[1] - 1}/${contentLength}")
+                        response.setContentLength((int) range[1I] - range[0I]) 
                     }
 
                     // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
@@ -225,6 +225,17 @@ class Proxy implements URIManipulation {
         }
     }
 
+    private copyRemoteResponseHeadersToResponse(HeaderIterator headers, HttpServletResponse response, boolean canRewrite, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+        headers.each { Header header ->
+            if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
+                response.setHeader(header.name, encodeTargetURI(baseURI, requestURI, header.value, rewriteConfig))
+            }
+            else if (!dropHeader(header.name, canRewrite)) {
+                response.setHeader(header.name, header.value)
+            }
+        }
+    }
+
     private void sendError(URI requestURI, HttpServletResponse response, int statusCode, Throwable thrw, String message = (ExceptionUtils.getRootCause(thrw) ?: thrw).message) {
         try {
             response.sendError(statusCode, message)
@@ -278,7 +289,7 @@ class Proxy implements URIManipulation {
     }
 
     /**
-     * Returns whether a certain header (ignoring case) should be dropped. Drops <tt>Content-Length</tt> if rewriting.
+     * Returns whether a certain header (ignoring case) should be dropped. Also drops <tt>Content-Length</tt> if rewriting.
      */
     // TODO Header whitelist
     boolean dropHeader(String name, boolean canRewrite) {
