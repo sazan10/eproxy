@@ -40,7 +40,7 @@ class Rewriting {
     @Autowired
     ReEncoding reEncoding
 
-    @Autowired
+    @Autowired(required = false)
     TelemetryFilter telemetryFilter
     
     @Lazy
@@ -115,8 +115,10 @@ class Rewriting {
                 configure(new MetaRewritingFilter(), baseURI, requestURI, rewriteConfig),
                 configure(new SrcsetFilter(), baseURI, requestURI, rewriteConfig),
                 configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig),
-                telemetryFilter
             ])
+            if (telemetryFilter) {
+                filters << telemetryFilter
+            }
         }
         filters << new SVGFilter() << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())

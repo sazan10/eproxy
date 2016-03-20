@@ -9,6 +9,7 @@ import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
 import org.apache.xerces.xni.XMLString
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -24,12 +25,10 @@ import org.springframework.web.context.request.ServletRequestAttributes
  * @version $Id$
  */
 @Component
+@ConditionalOnProperty(name = 'telemetry.enabled')
 @CompileStatic
 class TelemetryFilter extends BaseFilter {
     
-    @Value('${telemetry.enabled}')
-    boolean telemetryEnabled
-
     @Value('${telemetry.trackingID}')
     String trackingID
 
@@ -55,7 +54,7 @@ class TelemetryFilter extends BaseFilter {
     
     @Override
     void endElement(QName element, Augmentations augs) {
-        if (telemetryEnabled && nameIs(element, 'body')) {
+        if (nameIs(element, 'body')) {
             writeJavaScript(trackingIDXMLString)
             if (hostName) {
                 writeJavaScript(hostNameConfigXMLString)
