@@ -294,7 +294,7 @@ class Proxy implements URIManipulation {
     // TODO Header whitelist
     boolean dropHeader(String name, boolean canRewrite) {
         boolean out = false
-        if ([ 'Content-Security-Policy', 'Transfer-Encoding', 'Date', 'Pragma', 'Set-Cookie', 'Age' ].any { it.equalsIgnoreCase(name) }) {
+        if ([ 'Content-Security-Policy', 'Transfer-Encoding', 'Date', 'Pragma', 'Set-Cookie', 'Age', 'P3P' ].any { it.equalsIgnoreCase(name) }) {
             out = true
         }
         if (!out && canRewrite) {

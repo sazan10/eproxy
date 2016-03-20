@@ -27,7 +27,7 @@ import com.eaio.eproxy.Eproxy
  */
 @RunWith(SpringJUnit4ClassRunner)
 @SpringApplicationConfiguration(classes = Eproxy)
-@WebIntegrationTest(value = 'http.maxRedirects=1', randomPort = true)
+@WebIntegrationTest(value = [ 'http.maxRedirects=1', 'cookies.enabled=false' ], randomPort = true)
 class ProxyHTTPIT {
     
     @Rule

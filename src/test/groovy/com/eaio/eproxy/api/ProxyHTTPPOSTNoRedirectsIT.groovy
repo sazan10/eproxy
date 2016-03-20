@@ -26,7 +26,7 @@ import com.eaio.eproxy.Eproxy
  */
 @RunWith(SpringJUnit4ClassRunner)
 @SpringApplicationConfiguration(classes = Eproxy)
-@WebIntegrationTest(value = 'http.maxRedirects=0', randomPort = true)
+@WebIntegrationTest(value = [ 'http.maxRedirects=0', 'cookies.enabled=false' ], randomPort = true)
 class ProxyHTTPPOSTNoRedirectsIT {
     
     byte[] data = '''cmd=_s-xclick&encrypted=-----BEGIN+PKCS7-----%0D%0AMIAGCSqGSIb3DQEHA6CAMIACAQAxggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMC

@@ -21,7 +21,7 @@ import com.eaio.eproxy.Eproxy
  */
 @RunWith(SpringJUnit4ClassRunner)
 @SpringApplicationConfiguration(classes = Eproxy)
-@WebIntegrationTest(randomPort = true)
+@WebIntegrationTest(value = 'cookies.enabled=false', randomPort = true)
 class NoScriptRedirectIT {
 
     @Autowired

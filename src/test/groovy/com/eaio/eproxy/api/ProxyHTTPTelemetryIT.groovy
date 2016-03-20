@@ -27,7 +27,7 @@ import com.eaio.eproxy.Eproxy
  */
 @RunWith(SpringJUnit4ClassRunner)
 @SpringApplicationConfiguration(classes = Eproxy)
-@WebIntegrationTest(value = [ 'telemetry.enabled=true', 'telemetry.trackingID=UA-7427410-88', 'telemetry.hostName=milch-basiertes-vegi-schnitzel.com' ], randomPort = true)
+@WebIntegrationTest(value = [ 'telemetry.enabled=true', 'telemetry.trackingID=UA-7427410-88', 'telemetry.hostName=milch-basiertes-vegi-schnitzel.com', 'cookies.enabled=false' ], randomPort = true)
 class ProxyHTTPTelemetryIT {
     
     @Rule
