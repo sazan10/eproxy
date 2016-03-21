@@ -327,4 +327,20 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), not(containsString('url(http://www.hidayahsunnah.com/wp-content/plugins/wp-socializer/public/social-icons/wp-socializer-sprite-32px.png?v1)')))
     }
     
+    @Test
+    void 'CSS rewriting should keep quotes'() {
+        HttpServletRequest request = buildHttpServletRequest('https://www.google.com/about/products/default.css')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), allOf(containsString('@import"http://fnuh.com/rnw-https/www.google.com/css/maia.css"'),
+            containsString('@import"http://fnuh.com/rnw-https/www.google.com/about/css/default.css"'),
+            containsString('@import"http://fnuh.com/rnw-https/fonts.googleapis.com/css?family=Open+Sans:300,600,700"')))
+    }
+    
 }

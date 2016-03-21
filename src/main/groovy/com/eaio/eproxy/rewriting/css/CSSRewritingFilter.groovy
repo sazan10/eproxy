@@ -25,18 +25,18 @@ import com.steadystate.css.dom.*
  */
 @Slf4j
 class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
-    
+
     @Lazy
     private static Pattern patternURLImage = {
         //  Pattern.compile("(?:url|image)\\s*\\(\\s*(.*?)\\s*\\)", Pattern.CASE_INSENSITIVE)
         use (CSSEscapeRegEx) {
             StringBuilder builder = new StringBuilder()
             builder.append('(?:').appendPattern('url').append('|').appendPattern('image')
-                .append(')\\s*').appendPattern('(', true).append('\\s*(.*?)\\s*').appendPattern(')', true)
+                    .append(')\\s*').appendPattern('(', true).append('\\s*(.*?)\\s*').appendPattern(')', true)
             Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
         }
     }()
-    
+
     @Lazy
     private static Pattern patternImport = {
         //  Pattern.compile("@import\\s*(.*?)\\s*(;|$)", Pattern.CASE_INSENSITIVE)
@@ -47,24 +47,24 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
             Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
         }
     }()
-    
+
     @Lazy
     private static Pattern patternSrcColorSpace = {
         //  Pattern.compile("\\W(?:src|colorSpace)\\s*=\\s*(.*?)\\s*(;|$)", Pattern.CASE_INSENSITIVE)
         use (CSSEscapeRegEx) {
             StringBuilder builder = new StringBuilder()
             builder.append('\\W(?:').appendPattern('src').append('|').appendPattern('colorSpace')
-                .append(')\\s*=\\s*(.*?)\\s*(').appendPattern(';').append('|$)')
+                    .append(')\\s*=\\s*(.*?)\\s*(').appendPattern(';').append('|$)')
 
             Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
         }
     }()
-    
+
     @Lazy
     private CSSUnescaper cssUnescaper
-    
+
     private boolean inStyleElement
-    
+
     /**
      * Rewrites any style attributes, too.
      * 
@@ -79,14 +79,14 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         rewriteElement(qName, atts, augs)
         super.startElement(qName, atts, augs)
     }
-    
+
     @CompileStatic
     @Override
     void emptyElement(QName qName, XMLAttributes atts, Augmentations augs) {
         rewriteElement(qName, atts, augs)
         super.emptyElement(qName, atts, augs)
     }
-    
+
     @CompileStatic
     @Override
     void endElement(QName qName, Augmentations augs) {
@@ -95,7 +95,7 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         }
         super.endElement(qName, augs)
     }
-    
+
     @CompileStatic
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         String css = atts.getValue('style') // TODO: SVG attributes (mask, fill and others?)
@@ -139,22 +139,28 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         String unescapedCSS = unescapeHTML(css) ?: ''
         replacePatterns(unescapedCSS)
     }
-    
+
     @CompileStatic
     String unescapeHTML(String css) {
         CSSEscapeUtils.unescapeHTML(css)
     }
-    
+
     @CompileStatic
     String replacePatterns(String css) {
         [ patternURLImage, patternImport, patternSrcColorSpace ].inject(css, { String s, Pattern p ->
             s.replaceAll(p, { List<String> matches ->
                 String out = matches[0I]
                 String uri = matches[1I], unescapedURI = cssUnescaper.translate(uri)
-                unescapedURI = removeStart(unescapedURI, '"')
-                unescapedURI = removeStart(unescapedURI, '\'')
-                unescapedURI = removeEnd(unescapedURI, '"')
-                unescapedURI = removeEnd(unescapedURI, '\'')
+                if (unescapedURI.startsWith('"') || unescapedURI.startsWith('\'')) {
+                    unescapedURI = removeStart(unescapedURI, '"')
+                    unescapedURI = removeStart(unescapedURI, '\'')
+                    uri = uri.substring(1I)
+                }
+                if (unescapedURI.endsWith('"') || unescapedURI.endsWith('\'')) {
+                    unescapedURI = removeEnd(unescapedURI, '"')
+                    unescapedURI = removeEnd(unescapedURI, '\'')
+                    uri = uri.substring(0I, uri.length() - 1I)
+                }
                 if (attributeValueNeedsRewriting(unescapedURI)) {
                     String rewritten = encodeTargetURI(baseURI, requestURI, unescapedURI, rewriteConfig)
                     out = replace(matches[0I], uri, rewritten)
