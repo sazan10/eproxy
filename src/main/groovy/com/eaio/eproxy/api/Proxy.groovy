@@ -42,6 +42,7 @@ import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.ReEncoding
 import com.eaio.net.httpclient.TimingInterceptor
 import com.google.apphosting.api.DeadlineExceededException
+import com.google.apphosting.api.ApiProxy.CancelledException
 
 /**
  * Proxies and optionally rewrites content.
@@ -212,6 +213,9 @@ class Proxy implements URIManipulation {
         catch (RuntimeException ex) {
             if (ex.message?.endsWith('Resolver failure.')) { // Google App Engine
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else if (ex instanceof CancelledException) {
+                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
             }
             else {
                 throw ex
