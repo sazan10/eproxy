@@ -1,27 +1,3 @@
-document.getElementById('submit').onclick = function() {
-    var url = document.getElementById('url').value.replace(/^\s\s*/, '').replace(/\s\s*$/, '')
-    if (url) {
-        var uri = parseUri(url), encodedHost = punycode.ToASCII(uri['host'])
-        uri['authority'] = uri['authority'].replace(uri.host, encodedHost)
-        uri['host'] = encodedHost
-        try {
-            ga('send', 'pageview', '/proxy')
-        }
-        catch (e) {}
-        var encodedURI = (uri['protocol'] || 'http') + '/' + uri['authority'] + (uri['relative'] ? uri['relative'] : '/')
-        location.href = parseUri(location.href)['directory'] + 'rwn-' + encodedURI
-    }
-    return false
-}
-
-document.getElementById('url').onkeydown = function() {
-    try {
-        ga('send', 'event', 'URL', 'keydown')
-    }
-    catch (e) {}
-    this.onkeydown = function() {}
-}
-
 // From https://stackoverflow.com/questions/183485/can-anyone-recommend-a-good-free-javascript-for-punycode-to-unicode-conversion
 
 //Javascript Punycode converter derived from example in RFC3492.
@@ -344,34 +320,3 @@ var punycode = new function Punycode() {
       return out.join(".");
   }
 }();
-
-//parseUri 1.2.2
-//(c) Steven Levithan <stevenlevithan.com>
-//MIT License
-
-function parseUri (str) {
-    var options = {
-            key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
-            q:   {
-                name:   "queryKey",
-                parser: /(?:^|&)([^&=]*)=?([^&]*)/g
-            },
-            parser: {
-                loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
-            }
-        };
-    
-    
-    var m   = options.parser.loose.exec(str),
-        uri = {},
-        i   = 14;
-
-    while (i--) uri[options.key[i]] = m[i] || "";
-
-    uri[options.q.name] = {};
-    uri[options.key[12]].replace(options.q.parser, function ($0, $1, $2) {
-        if ($1) uri[options.q.name][$1] = $2;
-    });
-
-    return uri;
-};

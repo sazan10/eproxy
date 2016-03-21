@@ -15,7 +15,7 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
 /**
- * Embeds the telemetry JavaScript on the page (if enabled).
+ * Adds the proxy and telemery functions JavaScript to the page (if enabled).
  * <p>
  * Needs to be placed after {@link RemoveActiveContentFilter} obviously.
  * <p>
@@ -25,14 +25,14 @@ import org.springframework.web.context.request.ServletRequestAttributes
  * @version $Id$
  */
 @Component
-@ConditionalOnProperty(name = 'telemetry.enabled')
+@ConditionalOnProperty(name = 'proxy.javaScript.enabled')
 @CompileStatic
-class TelemetryFilter extends BaseFilter {
+class ProxyJavaScriptFilter extends BaseFilter {
     
-    @Value('${telemetry.trackingID}')
+    @Value('${proxy.javaScript.trackingID}')
     String trackingID
 
-    @Value('${telemetry.hostName}')
+    @Value('${proxy.javaScript.hostName}')
     String hostName
     
     @Lazy
@@ -59,7 +59,7 @@ class TelemetryFilter extends BaseFilter {
             if (hostName) {
                 writeJavaScript(hostNameConfigXMLString)
             }
-            writeTelemetryJavaScript()
+            writeProxyJavaScript()
         }
         super.endElement(element, augs)
     }
@@ -70,10 +70,10 @@ class TelemetryFilter extends BaseFilter {
         super.endElement(scriptElement, null)
     }
     
-    private writeTelemetryJavaScript() {
+    private writeProxyJavaScript() {
         XMLAttributes atts = new XMLAttributesImpl(2I)
         atts.addAttribute(asyncAttribute, null, 'async')
-        atts.addAttribute(srcAttribute, null, (((ServletRequestAttributes) RequestContextHolder.requestAttributes)?.request?.contextPath ?: '') + '/resources/js/telemetry.js')
+        atts.addAttribute(srcAttribute, null, (((ServletRequestAttributes) RequestContextHolder.requestAttributes)?.request?.contextPath ?: '') + '/resources/js/proxy.js')
         super.startElement(scriptElement, atts, null)
         super.endElement(scriptElement, null)
     }

@@ -41,7 +41,7 @@ class Rewriting {
     ReEncoding reEncoding
 
     @Autowired(required = false)
-    TelemetryFilter telemetryFilter
+    ProxyJavaScriptFilter proxyJavaScriptFilter
     
     @Lazy
     private Charset defaultCharset = Charset.forName('UTF-8')
@@ -116,8 +116,8 @@ class Rewriting {
                 configure(new SrcsetFilter(), baseURI, requestURI, rewriteConfig),
                 configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig),
             ])
-            if (telemetryFilter) {
-                filters << telemetryFilter
+            if (proxyJavaScriptFilter) {
+                filters << proxyJavaScriptFilter
             }
         }
         filters << new SVGFilter() << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())

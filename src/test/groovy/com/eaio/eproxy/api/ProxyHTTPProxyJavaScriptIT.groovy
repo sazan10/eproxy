@@ -20,15 +20,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import com.eaio.eproxy.Eproxy
 
 /**
- * Simulates enabled telemetry.
+ * Simulates enabled proxy JavaScript.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
 @RunWith(SpringJUnit4ClassRunner)
 @SpringApplicationConfiguration(classes = Eproxy)
-@WebIntegrationTest(value = [ 'telemetry.enabled=true', 'telemetry.trackingID=UA-7427410-88', 'telemetry.hostName=milch-basiertes-vegi-schnitzel.com', 'cookies.enabled=false' ], randomPort = true)
-class ProxyHTTPTelemetryIT {
+@WebIntegrationTest(value = [ 'proxy.javaScript.enabled=true', 'proxy.javaScript.trackingID=UA-7427410-88', 'proxy.javaScript.hostName=milch-basiertes-vegi-schnitzel.com', 'cookies.enabled=false' ], randomPort = true)
+class ProxyHTTPProxyJavaScriptIT {
     
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
@@ -37,7 +37,7 @@ class ProxyHTTPTelemetryIT {
     Proxy proxy
     
     @Test
-    void 'telemetry JavaScript should be present on the page'() {
+    void 'proxy JavaScript should be present on the page'() {
         HttpServletRequest request = buildHttpServletRequest('http://www.n-tv.de')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -49,7 +49,7 @@ class ProxyHTTPTelemetryIT {
         proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), allOf(
             containsString('UA-7427410-88'),
-            containsString('telemetry.js'),
+            containsString('proxy.js'),
             containsString('milch-basiertes-vegi-schnitzel.com')))
     }
 
