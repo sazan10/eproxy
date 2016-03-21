@@ -1,6 +1,7 @@
 package com.eaio.eproxy.cookies
 
 import static org.apache.commons.lang3.StringUtils.*
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import javax.servlet.http.Cookie
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 @ConditionalOnProperty(name = 'cookies.enabled')
 @Component
 @Slf4j
@@ -35,8 +37,8 @@ class CookieTranslator {
         if (cookies) {
             CookieOrigin cookieOrigin = createCookieOrigin(requestURI)
             long now = System.currentTimeMillis()
-            List<org.apache.http.cookie.Cookie> httpClientCookies = cookies.collect {
-                decodeHttpClientCookie(toHttpClientCookie(it, now))
+            List<org.apache.http.cookie.Cookie> httpClientCookies = (List<org.apache.http.cookie.Cookie>) cookies.collect { Cookie cookie ->
+                decodeHttpClientCookie(toHttpClientCookie(cookie, now))
             }.findAll { org.apache.http.cookie.Cookie cookie ->
                 cookieSpec.match(cookie, cookieOrigin)
             }
