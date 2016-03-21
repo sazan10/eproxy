@@ -343,4 +343,29 @@ class ProxyHTTPRewritingIT {
             containsString('@import"http://fnuh.com/rnw-https/fonts.googleapis.com/css?family=Open+Sans:300,600,700"')))
     }
     
+    @Test
+    void 'SVG rewriting should keep XML namespaces'() {
+        HttpServletRequest request = buildHttpServletRequest('https://www.google.com/search/about/img/badges/ios/badge.svg')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('xmlns:i="'))
+        assertThat(bOut.toString(0I), containsString('''<svg version="1.1" id="US_UK_Download_on_the" x="0px" y="0px"
+    viewBox="-57.5 -17 250 74.1"
+    enable-background="new -57.5 -17 250 74.1" xml:space="preserve"
+    preserveAspectRatio="xMidYMid meet" zoomAndPan="magnify"
+    contentScriptType="application/ecmascript"
+    contentStyleType="text/css"
+    xmlns:x="http://ns.adobe.com/Extensibility/1.0/"
+    xmlns:i="http://ns.adobe.com/AdobeIllustrator/10.0/"
+    xmlns:graph="http://ns.adobe.com/Graphs/1.0/"
+xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink">'''))
+    }
+    
 }

@@ -170,8 +170,8 @@ class Rewriting {
         DefaultFilter uriRewritingFilter = configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig)
         cssRewritingFilter.documentHandler = uriRewritingFilter
         // 3rd in chain
-        uriRewritingFilter.documentHandler = new XMLDocumentHandlerDocumentHandlerAdapter(
-            new XMLSerializer(outputWriter, new OutputFormat(Method.XML, (charset ?: defaultCharset).name(), true)))
+        XMLSerializer serializer = new XMLSerializer(outputWriter, new OutputFormat(Method.XML, (charset ?: defaultCharset).name(), true))
+        uriRewritingFilter.documentHandler = new XMLDocumentHandlerDocumentHandlerAdapter(serializer)
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
@@ -192,7 +192,9 @@ class Rewriting {
     }
     
     XMLReader newXMLReader() {
-        XMLReaderFactory.createXMLReader()
+        XMLReader out = XMLReaderFactory.createXMLReader()
+        out.setFeature('http://xml.org/sax/features/namespace-prefixes', true)
+        out
     }
 
     InputSource newSAXInputSource(InputStream inputStream, Charset charset) {

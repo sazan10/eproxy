@@ -10,6 +10,7 @@ import com.eaio.eproxy.rewriting.URIManipulation
 
 /**
  * Rewrites all attributes except those already covered by other {@link BaseFilter filters}.
+ * Also ignores <tt>xmlns</tt> and <tt>xmlns</tt>-prefixed attributes.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
@@ -58,6 +59,7 @@ class URIRewritingFilter extends RewritingFilter implements URIManipulation {
             if (!equalsIgnoreCase(atts.getLocalName(i), 'style') && !startsWithIgnoreCase(atts.getLocalName(i), 'on') &&
                 !equalsIgnoreCase(atts.getLocalName(i), 'srcset') && !equalsIgnoreCase(atts.getLocalName(i), 'http-equiv') &&
                 !equalsIgnoreCase(atts.getLocalName(i), 'content') &&
+                !equalsIgnoreCase(atts.getPrefix(i), 'xmlns') && !equalsIgnoreCase(atts.getQName(i), 'xmlns') && // Don't rewrite xmlns namespaced attributes.
                 attributeValueNeedsRewriting(attributeValue)) {
                 atts.setValue(i, encodeTargetURI(baseURI, requestURI, attributeValue, rewriteConfig))
             }
