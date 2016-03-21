@@ -62,7 +62,7 @@ class CookieTranslator {
         }
         if (cookies) {
             long now = System.currentTimeMillis()
-            cookies.collect { toServletCookie(encodeHttpClientCookie(it), now) }.each {
+            cookies.collect { toServletCookie(encodeHttpClientCookie(it, baseURI), now) }.each {
                 log.debug('adding response cookie {}={}', it.name, it.value)
                 response.addCookie(it)
             }
@@ -87,11 +87,11 @@ class CookieTranslator {
         out
     }
 
-    org.apache.http.cookie.Cookie encodeHttpClientCookie(org.apache.http.cookie.Cookie cookie) {
+    org.apache.http.cookie.Cookie encodeHttpClientCookie(org.apache.http.cookie.Cookie cookie, URI baseURI) {
         org.apache.http.cookie.Cookie out = new BasicClientCookie("${cookie.domain}_${cookie.name}", cookie.value)
         out.with {
             comment = cookie.comment
-            path = cookie.path // TODO
+            path = substringBeforeLast(baseURI.rawPath, '/') + cookie.path
             secure = cookie.secure // TODO: Allow for non-HTTPs proxies
             version = cookie.version
         }
