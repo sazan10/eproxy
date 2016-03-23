@@ -56,7 +56,9 @@
     }
     eaio.track['exception'] = function(category, thrown, label, params) {
         try {
-            eaio.track.event(category, thrown.stack ? thrown.stack.replace(/[\r\n]\s+\w+ /g, ' > ').replace(/https?:\/\/[^/]+/g, '...') : thrown, label, null, null, params) 
+            var message = thrown['message'] ? thrown['name'] + ": " + thrown['message'] : /^([^\r\n]+)/.exec(thrown['stackTrace'] || thrown['stack'])[1]
+            var stack = (thrown['stackTrace'] || thrown['stack']).replace(/^[^:]+: [^\r\n]+/, '').replace(/\s\(([^)]+)\)/g, '@$1').replace(/[\r\n](\s*at)?\s+/g, ' > ').replace(/https?:\/\/[^/]+/ig, '...')
+            eaio.track.event(category, message + " " + stack, label, null, null, params) 
         }
         catch (e) {}
     }
@@ -77,23 +79,19 @@
      * Performance tracking of loaded resources.
      * 
      * See http://www.stevesouders.com/blog/2014/08/21/resource-timing-practical-tips/ (used with changes to the TCP time calculation).
-     * 
-     * @return an array of all matching resources
      */
     eaio['trackResourcePerformance'] = function(pattern, name, label, params) {
-    	var out = []
         try {
             var resourceEntries = window.performance.getEntriesByType('resource'), i, r0, timing = eaio.track.timing
             for (i = 0; i < resourceEntries.length; ++i) {
                 r0 = resourceEntries[i]
                 if (pattern.test(r0.name)) {
                     trackPerformance(r0, name, label, params)
-                    out.push(r0)
+                    break
                 }
             }
         }
         catch (e) {}
-        return out
     }
     
     /**
