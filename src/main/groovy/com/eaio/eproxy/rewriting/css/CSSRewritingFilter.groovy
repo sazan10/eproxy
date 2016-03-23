@@ -118,7 +118,7 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
             String css = new String(xmlString.ch, xmlString.offset, xmlString.length) // TODO: performance
             if (isNotBlank(css)) {
                 String rewritten = rewriteCSS(css)
-                super.characters(new XMLString(rewritten.toCharArray(), 0I, rewritten.length()), augs) // TODO: performance
+                super.characters(new XMLString(rewritten.toCharArray(), 0I, rewritten.length()), augs)
                 log.debug('rewrote CSS {} chars to {} chars', xmlString.length, rewritten.length())
             }
         }

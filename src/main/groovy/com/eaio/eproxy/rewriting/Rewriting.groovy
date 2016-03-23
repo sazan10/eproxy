@@ -149,7 +149,7 @@ class Rewriting {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         try {
             CSSRewritingFilter handler = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
-            outputWriter.write(handler.rewriteCSS(toString(inputStream, charset ?: defaultCharset))) // TODO Performance
+            outputWriter.write(handler.rewriteCSS(toString(inputStream, charset ?: defaultCharset)))
         }
         catch (NullPointerException ignored) {}
         finally {
