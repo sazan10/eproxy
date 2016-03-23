@@ -1,21 +1,21 @@
 (function() {
-    
+
     function decodeTargetURI(uri) {
-        var out = uri
-        try {
-            out = /(https?\/.+)/i.exec(uri)[1].replace(/^(https?)\//i, "$1://")
-        }
-        catch (e) {}
-        return out
+        return /(https?\/.+)/i.exec(uri)[1].replace(/^(https?)\//i, "$1://")
     }
 
     /**
      * Pings javascript: links back to GA.
      */
     function trackJavaScriptURIs() {
-        if (([].slice.call(document.links)).filter(function(a) { return /^javascript:/i.test(this.href) }).length) {
-            var currentURL = decodeTargetURI(location.href)
-            eaio.track.event('TrackJavaScriptURIs', currentURL)
+        try {
+            if (([].slice.call(document.links)).filter(function(a) { return /^javascript:/i.test(this.href) }).length) {
+                var currentURL = decodeTargetURI(location.href)
+                eaio.track.event('TrackJavaScriptURIs', currentURL)
+            }
+        }
+        catch (e) {
+            eaio.track.exception('javascript-uris', e)
         }
     }
 
