@@ -69,4 +69,11 @@ class CSSRewritingFilterTest {
         new File('src/test/resources/com/eaio/eproxy/rewriting/css').listFiles().collect { [ it ] as Object[] }
     }
     
+    @Test
+    void 'should not write beyond src attribute'() {
+        String style = '''.fancybox-ie6 #fancybox-left-ico{background:transparent;filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/images/fancybox/fancy_nav_left-333220e.png', sizingMethod='scale')}'''
+        String out = cssRewritingFilter.rewriteCSS(style)
+        assertThat(out, containsString(", sizingMethod='scale'"))
+    }
+    
 }

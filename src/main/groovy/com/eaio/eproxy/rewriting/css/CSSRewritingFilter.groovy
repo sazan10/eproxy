@@ -50,11 +50,11 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
 
     @Lazy
     private static Pattern patternSrcColorSpace = {
-        //  Pattern.compile("\\W(?:src|colorSpace)\\s*=\\s*(.*?)\\s*(;|$)", Pattern.CASE_INSENSITIVE)
+        //  Pattern.compile("\\W(?:src|colorSpace)\\s*=\\s*(.*?)\\s*(,|;|$)", Pattern.CASE_INSENSITIVE)
         use (CSSEscapeRegEx) {
             StringBuilder builder = new StringBuilder()
             builder.append('\\W(?:').appendPattern('src').append('|').appendPattern('colorSpace')
-                    .append(')\\s*=\\s*(.*?)\\s*(').appendPattern(';').append('|$)')
+                    .append(')\\s*=\\s*(.*?)\\s*(').appendPattern(',').append('|').appendPattern(';').append('|$)')
 
             Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
         }
