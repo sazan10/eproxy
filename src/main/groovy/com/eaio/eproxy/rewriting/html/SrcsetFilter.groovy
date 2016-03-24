@@ -45,7 +45,7 @@ class SrcsetFilter extends RewritingFilter implements URIManipulation {
                             parts[index] = replace(parts[index], imageURI, encodeTargetURI(baseURI, requestURI, imageURI, rewriteConfig))
                         }
                     }
-                    atts.setValue(i, parts.join(','))
+                    atts.setValue(i, parts.join(', '))
                 }
                 else if (attributeValueNeedsRewriting(attributeValue)) {
                     String imageURI = substringBefore(attributeValue, ' ') ?: attributeValue

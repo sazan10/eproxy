@@ -18,7 +18,7 @@ import com.eaio.net.httpclient.ReEncoding
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-class SrcsetRewritingFilterTest {
+class SrcsetFilterTest {
     
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
@@ -33,7 +33,7 @@ class SrcsetRewritingFilterTest {
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         errorCollector.checkThat(output as String, containsString('view-source:http://rah.com/rnw-http/fnuh.com/creme.jpg'))
-        errorCollector.checkThat(output as String, containsString(',http://rah.com/rnw-https/plop.com/fnord.jpg 640w,'))
+        errorCollector.checkThat(output as String, containsString(', http://rah.com/rnw-https/plop.com/fnord.jpg 640w, '))
         errorCollector.checkThat(output as String, containsString('"http://rah.com/rnw-https/plop.com/meetbefore.jpg"'))
         errorCollector.checkThat(output as String, containsString('"http://rah.com/rnw-http/creme.com/muh-kuh.jpg"'))
     }
