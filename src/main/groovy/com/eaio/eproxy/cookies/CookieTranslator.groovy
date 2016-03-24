@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.Header
 import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.cookie.Cookie as HCCookie
 import org.apache.http.cookie.ClientCookie
 import org.apache.http.cookie.CookieOrigin
 import org.apache.http.cookie.MalformedCookieException
@@ -37,9 +38,9 @@ class CookieTranslator {
         if (cookies) {
             CookieOrigin cookieOrigin = createCookieOrigin(requestURI)
             long now = System.currentTimeMillis()
-            List<org.apache.http.cookie.Cookie> httpClientCookies = (List<org.apache.http.cookie.Cookie>) cookies.collect { Cookie cookie ->
+            List<HCCookie> httpClientCookies = (List<HCCookie>) cookies.collect { Cookie cookie ->
                 decodeHttpClientCookie(toHttpClientCookie(cookie, now))
-            }.findAll { org.apache.http.cookie.Cookie cookie ->
+            }.findAll { HCCookie cookie ->
                 cookieSpec.match(cookie, cookieOrigin)
             }
             if (httpClientCookies) {
@@ -53,7 +54,7 @@ class CookieTranslator {
 
     void addToResponse(Header[] headers, URI baseURI, URI requestURI, HttpServletResponse response) {
         CookieOrigin cookieOrigin = createCookieOrigin(requestURI)
-        List<org.apache.http.cookie.Cookie> cookies = new ArrayList<>()
+        List<HCCookie> cookies = new ArrayList<>()
         headers.findAll { it.name?.equalsIgnoreCase('Set-Cookie') }.each { Header header ->
             try {
                 cookies.addAll(cookieSpec.parse(header, cookieOrigin))
@@ -71,12 +72,12 @@ class CookieTranslator {
         }
     }
 
-    CookieOrigin createCookieOrigin(URI requestURI) {
+    private CookieOrigin createCookieOrigin(URI requestURI) {
         new CookieOrigin(requestURI.host, requestURI.port < 0I && requestURI.scheme.equalsIgnoreCase('http') ? 80I : requestURI.port < 0I && requestURI.scheme.equalsIgnoreCase('https') ? 443I : requestURI.port,
                 requestURI.rawPath, requestURI.scheme?.equalsIgnoreCase('https'))
     }
 
-    org.apache.http.cookie.Cookie decodeHttpClientCookie(org.apache.http.cookie.Cookie cookie) {
+    private HCCookie decodeHttpClientCookie(HCCookie cookie) {
         BasicClientCookie out = new BasicClientCookie(substringAfter(cookie.name, '_'), cookie.value)
         out.with {
             comment = cookie.comment
@@ -89,8 +90,8 @@ class CookieTranslator {
         out
     }
 
-    org.apache.http.cookie.Cookie encodeHttpClientCookie(org.apache.http.cookie.Cookie cookie, URI baseURI) {
-        org.apache.http.cookie.Cookie out = new BasicClientCookie("${cookie.domain}_${cookie.name}", cookie.value)
+    private HCCookie encodeHttpClientCookie(HCCookie cookie, URI baseURI) {
+        HCCookie out = new BasicClientCookie("${cookie.domain}_${cookie.name}", cookie.value)
         out.with {
             comment = cookie.comment
             path = substringBeforeLast(baseURI.rawPath, '/') + cookie.path
@@ -100,7 +101,7 @@ class CookieTranslator {
         out
     }
 
-    Cookie toServletCookie(org.apache.http.cookie.Cookie cookie, long now = System.currentTimeMillis()) {
+    private Cookie toServletCookie(HCCookie cookie, long now = System.currentTimeMillis()) {
         Cookie out = new Cookie(cookie.name, cookie.value)
         out.with {
             comment = cookie.comment
@@ -117,7 +118,7 @@ class CookieTranslator {
         out
     }
 
-    org.apache.http.cookie.Cookie toHttpClientCookie(Cookie cookie, long now = System.currentTimeMillis()) {
+    private HCCookie toHttpClientCookie(Cookie cookie, long now = System.currentTimeMillis()) {
         BasicClientCookie out = new BasicClientCookie(cookie.name, cookie.value)
         out.with {
             comment = cookie.comment
