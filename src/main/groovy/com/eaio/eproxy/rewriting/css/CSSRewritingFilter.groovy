@@ -31,8 +31,8 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         //  Pattern.compile("(?:url|image)\\s*\\(\\s*(.*?)\\s*\\)", Pattern.CASE_INSENSITIVE)
         use (CSSEscapeRegEx) {
             StringBuilder builder = new StringBuilder()
-            builder.append('(?:').appendPattern('url').append('|').appendPattern('image')
-                    .append(')\\s*').appendPattern('(', true).append('\\s*(.*?)\\s*').appendPattern(')', true)
+            builder.append('(?:').appendRegEx('url').append('|').appendRegEx('image')
+                    .append(')\\s*').appendRegEx('(', true).append('\\s*(.*?)\\s*').appendRegEx(')', true)
             Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
         }
     }()
@@ -42,7 +42,7 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         //  Pattern.compile("@import\\s*(.*?)\\s*(;|$)", Pattern.CASE_INSENSITIVE)
         use (CSSEscapeRegEx) {
             StringBuilder builder = new StringBuilder()
-            builder.appendPattern('@import').append('\\s*(.*?)\\s*(').appendPattern(';').append('|$)')
+            builder.appendRegEx('@import').append('\\s*(.*?)\\s*(').appendRegEx(';').append('|$)')
 
             Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
         }
@@ -53,8 +53,8 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         //  Pattern.compile("\\W(?:src|colorSpace)\\s*=\\s*(.*?)\\s*(,|;|$)", Pattern.CASE_INSENSITIVE)
         use (CSSEscapeRegEx) {
             StringBuilder builder = new StringBuilder()
-            builder.append('\\W(?:').appendPattern('src').append('|').appendPattern('colorSpace')
-                    .append(')\\s*=\\s*(.*?)\\s*(').appendPattern(',').append('|').appendPattern(';').append('|$)')
+            builder.append('\\W(?:').appendRegEx('src').append('|').appendRegEx('colorSpace')
+                    .append(')\\s*=\\s*(.*?)\\s*(').appendRegEx(',').append('|').appendRegEx(';').append('|$)')
 
             Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
         }

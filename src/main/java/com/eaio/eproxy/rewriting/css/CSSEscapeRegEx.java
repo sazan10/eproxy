@@ -4,6 +4,8 @@ import java.io.IOException;
 
 /**
  * Creates regular expressions that support CSS escaping.
+ * <p>
+ * For example a character <tt>é</tt> is turned into <tt>(?:\\\\0{0,4}e9[ \\t\\n]?|é)</tt>.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
@@ -11,16 +13,21 @@ import java.io.IOException;
 public class CSSEscapeRegEx {
     
     /**
+     * For use with Groovy categories.
+     * 
      * @return never <code>null</code>
      */
-    public static Appendable appendCharacter(Appendable self, Character o) throws IOException {
-        return appendCharacter(self, o, false);
+    public static Appendable appendRegEx(Appendable self, Character o) throws IOException {
+        return appendRegEx(self, o, false);
     }
     
     /**
+     * For use with Groovy categories.
+     * 
+     * @param escape whether to escape the character
      * @return never <code>null</code>
      */
-    public static Appendable appendCharacter(Appendable self, Character o, boolean escape) throws IOException {
+    public static Appendable appendRegEx(Appendable self, Character o, boolean escape) throws IOException {
         if (self == null) {
             self = new StringBuilder();
         }
@@ -43,40 +50,46 @@ public class CSSEscapeRegEx {
     }
     
     /**
+     * For use with Groovy categories.
+     * 
      * @return never <code>null</code>
      */
-    public static Appendable appendPattern(Appendable self, Object o) throws IOException {
-        return appendPattern(self, o, false);
+    public static Appendable appendRegEx(Appendable self, Object o) throws IOException {
+        return appendRegEx(self, o, false);
     }
     
     /**
+     * For use with Groovy categories.
+     * 
      * @return never <code>null</code>
      */
-    public static Appendable appendPattern(Appendable self, Object o, boolean escape) throws IOException {
+    public static Appendable appendRegEx(Appendable self, Object o, boolean escape) throws IOException {
         if (self == null) {
             self = new StringBuilder();
         }
         if (o instanceof Character) {
-            appendCharacter(self, ((Character) o), escape);
+            appendRegEx(self, ((Character) o), escape);
         }
         else if (o instanceof CharSequence) {
             for (int i = 0; i < ((CharSequence) o).length(); ++i) {
-                appendCharacter(self, ((CharSequence) o).charAt(i), escape);
+                appendRegEx(self, ((CharSequence) o).charAt(i), escape);
             }
         }
         return self;
     }
     
     /**
+     * For use with Groovy categories.
+     * 
      * @return never <code>null</code>
      */
-    public static Appendable appendPattern(Appendable self, Object... data) throws IOException {
+    public static Appendable appendRegEx(Appendable self, Object... data) throws IOException {
         if (self == null) {
             self = new StringBuilder();
         }
         if (data != null) {
             for (Object o : data) {
-                appendPattern(self, o);
+                appendRegEx(self, o);
             }
         }
         return self;
@@ -84,10 +97,11 @@ public class CSSEscapeRegEx {
     
     /**
      * Convenience method.
+     * 
      * @return never <code>null</code>
      */
     public static String toPattern(Object... data) throws IOException {
-        return appendPattern(null, data).toString();
+        return appendRegEx(null, data).toString();
     }
 
 }

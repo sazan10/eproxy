@@ -19,7 +19,7 @@ class CSSEscapeRegExTest {
     public ErrorCollector errorCollector = new ErrorCollector()
 
     /**
-     * Test method for {@link com.eaio.eproxy.rewriting.css.CSSEscapeRegEx#appendPattern(java.lang.Appendable, java.lang.Object)}.
+     * Test method for {@link com.eaio.eproxy.rewriting.css.CSSEscapeRegEx#appendRegEx(java.lang.Appendable, java.lang.Object)}.
      */
     @Test
     void 'toPattern should be compilable'() {
