@@ -101,27 +101,33 @@ class Rewriting {
 
     void rewriteHTML(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
-        XMLReader xmlReader = newHTMLReader()
-        Collection<DefaultFilter> filters = []
-        if (rewriteConfig.removeActiveContent) {
-            filters << new RemoveActiveContentFilter()
+        XMLReader xmlReader = newHTMLReader(outputWriter, charset, baseURI, requestURI, rewriteConfig)
+        try {
+            xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
-        if (rewriteConfig.removeNoScriptElements) {
-            filters << new RemoveNoScriptElementsFilter()
+        catch (SAXParseException ex) {
+            log.warn("While parsing {}@{}:{}: {}", requestURI, ex.lineNumber, ex.columnNumber, (ExceptionUtils.getRootCause(ex) ?: ex).message)
         }
-        if (rewriteConfig.rewrite) {
-            filters.addAll([
-                configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig),
-                configure(new MetaRewritingFilter(), baseURI, requestURI, rewriteConfig),
-                configure(new SrcsetFilter(), baseURI, requestURI, rewriteConfig),
-                configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig),
-            ])
-            if (proxyJavaScriptFilter) {
-                filters << proxyJavaScriptFilter
+        catch (SAXException ex) {
+            if (ExceptionUtils.getRootCause(ex) instanceof IOException) {
+                throw ExceptionUtils.getRootCause(ex)
+            }
+            else {
+                log.warn("While parsing {}: {}", requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
-        filters << new SVGFilter() << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
-        xmlReader.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
+        catch (NullPointerException ignored) {}
+        finally {
+            try {
+                outputWriter.flush()
+            }
+            catch (emall) {}
+        }
+    }
+    
+    void rewriteHTMLFragment(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+        Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
+        XMLReader xmlReader = newHTMLFragmentReader(outputWriter, charset, baseURI, requestURI, rewriteConfig)
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
@@ -147,8 +153,8 @@ class Rewriting {
 
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
+        CSSRewritingFilter handler = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
         try {
-            CSSRewritingFilter handler = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
             outputWriter.write(handler.rewriteCSS(toString(inputStream, charset ?: defaultCharset)))
         }
         catch (NullPointerException ignored) {}
@@ -188,6 +194,38 @@ class Rewriting {
         SAXParser out = new SAXParser()
         out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
         out.setProperty('http://cyberneko.org/html/properties/names/elems', 'lower')
+        out
+    }
+    
+    XMLReader newHTMLReader(Writer outputWriter, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+        XMLReader out = newHTMLReader()
+        Collection<DefaultFilter> filters = []
+        if (rewriteConfig.removeActiveContent) {
+            filters << new RemoveActiveContentFilter()
+        }
+        if (rewriteConfig.removeNoScriptElements) {
+            filters << new RemoveNoScriptElementsFilter()
+        }
+        if (rewriteConfig.rewrite) {
+            filters.addAll([
+                configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig),
+                configure(new MetaRewritingFilter(), baseURI, requestURI, rewriteConfig),
+                configure(new SrcsetFilter(), baseURI, requestURI, rewriteConfig),
+                configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig),
+            ])
+            if (proxyJavaScriptFilter) {
+                filters << proxyJavaScriptFilter
+            }
+        }
+        filters << new SVGFilter() << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
+        out.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
+        
+        out
+    }
+    
+    XMLReader newHTMLFragmentReader(Writer outputWriter, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+        XMLReader out = newHTMLReader(outputWriter, charset, baseURI, requestURI, rewriteConfig)
+        out.setFeature('http://cyberneko.org/html/features/balance-tags/document-fragment', true)
         out
     }
     

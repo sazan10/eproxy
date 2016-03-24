@@ -37,8 +37,8 @@ class RewritingIT {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         rewriting.rewriteSVG(new File('src/test/resources/com/eaio/eproxy/rewriting/svg/style.svg').newInputStream(),
             bOut, null, 'http://lol.lol'.toURI(), 'http://blorb.com'.toURI(), RewriteConfig.fromString('rnw'))
-        errorCollector.checkThat(bOut as String, containsString('url(http://lol.lol/rnw-http/blorb.com/fnuh.png)'))
-        errorCollector.checkThat(bOut as String, containsString('url(http://lol.lol/rnw-http/keks.org/plop.png)'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('url(http://lol.lol/rnw-http/blorb.com/fnuh.png)'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('url(http://lol.lol/rnw-http/keks.org/plop.png)'))
     }
     
     @Test
@@ -46,7 +46,7 @@ class RewritingIT {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         rewriting.rewriteSVG(new File('src/test/resources/com/eaio/eproxy/rewriting/svg/external-style-sheet.svg').newInputStream(),
             bOut, null, 'http://lol.lol'.toURI(), 'http://blorb.com'.toURI(), RewriteConfig.fromString('rnw'))
-        errorCollector.checkThat(bOut as String, containsString('href="http://lol.lol/rnw-http/blorb.com/svg-stylesheet.css"'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('href="http://lol.lol/rnw-http/blorb.com/svg-stylesheet.css"'))
     }
     
     @Test
@@ -64,7 +64,16 @@ class RewritingIT {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         rewriting.rewriteSVG(new File('src/test/resources/com/eaio/eproxy/rewriting/svg/mm-logo.svg').newInputStream(), bOut,
             Charset.forName('UTF-8'), URI.create('http://oha.com/ui/'), URI.create('http://fnuh.com/mm-logo.svg'), RewriteConfig.fromString('rnw'))
-        assertThat(bOut as String, containsString('.st0{fill:#df0000}'))
+        assertThat(bOut.toString(0I), containsString('.st0{fill:#df0000}'))
+    }
+    
+    @Test
+    void 'HTML fragment rewriting should be supported'() {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        rewriting.rewriteHTMLFragment(new ByteArrayInputStream('<a href="http://pruh.com">Mega-pruh!</a><b style="background-image: url(http://rah.com/ouch.png)">wah</b>'.bytes), bOut,
+            Charset.forName('UTF-8'), URI.create('http://oha.com/ui/'), URI.create('http://fnuh.com/mm-logo.svg'), RewriteConfig.fromString('rnw'))
+        assertThat(bOut.toString(0I), containsString('http://oha.com/ui/rnw-http/pruh.com'))
+        assertThat(bOut.toString(0I), containsString('url(http://oha.com/ui/rnw-http/rah.com/ouch.png)'))
     }
 
 }
