@@ -11,7 +11,7 @@
         try {
             if (([].slice.call(document.links)).filter(function(a) { return /^javascript:/i.test(this.href) }).length) {
                 var currentURL = decodeTargetURI(location.href)
-                eaio.track.event('TrackJavaScriptURIs', currentURL)
+                eaio.track.event('javascript-uris', currentURL)
             }
         }
         catch (e) {
