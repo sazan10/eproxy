@@ -18,6 +18,7 @@
                     r0 = resourceEntries[i]
                     if (!/^data:/i.test(r0.name) && !/https?:\/\/(localhost|127.0.0.1)(:\d+)?\//i.test(r0.name) && !new RegExp("^" + location.origin).test(r0.name) && !r0.name.startsWith('https://www.google-analytics.com/collect')) {
                         eaio.track.event('resources-on-different-domains', currentURL, decodeTargetURI(r0.name))
+                        break
                     }
                 }
             }

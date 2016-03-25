@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ErrorCollector
@@ -250,6 +251,7 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
+    @Ignore
     void 'SVG should be rewriting 2'() {
         HttpServletRequest request = buildHttpServletRequest('https://en.wikipedia.org/static/1.27.0-wmf.13/skins/Vector/images/user-icon.svg?7b5d5')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
@@ -344,6 +346,7 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
+    @Ignore
     void 'SVG rewriting should keep XML namespaces'() {
         HttpServletRequest request = buildHttpServletRequest('https://www.google.com/search/about/img/badges/ios/badge.svg')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
