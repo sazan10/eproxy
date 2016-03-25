@@ -4,7 +4,7 @@
 	 * Pings the page performance back to GA.
 	 */
 	function trackPagePerformance() {
-	    eaio.trackPagePerformance('Proxy')
+	    eaio.track.pagePerformance('Proxy')
 	}
 
 	if (/m/.test(document.readyState)) { // coMplete
