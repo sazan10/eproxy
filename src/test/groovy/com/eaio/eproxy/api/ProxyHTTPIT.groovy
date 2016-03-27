@@ -68,7 +68,7 @@ class ProxyHTTPIT {
     
     @Test
     void 'ports should be supported'() {
-        HttpServletRequest request = buildHttpServletRequest('https://www.google.com:443/')
+        HttpServletRequest request = buildHttpServletRequest('https://www.bing.com:443/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -77,7 +77,7 @@ class ProxyHTTPIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'https', request, response)
-        assertThat(bOut.toString(0I), containsString('form action="http://fnuh.com/rnw-https/www.google.com:443/search"'))
+        assertThat(bOut.toString(0I), containsString('action="http://fnuh.com/rnw-https/www.bing.com:443/search"'))
     }
     
     // Test URLs from media.io, may still be broken or not

@@ -25,6 +25,8 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.InputStreamEntity
 import org.apache.http.message.BasicHeaderValueParser
 import org.apache.http.message.ParserCursor
+import org.apache.http.protocol.HttpContext
+import org.apache.http.protocol.HttpCoreContext
 import org.apache.http.util.CharArrayBuffer
 import org.apache.http.util.EntityUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -109,6 +111,7 @@ class Proxy implements URIManipulation {
             }
 
             remoteResponse = httpClient.execute(uriRequest, context)
+            requestURI = getTargetURI(context) ?: requestURI
 
             response.with {
                 if (!committed) {
@@ -344,4 +347,15 @@ class Proxy implements URIManipulation {
         }
     }
 
+    /**
+     * Extracts the URI of the last request (after following redirects) from the given {@link HttpContext}.
+     *
+     * @see com.eaio.net.httpclient.TimingInterceptor
+     */
+    URI getTargetURI(HttpContext context) {
+        HttpUriRequest currentReq = (HttpUriRequest) context.getAttribute(HttpCoreContext.HTTP_REQUEST)
+        HttpHost currentHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST)
+        currentReq.URI.absolute ? currentReq.URI : (currentHost.toURI() + currentReq.URI).toURI()
+    }
+    
 }

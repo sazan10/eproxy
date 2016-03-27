@@ -81,7 +81,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'forms should be rewritten'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.google.com')
+        HttpServletRequest request = buildHttpServletRequest('https://www.bing.com/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -90,7 +90,7 @@ class ProxyHTTPRewritingIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('action="http://fnuh.com/rnw-http/www.google.com/search"'))
+        assertThat(bOut.toString(0I), containsString('action="http://fnuh.com/rnw-http/www.bing.com/search"'))
     }
     
     @Test
@@ -317,7 +317,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'all style attributes should be rewritten'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.hidayahsunnah.com/blog/2014/10/01/ceramah-singkat-islam-dan-kesimbangan-alam-ustadz-riyadh-bin-badr-bajrey/')
+        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/%20Islam%20dan%20Kesimbangan%20Alam%20%E2%80%93%20Ustadz%20Riyadh%20bin%20Badr%20Bajrey.%20%E2%80%93%20Hidayah%20Sunnah%20Indonesia.html') // Saved from http://www.hidayahsunnah.com/blog/2014/10/01/ceramah-singkat-islam-dan-kesimbangan-alam-ustadz-riyadh-bin-badr-bajrey/
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
