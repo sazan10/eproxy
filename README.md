@@ -56,7 +56,7 @@ Go to http://127.0.0.1:8080/index.html and press Ctrl-C when you're done.
 
 #### Tomcat or Jetty
 
-Deploy the ``eproxy##....war`` file.
+Deploy the ``target/eproxy##....war`` file.
 
 #### Google App Engine
 
