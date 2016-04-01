@@ -38,13 +38,23 @@ class RewritingFilter extends BaseFilter {
             if (colonIndex == -1I) {
                 colonIndex = Integer.MAX_VALUE
             }
-            [
-                { attributeValue.startsWith('/') },
-                { int index = bndmci.searchString(attributeValue, 'http:', patternHTTP); index >= 0I && index < colonIndex },
-                { int index = bndmci.searchString(attributeValue, 'https:', patternHTTPS); index >= 0I && index < colonIndex },
-                { int index = bndmci.searchString(attributeValue, ':/', patternColonSlash); index >= 0I && index < colonIndex },
-                { bndmci.searchString(attributeValue, 'view-source:', patternViewSource) == 0I },
-            ].any { it() }
+            if (attributeValue.startsWith('/')) {
+                return true
+            }
+            int index
+            index = bndmci.searchString(attributeValue, 'http:', patternHTTP)
+            if (index >= 0I && index < colonIndex) {
+                return true
+            }
+            index = bndmci.searchString(attributeValue, 'https:', patternHTTPS)
+            if (index >= 0I && index < colonIndex) {
+                return true
+            }
+            index = bndmci.searchString(attributeValue, ':/', patternColonSlash)
+            if (index >= 0I && index < colonIndex) {
+                return true
+            }
+            bndmci.searchString(attributeValue, 'view-source:', patternViewSource) == 0I
         }
     }
 

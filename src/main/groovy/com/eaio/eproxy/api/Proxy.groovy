@@ -233,7 +233,8 @@ class Proxy implements URIManipulation {
     }
 
     private copyRemoteResponseHeadersToResponse(HeaderIterator headers, HttpServletResponse response, boolean canRewrite, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
-        headers.each { Header header ->
+        while (headers.hasNext()) {
+            Header header = headers.nextHeader()
             if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                 response.setHeader(header.name, encodeTargetURI(baseURI, requestURI, header.value, rewriteConfig))
             }

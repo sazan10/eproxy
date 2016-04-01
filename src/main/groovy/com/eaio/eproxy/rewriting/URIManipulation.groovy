@@ -16,6 +16,8 @@ import com.eaio.eproxy.entities.RewriteConfig
  * <li><tt>{@link ReEncoding reEncoding}</tt></li>
  * <li><tt>log</tt></li>
  * </ul>
+ * <p>
+ * Pretty big memory hotspot, would probably benefit from @CompileStatic.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
