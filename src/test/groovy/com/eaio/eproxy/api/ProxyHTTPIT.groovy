@@ -27,7 +27,7 @@ import com.eaio.eproxy.Eproxy
  */
 @RunWith(SpringJUnit4ClassRunner)
 @SpringApplicationConfiguration(classes = Eproxy)
-@WebIntegrationTest(value = [ 'http.maxRedirects=1', 'cookies.enabled=false' ], randomPort = true)
+@WebIntegrationTest(value = [ 'cookies.enabled=false' ], randomPort = true)
 class ProxyHTTPIT {
     
     @Rule
@@ -47,7 +47,7 @@ class ProxyHTTPIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), containsString('johannburkard/eproxy'))
     }
     
@@ -111,31 +111,16 @@ class ProxyHTTPIT {
     }
     
     @Test
-    void 'broken HTTPS should be supported 3'() {
-        HttpServletRequest request = buildHttpServletRequest('https://t.co/0fRMkR6AOo')
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
-        HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
-            setHeader: { String name, String value -> },
-            getOutputStream: { new DelegatingServletOutputStream(bOut) },
-            isCommitted: { true },
-        ] as HttpServletResponse
-        proxy.proxy('https', request, response)
-        assertThat(bOut.toString(0I), containsString('The Red Line'))
-    }
-    
-    @Test
     void 'broken redirects should be supported'() {
         HttpServletRequest request = buildHttpServletRequest('http://bit.ly/19xbm5w')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
-            setHeader: { String name, String value -> },
+            setStatus: { int status -> assertThat(status, is(301I)) },
+            setHeader: { String name, String value -> if (name == 'Location') assertThat(value, is('http://fnuh.com/http/cprouvost.free.fr/fun/generiques/--%20Film%20--/Film%20-%20Star%20Wars%20(The%20Imperial%20March).mp3')) },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('http', request, response)
-        assertThat(bOut.toString(0I), containsString('Star Wars'))
     }
     
     @Test

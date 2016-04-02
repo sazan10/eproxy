@@ -76,12 +76,6 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Value('${http.readTimeout}')
     Integer readTimeout
 
-    @Value('${http.maxRedirects}')
-    Integer maxRedirects
-
-    @Value('${http.followPOSTAndDELETE}')
-    Boolean followPOSTAndDELETE
-
     @Value('${http.retryCount}')
     Integer retryCount
 
@@ -151,19 +145,15 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
             .setConnectionManager(connectionManager)
             // Retries. InterruptedIOException is allowed to be retried.
             .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true, [ UnknownHostException, ConnectException, SSLException ]))
-            // Fix insufficient handling of not encoded redirect URLs
-            .setRedirectStrategy(followPOSTAndDELETE ? new ReEncodingLaxRedirectStrategy(reEncoding()) : new ReEncodingRedirectStrategy(reEncoding()))
             .setDefaultRequestConfig(requestConfig())
             .setHttpProcessor(httpProcessor())
+            .disableRedirectHandling()
             
         if (userAgent) {
             builder.userAgent = userAgent
         }
         if (asyncMemcacheServiceHttpCacheStorage) {
             builder.httpCacheStorage = asyncMemcacheServiceHttpCacheStorage
-        }
-        if (maxRedirects == 0I) {
-            builder.disableRedirectHandling()
         }
         if (retryCount == 0I) {
             builder.disableAutomaticRetries()
@@ -196,7 +186,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
             .setConnectTimeout(connectionTimeout ?: 10000I)
             .setConnectionRequestTimeout(connectionRequestTimeout ?: 0I)
             .setSocketTimeout(readTimeout ?: 10000I)
-            .setMaxRedirects(maxRedirects ?: 10I)
+            .setMaxRedirects(0I)
             .build()
     }
     

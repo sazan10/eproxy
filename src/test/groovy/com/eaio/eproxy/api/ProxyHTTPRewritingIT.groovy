@@ -28,7 +28,7 @@ import com.eaio.eproxy.Eproxy
  */
 @RunWith(SpringJUnit4ClassRunner)
 @SpringApplicationConfiguration(classes = Eproxy)
-@WebIntegrationTest(value = [ 'http.maxRedirects=1', 'proxy.javaScript.enabled=false', 'cookies.enabled=false' ], randomPort = true)
+@WebIntegrationTest(value = [ 'proxy.javaScript.enabled=false', 'cookies.enabled=false' ], randomPort = true)
 class ProxyHTTPRewritingIT {
     
     @Rule
@@ -196,7 +196,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'query strings should be preserved'() {
-        HttpServletRequest request = buildHttpServletRequest('http://read-able.com/check.php?uri=https%3A%2F%2Fgithub.com%2Fjohannburkard%2Feproxy')
+        HttpServletRequest request = buildHttpServletRequest('http://www.webpagefx.com/tools/read-able/check.php?uri=https%3A%2F%2Fgithub.com%2Fjohannburkard%2Feproxy')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
