@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.*
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 
-import org.apache.commons.lang3.text.StrBuilder
 import org.apache.xerces.xni.parser.XMLDocumentFilter
 import org.junit.Rule
 import org.junit.Test
@@ -16,7 +15,6 @@ import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.Rewriting
-import com.eaio.net.httpclient.ReEncoding
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -29,7 +27,7 @@ class CSSRewritingFilterTest {
     public ErrorCollector errorCollector = new ErrorCollector()
 
     @Lazy
-    CSSRewritingFilter cssRewritingFilter = new CSSRewritingFilter(reEncoding: new ReEncoding(), baseURI: 'http://fnuh.com/'.toURI(),
+    CSSRewritingFilter cssRewritingFilter = new CSSRewritingFilter(baseURI: 'http://fnuh.com/'.toURI(),
         requestURI: 'https://www.google.com/'.toURI(), rewriteConfig: RewriteConfig.fromString('rnw'))
     
     @Test

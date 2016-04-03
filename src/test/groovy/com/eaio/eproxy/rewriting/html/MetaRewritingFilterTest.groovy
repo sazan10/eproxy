@@ -12,7 +12,6 @@ import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.Rewriting
-import com.eaio.net.httpclient.ReEncoding
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -24,7 +23,7 @@ class MetaRewritingFilterTest {
     public ErrorCollector errorCollector = new ErrorCollector()
     
     @Lazy
-    MetaRewritingFilter metaRewritingFilter = new MetaRewritingFilter(reEncoding: new ReEncoding(), baseURI: 'http://rah.com/'.toURI(),
+    MetaRewritingFilter metaRewritingFilter = new MetaRewritingFilter(baseURI: 'http://rah.com/'.toURI(),
         requestURI: 'https://www.facebook.com/'.toURI(), rewriteConfig: RewriteConfig.fromString('rnw'))
     
     @Test

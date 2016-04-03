@@ -4,30 +4,27 @@ import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.web.util.UriComponentsBuilder
 
 import com.eaio.eproxy.entities.RewriteConfig
+import com.eaio.net.httpclient.ReEncoding
 
 /**
  * Trait that contains a few URL manipulation methods.
- * <p>
- * Accesses
- * <ul>
- * <li><tt>{@link ReEncoding reEncoding}</tt></li>
- * <li><tt>log</tt></li>
- * </ul>
- * <p>
- * Pretty big memory hotspot, would probably benefit from @CompileStatic.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@CompileStatic
 trait URIManipulation {
+    
+    Logger log = LoggerFactory.getLogger(getClass())
 
     /**
      * Builds a URI that points to this web application.
      */
-    @CompileStatic
     URI buildBaseURI(String scheme, String host, int port, String contextPath) {
         new URI(scheme, null, host, getPort(scheme, port), contextPath, null, null)
     }
@@ -49,17 +46,16 @@ trait URIManipulation {
             builder.port(port)
         }
         if (queryString) {
-            reEncoding.reEncode(builder.build().toString() + '?' + queryString).toURI()
+            ReEncoding.INSTANCE.reEncode(builder.build().toString() + '?' + queryString).toURI()
         }
         else {
-            reEncoding.reEncode(builder.build().toString()).toURI()
+            ReEncoding.INSTANCE.reEncode(builder.build().toString()).toURI()
         }
     }
 
     /**    
      * Returns <tt>-1</tt> if <tt>port</tt> is 80 (for the "HTTP" scheme) or 443 (for the "HTTPS" scheme).
      */
-    @CompileStatic
     int getPort(String scheme, int port) {
         (scheme?.equalsIgnoreCase('http') && port == 80I) || (scheme?.equalsIgnoreCase('https') && port == 443I) ? -1I : port
     }
@@ -74,13 +70,13 @@ trait URIManipulation {
             if (!(resolvedURI.scheme?.equalsIgnoreCase('http')) && !(resolvedURI.scheme?.equalsIgnoreCase('https'))) {
                 builder.scheme(resolvedURI.scheme + ':' + baseURI.scheme)
                 try {
-                    resolvedURI = reEncoding.reEncode(resolvedURI.schemeSpecificPart).toURI()
+                    resolvedURI = ReEncoding.INSTANCE.reEncode(resolvedURI.schemeSpecificPart).toURI()
                 }
                 catch (URISyntaxException ex) {
                     log.warn('couldn\'t resolve {}: {}', resolvedURI.schemeSpecificPart, (ExceptionUtils.getRootCause(ex) ?: ex).message)
                 }
             }
-            builder.pathSegment(rewriteConfig ? rewriteConfig.toString() + resolvedURI.scheme : resolvedURI.scheme, resolvedURI.authority)
+            builder.pathSegment(rewriteConfig.asBoolean() ? rewriteConfig.toString() + resolvedURI.scheme : resolvedURI.scheme, resolvedURI.authority)
             if (resolvedURI.rawPath) {
                 builder.path(resolvedURI.rawPath)
             }
@@ -103,13 +99,13 @@ trait URIManipulation {
      * <code>resolve('http://foo.com/ah/oh.html'.toURI(), '/ui.html') = 'http://foo.com/ui.html'</code>
      */
     URI resolve(URI requestURI, String attributeValue) {
-        String reEncodedAttributeValue = reEncoding.reEncode(attributeValue)
+        String reEncodedAttributeValue = ReEncoding.INSTANCE.reEncode(attributeValue)
         try {
             requestURI.resolve(reEncodedAttributeValue)
         }
         catch (IllegalArgumentException ex) {
             if (ex.message?.startsWith('Malformed escape pair at index')) {
-                int index = (ex.message =~ /Malformed escape pair at index (\d+)/)[0I][1I] as int
+                int index = substringAfterLast(substringBefore(ex.message, ':'), ' ') as int
                 requestURI.resolve(reEncodedAttributeValue.substring(0I, index))
             }
             else {

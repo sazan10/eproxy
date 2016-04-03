@@ -24,7 +24,6 @@ import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.css.*
 import com.eaio.eproxy.rewriting.html.*
 import com.eaio.eproxy.rewriting.svg.SVGFilter
-import com.eaio.net.httpclient.ReEncoding
 
 /**
  * Rewrites links in different MIME types.
@@ -36,9 +35,6 @@ import com.eaio.net.httpclient.ReEncoding
 @Component
 @Slf4j
 class Rewriting {
-
-    @Autowired
-    ReEncoding reEncoding
 
     @Autowired(required = false)
     ProxyJavaScriptFilter proxyJavaScriptFilter
@@ -244,7 +240,6 @@ class Rewriting {
     }
     
     private <T extends RewritingFilter> T configure(T filter, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
-        filter.reEncoding = reEncoding
         filter.baseURI = baseURI
         filter.requestURI = requestURI
         filter.rewriteConfig = rewriteConfig

@@ -28,15 +28,12 @@ import com.eaio.net.httpclient.ReEncoding
 @Slf4j
 class NoScriptRedirect implements URIManipulation {
     
-    @Autowired
-    ReEncoding reEncoding
-
     @RequestMapping('/redir')
     void redirect(@RequestParam String url, @RequestParam('rewriteconfig') String rewriteConfigString,
         HttpServletRequest request, HttpServletResponse response) {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
         
-        String reEncodedURL = reEncoding.reEncode(trimToEmpty(url))
+        String reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(url))
         URI resolvedURI = URI.create(reEncodedURL)
         if (resolvedURI.scheme) {
             resolvedURI = new URI(resolvedURI.scheme, resolvedURI.host, null, null)

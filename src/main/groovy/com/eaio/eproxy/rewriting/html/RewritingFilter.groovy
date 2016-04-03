@@ -1,10 +1,8 @@
-
 package com.eaio.eproxy.rewriting.html
 
 import groovy.transform.CompileStatic
 
 import com.eaio.eproxy.entities.RewriteConfig
-import com.eaio.net.httpclient.ReEncoding
 import com.eaio.stringsearch.BNDMCI
 
 /**
@@ -15,8 +13,6 @@ import com.eaio.stringsearch.BNDMCI
  */
 @CompileStatic
 class RewritingFilter extends BaseFilter {
-
-    ReEncoding reEncoding
 
     URI baseURI, requestURI
 

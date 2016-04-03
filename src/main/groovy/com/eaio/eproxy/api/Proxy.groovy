@@ -41,7 +41,6 @@ import com.eaio.eproxy.rewriting.*
 import com.eaio.eproxy.rewriting.html.*
 import com.eaio.io.RangeInputStream
 import com.eaio.net.httpclient.AbortHttpUriRequestTask
-import com.eaio.net.httpclient.ReEncoding
 import com.eaio.net.httpclient.TimingInterceptor
 import com.google.apphosting.api.DeadlineExceededException
 import com.google.apphosting.api.ApiProxy.CancelledException
@@ -72,9 +71,6 @@ class Proxy implements URIManipulation {
 
     @Autowired
     Rewriting rewriting
-
-    @Autowired
-    ReEncoding reEncoding
 
     @Autowired(required = false)
     Timer timer

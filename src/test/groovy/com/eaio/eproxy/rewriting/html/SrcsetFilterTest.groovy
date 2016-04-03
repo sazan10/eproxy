@@ -12,7 +12,6 @@ import org.xml.sax.XMLReader
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.Rewriting
-import com.eaio.net.httpclient.ReEncoding
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -27,7 +26,7 @@ class SrcsetFilterTest {
     void '<img srcset> should be rewritten'() {
         StringWriter output = new StringWriter()
         XMLReader xmlReader = new Rewriting().newHTMLReader()
-        XMLDocumentFilter[] filters = [ new SrcsetFilter(reEncoding: new ReEncoding(), baseURI: 'http://rah.com'.toURI(),
+        XMLDocumentFilter[] filters = [ new SrcsetFilter(baseURI: 'http://rah.com'.toURI(),
             requestURI: 'https://plop.com/ui.html?fnuh=guh'.toURI(), rewriteConfig: RewriteConfig.fromString('rnw')),
             new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
