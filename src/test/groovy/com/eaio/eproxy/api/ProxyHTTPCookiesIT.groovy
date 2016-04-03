@@ -37,15 +37,37 @@ class ProxyHTTPCookiesIT {
         HttpServletRequest request = buildHttpServletRequest('http://www.bing.com')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         boolean cookieSet = false
+        String cookieName, cookieValue
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
-            addCookie: { Cookie cookie -> cookieSet = true; assertThat(cookie.name, containsString('bing.com')) },
+            addCookie: { Cookie cookie ->
+                assertThat(cookie.name, containsString('bing.com'))
+                cookieSet = true
+                cookieName = cookie.name
+                cookieValue = cookie.value
+            },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
+        assertThat(bOut.toString(0I), containsString('meta content'))
         assertThat(cookieSet, is(true))
+        bOut.reset()
+        request = buildHttpServletRequest('http://www.bing.com')
+        (java.lang.reflect.Proxy.getInvocationHandler(request).delegate)['getCookies'] = {
+            [ new Cookie(cookieName, cookieValue) ].toArray(new Cookie[1I])
+        }
+        response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+            addCookie: { Cookie cookie ->
+                assertThat(cookie.name, containsString('bing.com'))
+            },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), containsString('meta content'))
     }
 
