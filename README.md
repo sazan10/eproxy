@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/johannburkard/eproxy/badge.svg?branch=master&service=github)](https://coveralls.io/github/johannburkard/eproxy?branch=master)
+
 # eproxy
 
 eproxy is a proxy that
