@@ -227,7 +227,12 @@ class Rewriting {
     
     XMLReader newXMLReader() {
         XMLReader out = XMLReaderFactory.createXMLReader()
-        out.setFeature('http://xml.org/sax/features/namespace-prefixes', true)
+        out.with {
+            setFeature('http://xml.org/sax/features/namespace-prefixes', true)
+            // Prevent external XML entities from deadlocking threads, see doc/deadlock-external-xml-entity.txt
+            setFeature('http://xml.org/sax/features/external-general-entities', false)
+            setFeature('http://xml.org/sax/features/external-parameter-entities', false)
+        }
         out
     }
 

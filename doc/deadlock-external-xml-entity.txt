@@ -1,0 +1,76 @@
+Frozen threads found (potential deadlock)
+
+It seems that the following threads have not changed their stack for more than 10 seconds.
+These threads are possibly (but not necessarily!) in a deadlock or hung.
+
+http-nio-8080-exec-7 <--- Frozen for at least 2m 26s
+java.net.PlainSocketImpl.socketConnect(InetAddress, int, int) PlainSocketImpl.java (native)
+java.net.AbstractPlainSocketImpl.doConnect(InetAddress, int, int) AbstractPlainSocketImpl.java:339
+java.net.AbstractPlainSocketImpl.connectToAddress(InetAddress, int, int) AbstractPlainSocketImpl.java:200
+java.net.AbstractPlainSocketImpl.connect(SocketAddress, int) AbstractPlainSocketImpl.java:182
+java.net.SocksSocketImpl.connect(SocketAddress, int) SocksSocketImpl.java:392
+java.net.Socket.connect(SocketAddress, int) Socket.java:579
+java.net.Socket.connect(SocketAddress) Socket.java:528
+sun.net.NetworkClient.doConnect(String, int) NetworkClient.java:180
+sun.net.www.http.HttpClient.openServer(String, int) HttpClient.java:432
+sun.net.www.http.HttpClient.openServer() HttpClient.java:527
+sun.net.www.http.HttpClient.parseHTTPHeader(MessageHeader, ProgressSource, HttpURLConnection) HttpClient.java:767
+sun.net.www.http.HttpClient.parseHTTP(MessageHeader, ProgressSource, HttpURLConnection) HttpClient.java:633
+sun.net.www.protocol.http.HttpURLConnection.getInputStream() HttpURLConnection.java:1324
+org.apache.xerces.impl.XMLEntityManager.setupCurrentEntity(String, XMLInputSource, boolean, boolean)
+org.apache.xerces.impl.XMLEntityManager.startEntity(String, XMLInputSource, boolean, boolean)
+org.apache.xerces.impl.XMLEntityManager.startEntity(String, boolean)
+org.apache.xerces.impl.XMLDTDScannerImpl.startPE(String, boolean)
+org.apache.xerces.impl.XMLDTDScannerImpl.skipSeparator(boolean, boolean)
+org.apache.xerces.impl.XMLDTDScannerImpl.scanDecls(boolean)
+org.apache.xerces.impl.XMLDTDScannerImpl.scanDTDExternalSubset(boolean)
+org.apache.xerces.impl.XMLDocumentScannerImpl$DTDDispatcher.dispatch(boolean)
+org.apache.xerces.impl.XMLDocumentFragmentScannerImpl.scanDocument(boolean)
+org.apache.xerces.parsers.XML11Configuration.parse(boolean)
+org.apache.xerces.parsers.XML11Configuration.parse(XMLInputSource)
+org.apache.xerces.parsers.XMLParser.parse(XMLInputSource)
+org.apache.xerces.parsers.AbstractSAXParser.parse(InputSource)
+com.eaio.eproxy.rewriting.Rewriting.rewriteSVG(InputStream, OutputStream, Charset, URI, URI, RewriteConfig) Rewriting.groovy:178
+com.eaio.eproxy.rewriting.Rewriting.rewrite(InputStream, OutputStream, Charset, URI, URI, RewriteConfig, String) Rewriting.groovy:94
+com.eaio.eproxy.api.Proxy.proxy(String, String, HttpServletRequest, HttpServletResponse) Proxy.groovy:150
+sun.reflect.GeneratedMethodAccessor56.invoke(Object, Object[])
+sun.reflect.DelegatingMethodAccessorImpl.invoke(Object, Object[]) DelegatingMethodAccessorImpl.java:43
+java.lang.reflect.Method.invoke(Object, Object[]) Method.java:606
+org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(Object[]) InvocableHandlerMethod.java:222
+org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(NativeWebRequest, ModelAndViewContainer, Object[]) InvocableHandlerMethod.java:137
+org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletWebRequest, ModelAndViewContainer, Object[]) ServletInvocableHandlerMethod.java:110
+org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(HttpServletRequest, HttpServletResponse, HandlerMethod) RequestMappingHandlerAdapter.java:775
+org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(HttpServletRequest, HttpServletResponse, HandlerMethod) RequestMappingHandlerAdapter.java:705
+org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(HttpServletRequest, HttpServletResponse, Object) AbstractHandlerMethodAdapter.java:85
+org.springframework.web.servlet.DispatcherServlet.doDispatch(HttpServletRequest, HttpServletResponse) DispatcherServlet.java:959
+org.springframework.web.servlet.DispatcherServlet.doService(HttpServletRequest, HttpServletResponse) DispatcherServlet.java:893
+org.springframework.web.servlet.FrameworkServlet.processRequest(HttpServletRequest, HttpServletResponse) FrameworkServlet.java:965
+org.springframework.web.servlet.FrameworkServlet.doGet(HttpServletRequest, HttpServletResponse) FrameworkServlet.java:856
+javax.servlet.http.HttpServlet.service(HttpServletRequest, HttpServletResponse) HttpServlet.java:622
+org.springframework.web.servlet.FrameworkServlet.service(HttpServletRequest, HttpServletResponse) FrameworkServlet.java:841
+javax.servlet.http.HttpServlet.service(ServletRequest, ServletResponse) HttpServlet.java:729
+org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ServletRequest, ServletResponse) ApplicationFilterChain.java:291
+org.apache.catalina.core.ApplicationFilterChain.doFilter(ServletRequest, ServletResponse) ApplicationFilterChain.java:206
+org.apache.tomcat.websocket.server.WsFilter.doFilter(ServletRequest, ServletResponse, FilterChain) WsFilter.java:52
+org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ServletRequest, ServletResponse) ApplicationFilterChain.java:239
+org.apache.catalina.core.ApplicationFilterChain.doFilter(ServletRequest, ServletResponse) ApplicationFilterChain.java:206
+org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(HttpServletRequest, HttpServletResponse, FilterChain) CharacterEncodingFilter.java:85
+org.springframework.web.filter.OncePerRequestFilter.doFilter(ServletRequest, ServletResponse, FilterChain) OncePerRequestFilter.java:107
+org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ServletRequest, ServletResponse) ApplicationFilterChain.java:239
+org.apache.catalina.core.ApplicationFilterChain.doFilter(ServletRequest, ServletResponse) ApplicationFilterChain.java:206
+org.apache.catalina.core.StandardWrapperValve.invoke(Request, Response) StandardWrapperValve.java:212
+org.apache.catalina.core.StandardContextValve.invoke(Request, Response) StandardContextValve.java:106
+org.apache.catalina.authenticator.AuthenticatorBase.invoke(Request, Response) AuthenticatorBase.java:502
+org.apache.catalina.core.StandardHostValve.invoke(Request, Response) StandardHostValve.java:141
+org.apache.catalina.valves.ErrorReportValve.invoke(Request, Response) ErrorReportValve.java:79
+org.apache.catalina.core.StandardEngineValve.invoke(Request, Response) StandardEngineValve.java:88
+org.apache.catalina.connector.CoyoteAdapter.service(Request, Response) CoyoteAdapter.java:521
+org.apache.coyote.http11.AbstractHttp11Processor.process(SocketWrapper) AbstractHttp11Processor.java:1096
+org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(SocketWrapper, SocketStatus) AbstractProtocol.java:674
+org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun() NioEndpoint.java:1500
+org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.run() NioEndpoint.java:1456
+java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor$Worker) ThreadPoolExecutor.java:1145
+java.util.concurrent.ThreadPoolExecutor$Worker.run() ThreadPoolExecutor.java:615
+org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run() TaskThread.java:61
+java.lang.Thread.run() Thread.java:745
+

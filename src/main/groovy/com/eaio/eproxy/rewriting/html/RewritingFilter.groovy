@@ -28,30 +28,37 @@ class RewritingFilter extends BaseFilter {
         patternViewSource = bndmci.processString('view-source:')
 
     boolean attributeValueNeedsRewriting(String attributeValue) {
-        // Exclude HTML attribute values
+        // Exclude HTML attribute values and anchor links
         if (attributeValue && !attributeValue?.startsWith('<') && !attributeValue?.startsWith('#')) {
             int colonIndex = attributeValue.indexOf(':')
             if (colonIndex == -1I) {
                 colonIndex = Integer.MAX_VALUE
             }
-            if (attributeValue.startsWith('/')) {
-                return true
-            }
-            int index
-            index = bndmci.searchString(attributeValue, 'http:', patternHTTP)
-            if (index >= 0I && index < colonIndex) {
-                return true
-            }
-            index = bndmci.searchString(attributeValue, 'https:', patternHTTPS)
-            if (index >= 0I && index < colonIndex) {
-                return true
-            }
-            index = bndmci.searchString(attributeValue, ':/', patternColonSlash)
-            if (index >= 0I && index < colonIndex) {
-                return true
-            }
-            bndmci.searchString(attributeValue, 'view-source:', patternViewSource) == 0I
+            attributeValue.startsWith('/') ||
+                containsHTTP(attributeValue, colonIndex) || 
+                containsHTTPS(attributeValue, colonIndex) ||
+                containsColonSlash(attributeValue, colonIndex) ||
+                startsWithViewSource(attributeValue)
         }
+    }
+
+    private boolean containsHTTP(String attributeValue, int colonIndex) {
+        int index = bndmci.searchString(attributeValue, 'http:', patternHTTP)
+        index >= 0I && index < colonIndex
+    }
+    
+    private boolean containsHTTPS(String attributeValue, int colonIndex) {
+        int index = bndmci.searchString(attributeValue, 'https:', patternHTTPS)
+        index >= 0I && index < colonIndex
+    }
+    
+    private boolean containsColonSlash(String attributeValue, int colonIndex) {
+        int index = bndmci.searchString(attributeValue, ':/', patternColonSlash)
+        index >= 0I && index < colonIndex
+    }
+    
+    private boolean startsWithViewSource(String attributeValue) {
+        bndmci.searchString(attributeValue, 'view-source:', patternViewSource) == 0I
     }
 
 }
