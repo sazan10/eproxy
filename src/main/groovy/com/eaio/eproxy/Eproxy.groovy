@@ -1,8 +1,8 @@
 package com.eaio.eproxy
 
-import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
+import java.net.Proxy
 import javax.net.ssl.SSLException
 
 import org.apache.http.HttpRequestInterceptor
@@ -25,7 +25,7 @@ import org.apache.http.impl.client.cache.CacheConfig
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder
 import org.apache.http.impl.client.cache.CachingHttpClients
 import org.apache.http.impl.conn.*
-import org.apache.http.impl.cookie.DefaultCookieSpec
+import org.apache.http.impl.cookie.RFC6265LaxSpec
 import org.apache.http.protocol.*
 import org.apache.http.ssl.SSLContexts
 import org.springframework.beans.factory.annotation.Autowired
@@ -252,7 +252,7 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     
     @Bean
     CookieSpec cookieSpec() {
-        new DefaultCookieSpec()
+        new RFC6265LaxSpec()
     }
 
     static main(args) {

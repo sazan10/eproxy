@@ -58,7 +58,7 @@ class CookieTranslator {
                 cookies.addAll(cookieSpec.parse(header, cookieOrigin))
             }
             catch (MalformedCookieException ex) {
-                log.info('couldn\'t convert {}: {} to a cookie: {}', header.name, header.value, (ExceptionUtils.getRootCause(ex) ?: ex).message)
+                log.warn('couldn\'t convert {}: {} to a cookie: {}', header.name, header.value, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
         if (cookies) {
@@ -70,7 +70,7 @@ class CookieTranslator {
         }
     }
 
-    private CookieOrigin createCookieOrigin(URI requestURI) {
+    CookieOrigin createCookieOrigin(URI requestURI) {
         new CookieOrigin(requestURI.host, requestURI.port < 0I && requestURI.scheme.equalsIgnoreCase('http') ? 80I : requestURI.port < 0I && requestURI.scheme.equalsIgnoreCase('https') ? 443I : requestURI.port,
                 requestURI.rawPath, requestURI.scheme?.equalsIgnoreCase('https'))
     }
