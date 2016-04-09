@@ -11,11 +11,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.Header
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.cookie.Cookie as HCCookie
-import org.apache.http.cookie.ClientCookie
-import org.apache.http.cookie.CookieOrigin
-import org.apache.http.cookie.MalformedCookieException
+import org.apache.http.cookie.*
 import org.apache.http.impl.cookie.BasicClientCookie
-import org.apache.http.impl.cookie.DefaultCookieSpec
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
@@ -31,8 +29,8 @@ import org.springframework.stereotype.Component
 @Slf4j
 class CookieTranslator {
 
-    @Lazy
-    DefaultCookieSpec cookieSpec
+    @Autowired
+    CookieSpec cookieSpec
 
     void addToRequest(Cookie[] cookies, URI baseURI, URI requestURI, HttpUriRequest request) {
         if (cookies) {
@@ -97,6 +95,7 @@ class CookieTranslator {
             path = substringBeforeLast(baseURI.rawPath, '/') + cookie.path
             secure = cookie.secure // TODO: Allow for non-HTTPs proxies
             version = cookie.version
+            expiryDate = cookie.expiryDate
         }
         out
     }

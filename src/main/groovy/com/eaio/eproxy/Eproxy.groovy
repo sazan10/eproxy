@@ -18,19 +18,21 @@ import org.apache.http.conn.socket.ConnectionSocketFactory
 import org.apache.http.conn.socket.PlainConnectionSocketFactory
 import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
+import org.apache.http.cookie.CookieSpec
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler
 import org.apache.http.impl.client.cache.CacheConfig
 import org.apache.http.impl.client.cache.CachingHttpClientBuilder
 import org.apache.http.impl.client.cache.CachingHttpClients
 import org.apache.http.impl.conn.*
+import org.apache.http.impl.cookie.DefaultCookieSpec
 import org.apache.http.protocol.*
 import org.apache.http.ssl.SSLContexts
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration
+import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter
 import org.springframework.context.annotation.*
 import org.springframework.web.servlet.DispatcherServlet
@@ -246,6 +248,11 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Lazy
     Timer timer() {
         new Timer('eproxy', true)
+    }
+    
+    @Bean
+    CookieSpec cookieSpec() {
+        new DefaultCookieSpec()
     }
 
     static main(args) {

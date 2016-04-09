@@ -70,5 +70,26 @@ class ProxyHTTPCookiesIT {
         proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), containsString('meta content'))
     }
+    
+    @Test
+    void 'should support cookie expiration'() {
+        HttpServletRequest request = buildHttpServletRequest('http://www.bing.com')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        boolean cookieSet = false
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+            addCookie: { Cookie cookie ->
+                if (cookie.name == 'bing.com_SRCHD' || cookie.name == 'bing.com_SRCHUID' || cookie.name == 'bing.com_SRCHUSR') {
+                    cookieSet = true
+                    assertThat(cookie.dump(), cookie.maxAge, greaterThan(0I))
+                }
+            },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'http', request, response)
+        assertThat(cookieSet, is(true))
+    }
 
 }
