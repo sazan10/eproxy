@@ -168,9 +168,6 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                        <configuration>
-                            <dumpOnExit>true</dumpOnExit>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>default-prepare-agent-integration</id>

@@ -10,10 +10,8 @@ import org.junit.Test;
  */
 public class DummyTest {
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void hardlyATestLOL() {
-        System.runFinalizersOnExit(true);
+    public void notReallyATestLOL() {
     }
 
 }

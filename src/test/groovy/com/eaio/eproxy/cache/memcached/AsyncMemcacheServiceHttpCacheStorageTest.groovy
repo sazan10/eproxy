@@ -57,7 +57,7 @@ class AsyncMemcacheServiceHttpCacheStorageTest {
     void 'InterruptedException should interrupt the thread'() {
         asyncMemcacheServiceHttpCacheStorage.@asyncMemcacheService = [ get: { [ get: { throw new InterruptedException() } ] as Future<Object> } ] as AsyncMemcacheService
         asyncMemcacheServiceHttpCacheStorage.getEntry('uiuiui')
-        assertThat(Thread.currentThread().isInterrupted(), is(true))
+        assertThat(Thread.currentThread().interrupted(), is(true)) // Do not use .isInterrupted() or .interrupted, see https://github.com/jacoco/jacoco/issues/394
     }
     
 }
