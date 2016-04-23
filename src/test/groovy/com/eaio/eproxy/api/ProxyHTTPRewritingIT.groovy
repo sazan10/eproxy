@@ -138,7 +138,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'CSS should be rewritten 2'() {
-        HttpServletRequest request = buildHttpServletRequest('https://static.xx.fbcdn.net/rsrc.php/v2/yL/r/EZnQqgEpw9Z.css')
+        HttpServletRequest request = buildHttpServletRequest('https://static.xx.fbcdn.net/rsrc.php/v2/yL/r/cExaeQ07vMA.css')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -147,9 +147,7 @@ class ProxyHTTPRewritingIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'https', request, response)
-        assertThat(bOut.toString(0I), anyOf(
-            containsString('._4f7n{background-image:url(data:image/png;base64,iVBORw0KGgoAAAA'),
-            containsString('._4f7n { background-image: url(data:image/png;base64,iVBORw0KGgoAAAA')))
+        assertThat(bOut.toString(0I), containsString('src:url(data:font/opentype;base64,T1RUTwAJAIAAA'))
     }
     
     @Test
@@ -251,9 +249,8 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
-    @Ignore
-    void 'SVG should be rewriting 2'() {
-        HttpServletRequest request = buildHttpServletRequest('https://en.wikipedia.org/static/1.27.0-wmf.13/skins/Vector/images/user-icon.svg?7b5d5')
+    void 'SVG should be rewritten 2'() {
+        HttpServletRequest request = buildHttpServletRequest('https://web.archive.org/web/20160401213553/https://en.wikipedia.org/static/1.27.0-wmf.13/skins/Vector/images/user-icon.svg?7b5d5')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -346,7 +343,6 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
-    @Ignore
     void 'SVG rewriting should keep XML namespaces'() {
         HttpServletRequest request = buildHttpServletRequest('https://www.google.com/search/about/img/badges/ios/badge.svg')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
@@ -361,14 +357,11 @@ class ProxyHTTPRewritingIT {
         assertThat(bOut.toString(0I), containsString('''<svg version="1.1" id="US_UK_Download_on_the" x="0px" y="0px"
     viewBox="-57.5 -17 250 74.1"
     enable-background="new -57.5 -17 250 74.1" xml:space="preserve"
-    preserveAspectRatio="xMidYMid meet" zoomAndPan="magnify"
-    contentScriptType="application/ecmascript"
-    contentStyleType="text/css"
     xmlns:x="http://ns.adobe.com/Extensibility/1.0/"
     xmlns:i="http://ns.adobe.com/AdobeIllustrator/10.0/"
     xmlns:graph="http://ns.adobe.com/Graphs/1.0/"
-xmlns="http://www.w3.org/2000/svg"
-xmlns:xlink="http://www.w3.org/1999/xlink">'''))
+    xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink">'''))
     }
     
 }
