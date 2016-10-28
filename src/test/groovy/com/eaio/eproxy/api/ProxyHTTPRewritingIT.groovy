@@ -138,7 +138,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'CSS should be rewritten 2'() {
-        HttpServletRequest request = buildHttpServletRequest('https://static.xx.fbcdn.net/rsrc.php/v2/yL/r/cExaeQ07vMA.css')
+        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/https_www.facebook.com_rsrc.php_v3_yu_r_lZ86cv9aR90.css')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -146,7 +146,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'https', request, response)
+        proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), containsString('src:url(data:font/opentype;base64,T1RUTwAJAIAAA'))
     }
     
