@@ -16,7 +16,7 @@ document.getElementById('submit').onclick = function() {
 
 document.getElementById('url').onkeydown = function() {
     try {
-        ga('send', 'event', 'URL', 'keydown')
+        ga('send', 'event', 'URL', 'keydown', { 'nonInteraction': 1 })
     }
     catch (e) {}
     this.onkeydown = function() {}

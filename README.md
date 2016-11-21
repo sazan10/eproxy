@@ -19,13 +19,11 @@ eproxy is a proxy that
 * uses regex-based rewriting for CSS because there are no robust Java CSS parsers
 * attempts to be as secure as possible
 * runs stand-alone, in a JEE container (Tomcat or Jetty) and on Google App Engine
-* has [really good HTTP support](https://redbot.org/?uri=https%3A%2F%2Fweizentortillas.appspot.com%2Frnw-http%2Fwww.n-tv.de%2F&req_hdr=User-Agent%3AMozilla%2F5.0+%28X11%3B+Ubuntu%3B+Linux+x86_64%3B+rv%3A44.0%29+Gecko%2F20100101+Firefox%2F44.0&req_hdr=Referer%3Ahttps%3A%2F%2Fweizentortillas.appspot.com%2F)
-
-## [Demo Site](https://weizentortillas.appspot.com)
+* has really good HTTP support
 
 ## Security status
 
-[eproxy does pretty well](https://weizentortillas.appspot.com/rnw-http/repo.eaio.com/leak.html) on the [HTTPLeaks](https://github.com/cure53/HTTPLeaks/) test.
+eproxy does pretty well on the [HTTPLeaks](https://github.com/cure53/HTTPLeaks/) test.
 Still, it is not tested enough yet. Do not use eproxy yet if you rely on security.
 
 ## Installation
