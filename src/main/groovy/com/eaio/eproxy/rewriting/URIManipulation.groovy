@@ -104,9 +104,13 @@ trait URIManipulation {
             requestURI.resolve(reEncodedAttributeValue)
         }
         catch (IllegalArgumentException ex) {
-            if (ex.message?.startsWith('Malformed escape pair at index') || ex.message?.startsWith('Illegal character in fragment at index')) {
+            // Try to "Repair" malformed URLs, see URISyntaxException#getMessage()
+            if (ex.message?.contains(' at index ')) {
                 int index = substringAfterLast(substringBefore(ex.message, ':'), ' ') as int
-                requestURI.resolve(reEncodedAttributeValue.substring(0I, index))
+                try {
+                    requestURI.resolve(reEncodedAttributeValue.substring(0I, index))
+                }
+                catch (IllegalArgumentException ex2) {}
             }
             else {
                 log.warn('couldn\'t resolve {} relative to {}: {}', abbreviate(attributeValue, 100I),
