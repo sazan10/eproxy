@@ -108,6 +108,10 @@ trait URIManipulation {
                 int index = substringAfterLast(substringBefore(ex.message, ':'), ' ') as int
                 requestURI.resolve(reEncodedAttributeValue.substring(0I, index))
             }
+            else if (ex.message?.startsWith('Illegal character in fragment at index')) {
+                int index = substringAfterLast(substringBefore(ex.message, ':'), ' ') as int
+                requestURI.resolve(reEncodedAttributeValue.substring(0I, index))
+            }
             else {
                 log.warn('couldn\'t resolve {} relative to {}: {}', abbreviate(attributeValue, 100I),
                     requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)

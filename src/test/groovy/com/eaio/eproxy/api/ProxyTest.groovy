@@ -9,6 +9,8 @@ import org.apache.http.HeaderElement
 import org.junit.Test
 import org.junit.runner.RunWith
 
+import com.eaio.eproxy.entities.*
+
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
@@ -86,6 +88,12 @@ class ProxyTest {
     void 'broken URL encoding should be supported'() {
         assertThat(proxy.resolve('http://www.kajianilmiah.com'.toURI(), 'http://www.kajianilmiah.com/search/label/Tabshirul%20khalaf%20%28Masih%20Ahlussunnahkah%20Kita%20%3F%2'),
             is('http://www.kajianilmiah.com/search/label/Tabshirul%20khalaf%20%28Masih%20Ahlussunnahkah%20Kita%20%3F'.toURI()))
+    }
+    
+    @Test
+    void 'Vitaly Popov\'s referrer spamming URL should be supported'() {
+        assertThat(proxy.encodeTargetURI(URI.create('http://127.0.0.1:8080'), URI.create('http://secret.xn--oogle-wmc.com/'), "http://money.get.away.get.a.good.job.with.more.pay.and.you.are.okay.money.it.is.a.gas.grab.that.cash.with.both.hands.and.make.a.stash.new.car.caviar.four.star.daydream.think.i.ll.buy.me.a.football.team.money.get.back.i.am.alright.jack.ilovevitaly.com/#.keep.off.my.stack.money.it.is.a.hit.do.not.give.me.that.do.goody.good.bullshit.i.am.in.the.hi.fidelity.first.class.travelling.set.and.i.think.i.need.a.lear.jet.money.it.is.a.secret.ɢoogle.com/#.share.it.fairly.but.dont.take.a.slice.of.my.pie.money.so.they.say.is.the.root.of.all.evil.today.but.if.you.ask.for.a.rise.it's.no.surprise.that.they.are.giving.none.and.secret.ɢoogle.com",
+            RewriteConfig.fromString('rnw')), is('http://127.0.0.1:8080/rnw-http/money.get.away.get.a.good.job.with.more.pay.and.you.are.okay.money.it.is.a.gas.grab.that.cash.with.both.hands.and.make.a.stash.new.car.caviar.four.star.daydream.think.i.ll.buy.me.a.football.team.money.get.back.i.am.alright.jack.ilovevitaly.com/#.keep.off.my.stack.money.it.is.a.hit.do.not.give.me.that.do.goody.good.bullshit.i.am.in.the.hi.fidelity.first.class.travelling.set.and.i.think.i.need.a.lear.jet.money.it.is.a.secret.%C9%A2oogle.com/'))
     }
     
 }
