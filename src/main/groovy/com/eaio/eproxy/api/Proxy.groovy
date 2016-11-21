@@ -234,7 +234,7 @@ class Proxy implements URIManipulation {
             if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                 response.setHeader(header.name, encodeTargetURI(baseURI, requestURI, header.value, rewriteConfig))
             }
-            else if (!dropHeader(header.name, canRewrite)) {
+            else if (includeHeader(header.name, canRewrite)) {
                 response.setHeader(header.name, header.value)
             }
         }
@@ -293,20 +293,23 @@ class Proxy implements URIManipulation {
     }
 
     /**
-     * Returns whether a certain header (ignoring case) should be dropped. Also drops <tt>Content-Length</tt> if rewriting.
+     * Returns whether a certain header (ignoring case) should be included. Also drops <tt>Content-Length</tt> if rewriting.
      */
     // TODO Header whitelist
-    boolean dropHeader(String name, boolean canRewrite) {
+    boolean includeHeader(String name, boolean canRewrite) {
         switch (name?.toLowerCase()) {
+            case 'vary':
+            case 'connection':
             case 'content-security-policy':
             case 'transfer-encoding':
             case 'date':
             case 'pragma':
             case 'set-cookie':
             case 'age':
-            case 'p3p': return true
+            case 'p3p': return false
+            case 'content-length': return !canRewrite
         }
-        canRewrite ? 'Content-Length'.equalsIgnoreCase(name) : false
+        true
     }
 
     /**
