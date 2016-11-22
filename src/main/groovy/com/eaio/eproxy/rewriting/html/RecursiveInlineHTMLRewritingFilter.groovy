@@ -45,7 +45,7 @@ class RecursiveInlineHTMLRewritingFilter extends RewritingFilter {
             ByteArrayOutputStream bOut = new ByteArrayOutputStream()
             rewriting.rewriteHTMLFragment(new ByteArrayInputStream(atts.getValue(srcDocIndex).getBytes(defaultCharset)), bOut, defaultCharset, baseURI, requestURI, rewriteConfig)
             String rewrittenFragment = bOut.toString(defaultCharset.name())
-            log.info('rewrote srcdoc attribute from\n{}\nto\n{}', atts.getValue(srcDocIndex), rewrittenFragment)
+            log.trace('rewrote srcdoc attribute from\n{}\nto\n{}', atts.getValue(srcDocIndex), rewrittenFragment)
             atts.setValue(srcDocIndex, rewrittenFragment)
         }
     }
