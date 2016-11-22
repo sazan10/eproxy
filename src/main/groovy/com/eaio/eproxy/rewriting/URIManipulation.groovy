@@ -110,7 +110,7 @@ trait URIManipulation {
                 try {
                     requestURI.resolve(reEncodedAttributeValue.substring(0I, index))
                 }
-                catch (IllegalArgumentException ex2) {}
+                catch (IllegalArgumentException ignored) {}
             }
             else {
                 log.warn('couldn\'t resolve {} relative to {}: {}', abbreviate(attributeValue, 100I),

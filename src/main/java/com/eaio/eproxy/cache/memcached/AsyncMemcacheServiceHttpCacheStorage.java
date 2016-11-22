@@ -61,13 +61,13 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      */
     @Override
     public HttpCacheEntry getEntry(String key) throws IOException {
+        log.trace("getEntry {}", key);
         MemcacheStatus keyStatus = memcacheStatuses.get();
         HttpCacheEntry out;
         if (keyStatus != null && keyStatus.key.equals(key) && !keyStatus.cached) {
             out = null;
         }
         else {
-            log.trace("getEntry {}", key);
             Future<Object> future = asyncMemcacheService.get(key);
             out = (HttpCacheEntry) awaitFutureUntilTimeout("get", key, future);
             memcacheStatuses.set(new MemcacheStatus(key, out != null));
