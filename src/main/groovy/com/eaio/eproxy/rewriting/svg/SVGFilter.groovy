@@ -27,7 +27,7 @@ class SVGFilter extends BaseFilter {
         if (nameIs(element, 'svg')) {
             inSVGElement = true
         }
-        super.startElement(element, attributes, augs);
+        super.startElement(element, attributes, augs)
     }
 
     @Override
