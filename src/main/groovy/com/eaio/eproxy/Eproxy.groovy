@@ -1,8 +1,8 @@
 package com.eaio.eproxy
 
 import java.util.concurrent.TimeUnit
-
 import java.net.Proxy
+
 import javax.net.ssl.SSLException
 
 import org.apache.http.HttpRequestInterceptor
@@ -209,18 +209,18 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         // Timing
         TimingInterceptor timingInterceptor = new TimingInterceptor()
 
-        HttpProcessorBuilder.create()
+        HttpProcessorBuilder builder = HttpProcessorBuilder.create()
             .addFirst((HttpRequestInterceptor) timingInterceptor)
-            .addAll(new RequestContent(), new RequestTargetHost(), new RequestClientConnControl(), new RequestUserAgent(userAgent), new RequestExpectContinue(), new RequestAcceptEncoding())
+            .addAll(new RequestContent(), new RequestTargetHost(), new RequestClientConnControl())
+            
+        if (userAgent) {
+            builder.addAll(new RequestUserAgent(userAgent))
+        }
+        
+        builder.addAll(new RequestExpectContinue(), new RequestAcceptEncoding())
             .addAll(new ResponseContentEncoding(), timingInterceptor)
             .build()
     }
-    
-    //    Scheme createNonValidatingSSLScheme(int port = 443I) {
-    //        new Scheme('https', port,
-    //                new SSLSocketFactory([ isTrusted: { X509Certificate[] chain, String authType -> true } ] as TrustStrategy, new NullX509HostnameVerifier())
-    //                )
-    //    }
 
     @Bean
     ReEncoding reEncoding() {
