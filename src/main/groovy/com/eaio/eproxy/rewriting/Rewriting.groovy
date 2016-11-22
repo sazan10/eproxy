@@ -61,6 +61,7 @@ class Rewriting {
     //        'text/x-javascript',
     //    ] as Set
 
+    @Lazy
     private Set<String> html = [
         'text/html',
         'text/x-server-parsed-html',
@@ -209,13 +210,17 @@ class Rewriting {
                 configure(new SrcsetFilter(), baseURI, requestURI, rewriteConfig),
                 configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig),
             ])
+            
+            RecursiveInlineHTMLRewritingFilter recursiveInlineHTMLRewritingFilter = configure(new RecursiveInlineHTMLRewritingFilter(), baseURI, requestURI, rewriteConfig)
+            recursiveInlineHTMLRewritingFilter.rewriting = new Rewriting() // Needs to be a new reference for unclear reasons
+            filters << recursiveInlineHTMLRewritingFilter
+            
             if (proxyJavaScriptFilter) {
                 filters << proxyJavaScriptFilter
             }
         }
         filters << new SVGFilter() << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
         out.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
-        
         out
     }
     

@@ -60,6 +60,7 @@ class URIRewritingFilter extends RewritingFilter implements URIManipulation {
                 !equalsIgnoreCase(atts.getLocalName(i), 'srcset') && !equalsIgnoreCase(atts.getLocalName(i), 'http-equiv') &&
                 !equalsIgnoreCase(atts.getLocalName(i), 'content') &&
                 !equalsIgnoreCase(atts.getPrefix(i), 'xmlns') && !equalsIgnoreCase(atts.getQName(i), 'xmlns') && // Don't rewrite xmlns namespaced attributes.
+                !equalsIgnoreCase(atts.getLocalName(i), 'srcdoc') && // See RecursiveInlineHTMLRewritingFilter
                 attributeValueNeedsRewriting(attributeValue)) {
                 atts.setValue(i, encodeTargetURI(baseURI, requestURI, attributeValue, rewriteConfig))
             }

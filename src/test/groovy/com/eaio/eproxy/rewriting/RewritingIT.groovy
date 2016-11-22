@@ -42,7 +42,7 @@ class RewritingIT {
     }
     
     @Test
-    void 'should rewriting external stylesheet'() {
+    void 'should rewrite external stylesheet'() {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         rewriting.rewriteSVG(new File('src/test/resources/com/eaio/eproxy/rewriting/svg/external-style-sheet.svg').newInputStream(),
             bOut, null, 'http://lol.lol'.toURI(), 'http://blorb.com'.toURI(), RewriteConfig.fromString('rnw'))
@@ -74,6 +74,13 @@ class RewritingIT {
             Charset.forName('UTF-8'), URI.create('http://oha.com/ui/'), URI.create('http://fnuh.com/mm-logo.svg'), RewriteConfig.fromString('rnw'))
         assertThat(bOut.toString(0I), containsString('http://oha.com/ui/rnw-http/pruh.com'))
         assertThat(bOut.toString(0I), containsString('url(http://oha.com/ui/rnw-http/rah.com/ouch.png)'))
+    }
+    
+    @Test
+    void 'iframe srcdoc attributes should be rewritten'() {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        rewriting.rewriteHTML(new File('src/test/resources/com/eaio/eproxy/rewriting/html/iframe-srcdoc.html').newInputStream(), bOut, null, 'http://foo.com'.toURI(), 'http://repo.eaio.com/leak.html'.toURI(), RewriteConfig.fromString('rnw'))
+        assertThat(bOut as String, containsString('http://foo.com/rnw-http/rah.com/fnuh.jpg'))
     }
 
 }
