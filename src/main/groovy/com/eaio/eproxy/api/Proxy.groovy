@@ -114,7 +114,7 @@ class Proxy implements URIManipulation {
                     reset()
                 }
                 status = remoteResponse.statusLine.statusCode
-                setHeader('Vary', 'Accept-Encoding')
+                setHeader('Vary', 'Accept-Encoding') // TODO: ?
             }
 
             HeaderElement contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
@@ -249,15 +249,16 @@ class Proxy implements URIManipulation {
 
     private HttpUriRequest newRequest(String method, URI uri) {
         switch (method) {
-            case 'GET': return new HttpGet(uri)
             case 'DELETE': return new HttpDelete(uri)
-            case 'HEAD': return new HttpHead(uri)
-            case 'OPTIONS': return new HttpOptions(uri)
             case 'PATCH': return new HttpPatch(uri)
             case 'POST': return new HttpPost(uri)
             case 'PUT': return new HttpPut(uri)
+            case 'GET': return new HttpGet(uri)
+            case 'HEAD': return new HttpHead(uri)
+            case 'OPTIONS': return new HttpOptions(uri)
             case 'TRACE': return new HttpTrace(uri)
         }
+        log.warn('unsupported HTTP method {}', method)
     }
 
     /**
