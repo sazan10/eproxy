@@ -59,5 +59,71 @@ class NoScriptRedirectIT {
         redirect.redirect('www.n-tv.de/politik/Trump-und-Clinton-setzen-sich-durch-article17045231.html?ah#rah', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
-
+    
+    @Test
+    void 'should support Vitaly Popov\'s referrer spamming URL 1'() {
+        boolean sendRedirectCalled = false
+        HttpServletResponse response = [ sendRedirect: { String location ->
+            sendRedirectCalled = true
+            assertThat(location, is('http://fnuh.com/rnw-http/Secret.xn--oogle-wmc.com'))
+        } ] as HttpServletResponse
+        redirect.redirect('Secret.ɢoogle.com', 'rnw', buildHttpServletRequest('uiuiui'), response)
+        assertThat(sendRedirectCalled, is(true))
+    }
+    
+    @Test
+    void 'should support Vitaly Popov\'s referrer spamming URL 2'() {
+        boolean sendRedirectCalled = false
+        HttpServletResponse response = [ sendRedirect: { String location ->
+            sendRedirectCalled = true
+            assertThat(location, is('http://fnuh.com/rnw-https/Secret.xn--oogle-wmc.com'))
+        } ] as HttpServletResponse
+        redirect.redirect('https://Secret.ɢoogle.com', 'rnw', buildHttpServletRequest('uiuiui'), response)
+        assertThat(sendRedirectCalled, is(true))
+    }
+    
+    @Test
+    void 'should support Vitaly Popov\'s referrer spamming URL 3'() {
+        boolean sendRedirectCalled = false
+        HttpServletResponse response = [ sendRedirect: { String location ->
+            sendRedirectCalled = true
+            assertThat(location, is('http://fnuh.com/rnw-http/Secret.xn--oogle-wmc.com/ah'))
+        } ] as HttpServletResponse
+        redirect.redirect('Secret.ɢoogle.com/ah', 'rnw', buildHttpServletRequest('uiuiui'), response)
+        assertThat(sendRedirectCalled, is(true))
+    }
+    
+    @Test
+    void 'should support Vitaly Popov\'s referrer spamming URL 4'() {
+        boolean sendRedirectCalled = false
+        HttpServletResponse response = [ sendRedirect: { String location ->
+            sendRedirectCalled = true
+            assertThat(location, is('http://fnuh.com/rnw-https/Secret.xn--oogle-wmc.com/ah'))
+        } ] as HttpServletResponse
+        redirect.redirect('https://Secret.ɢoogle.com/ah', 'rnw', buildHttpServletRequest('uiuiui'), response)
+        assertThat(sendRedirectCalled, is(true))
+    }
+    
+    @Test
+    void 'should support Vitaly Popov\'s referrer spamming URL 5'() {
+        boolean sendRedirectCalled = false
+        HttpServletResponse response = [ sendRedirect: { String location ->
+            sendRedirectCalled = true
+            assertThat(location, is('http://fnuh.com/rnw-http/Secret.xn--oogle-wmc.com/ah?fuh#guh'))
+        } ] as HttpServletResponse
+        redirect.redirect('Secret.ɢoogle.com/ah?fuh#guh', 'rnw', buildHttpServletRequest('uiuiui'), response)
+        assertThat(sendRedirectCalled, is(true))
+    }
+    
+    @Test
+    void 'should support Vitaly Popov\'s referrer spamming URL 6'() {
+        boolean sendRedirectCalled = false
+        HttpServletResponse response = [ sendRedirect: { String location ->
+            sendRedirectCalled = true
+            assertThat(location, is('http://fnuh.com/rnw-https/Secret.xn--oogle-wmc.com/ah?fuh#guh'))
+        } ] as HttpServletResponse
+        redirect.redirect('https://Secret.ɢoogle.com/ah?fuh#guh', 'rnw', buildHttpServletRequest('uiuiui'), response)
+        assertThat(sendRedirectCalled, is(true))
+    }
+    
 }

@@ -27,22 +27,23 @@ import com.eaio.net.httpclient.ReEncoding
 @RestController
 @Slf4j
 class NoScriptRedirect implements URIManipulation {
-    
+
     @RequestMapping('/redir')
     void redirect(@RequestParam String url, @RequestParam('rewriteconfig') String rewriteConfigString,
-        HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
-        
-        String reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(url))
-        URI resolvedURI = URI.create(reEncodedURL)
+
+        String reEncodedURL
+        URI resolvedURI = URI.create(trimToEmpty(url))
         if (resolvedURI.scheme) {
-            resolvedURI = new URI(resolvedURI.scheme, resolvedURI.host, null, null)
+            reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(substringAfter(url, resolvedURI.rawAuthority)))
+            resolvedURI = new URI(resolvedURI.scheme, IDN.toASCII(resolvedURI.rawAuthority), null, null)
         }
         else {
-            resolvedURI = new URI(request.scheme, substringBefore(resolvedURI.rawPath, '/'), null, null)
-            reEncodedURL = substringAfter(reEncodedURL, '/')
+            reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(substringAfter(url, '/')))
+            resolvedURI = new URI(request.scheme, IDN.toASCII(substringBefore(resolvedURI.rawPath, '/')), null, null)
         }
-        
+
         String targetURI = encodeTargetURI(baseURI, resolvedURI, reEncodedURL, RewriteConfig.fromString(rewriteConfigString))
         response.sendRedirect(targetURI)
     }
