@@ -11,6 +11,9 @@ import org.apache.http.util.CharArrayBuffer
 import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
 import com.eaio.eproxy.rewriting.URIManipulation
 
@@ -21,6 +24,8 @@ import com.eaio.eproxy.rewriting.URIManipulation
  * @version $Id$
  */
 @CompileStatic
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
 

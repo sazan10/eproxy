@@ -5,6 +5,9 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
 import org.apache.xerces.xni.*
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
 import com.eaio.eproxy.rewriting.URIManipulation
 
@@ -16,6 +19,8 @@ import com.eaio.eproxy.rewriting.URIManipulation
  * @version $Id$
  */
 @CompileStatic
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 class URIRewritingFilter extends RewritingFilter implements URIManipulation {
 

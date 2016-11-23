@@ -6,6 +6,9 @@ import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
 import org.apache.xerces.xni.XMLString
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
 /**
  * Transforms HTML as follows:
@@ -17,6 +20,8 @@ import org.apache.xerces.xni.XMLString
  * @version $Id$
  */
 @CompileStatic
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 class RemoveNoScriptElementsFilter extends BaseFilter {
     
     private boolean inNoscriptElement

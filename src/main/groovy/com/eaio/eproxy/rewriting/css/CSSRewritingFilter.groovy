@@ -10,6 +10,9 @@ import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
 import org.apache.xerces.xni.XMLString
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 import org.w3c.css.sac.*
 import org.w3c.dom.css.*
 
@@ -23,6 +26,8 @@ import com.steadystate.css.dom.*
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
 

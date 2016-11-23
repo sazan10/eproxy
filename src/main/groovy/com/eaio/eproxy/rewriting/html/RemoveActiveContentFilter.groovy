@@ -7,6 +7,9 @@ import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
 import org.apache.xerces.xni.XMLString
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
 /**
  * Transforms HTML as follows:
@@ -19,6 +22,8 @@ import org.apache.xerces.xni.XMLString
  * @version $Id: TryEaioTransformer.java 7547 2015-07-01 20:02:47Z johann $
  */
 @CompileStatic
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 class RemoveActiveContentFilter extends BaseFilter {
 
     private boolean inScriptElement

@@ -12,6 +12,8 @@ import org.apache.xerces.xni.parser.XMLDocumentFilter
 import org.apache.xml.serialize.*
 import org.cyberneko.html.filters.DefaultFilter
 import org.cyberneko.html.parsers.SAXParser
+import org.springframework.beans.factory.BeanFactory
+import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.xml.sax.InputSource
@@ -34,10 +36,13 @@ import com.eaio.eproxy.rewriting.svg.SVGFilter
 @CompileStatic
 @Component
 @Slf4j
-class Rewriting {
+class Rewriting implements BeanFactoryAware {
 
+    // ProxyJavaScriptFilter is the only stateless filter
     @Autowired(required = false)
     ProxyJavaScriptFilter proxyJavaScriptFilter
+    
+    BeanFactory beanFactory
     
     @Lazy
     private Charset defaultCharset = Charset.forName('UTF-8')
@@ -150,7 +155,7 @@ class Rewriting {
 
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
-        CSSRewritingFilter handler = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
+        CSSRewritingFilter handler = configure(beanFactory.getBean(CSSRewritingFilter), baseURI, requestURI, rewriteConfig)
         try {
             outputWriter.write(handler.rewriteCSS(toString(inputStream, charset ?: defaultCharset)))
         }
@@ -167,10 +172,10 @@ class Rewriting {
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         XMLReader xmlReader = newXMLReader()
         // 1st in chain
-        DefaultFilter cssRewritingFilter = configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig)
+        DefaultFilter cssRewritingFilter = configure(beanFactory.getBean(CSSRewritingFilter), baseURI, requestURI, rewriteConfig)
         xmlReader.contentHandler = new ContentHandlerXMLDocumentHandlerAdapter(cssRewritingFilter)
         // 2nd in chain
-        DefaultFilter uriRewritingFilter = configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig)
+        DefaultFilter uriRewritingFilter = configure(beanFactory.getBean(URIRewritingFilter), baseURI, requestURI, rewriteConfig)
         cssRewritingFilter.documentHandler = uriRewritingFilter
         // 3rd in chain
         XMLSerializer serializer = new XMLSerializer(outputWriter, new OutputFormat(Method.XML, (charset ?: defaultCharset).name(), true))
@@ -198,29 +203,27 @@ class Rewriting {
         XMLReader out = newHTMLReader()
         Collection<DefaultFilter> filters = []
         if (rewriteConfig.removeActiveContent) {
-            filters << new RemoveActiveContentFilter()
+            filters << beanFactory.getBean(RemoveActiveContentFilter)
         }
         if (rewriteConfig.removeNoScriptElements) {
-            filters << new RemoveNoScriptElementsFilter()
+            filters << beanFactory.getBean(RemoveNoScriptElementsFilter)
         }
         if (rewriteConfig.rewrite) {
             filters.addAll([
-                configure(new CSSRewritingFilter(), baseURI, requestURI, rewriteConfig),
-                configure(new MetaRewritingFilter(), baseURI, requestURI, rewriteConfig),
-                configure(new SrcsetFilter(), baseURI, requestURI, rewriteConfig),
-                configure(new URIRewritingFilter(), baseURI, requestURI, rewriteConfig),
+                configure(beanFactory.getBean(CSSRewritingFilter), baseURI, requestURI, rewriteConfig),
+                configure(beanFactory.getBean(MetaRewritingFilter), baseURI, requestURI, rewriteConfig),
+                configure(beanFactory.getBean(SrcsetFilter), baseURI, requestURI, rewriteConfig),
+                configure(beanFactory.getBean(URIRewritingFilter), baseURI, requestURI, rewriteConfig),
+                configure(beanFactory.getBean(RecursiveInlineHTMLRewritingFilter), baseURI, requestURI, rewriteConfig)
             ])
-            
-            RecursiveInlineHTMLRewritingFilter recursiveInlineHTMLRewritingFilter = configure(new RecursiveInlineHTMLRewritingFilter(), baseURI, requestURI, rewriteConfig)
-            recursiveInlineHTMLRewritingFilter.rewriting = new Rewriting() // Needs to be a new reference for unclear reasons
-            filters << recursiveInlineHTMLRewritingFilter
-            
+
             if (proxyJavaScriptFilter) {
                 filters << proxyJavaScriptFilter
             }
         }
-        filters << new SVGFilter() << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
+        filters << beanFactory.getBean(SVGFilter) << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
         out.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
+
         out
     }
     
@@ -248,7 +251,7 @@ class Rewriting {
         }
         out
     }
-    
+
     private <T extends RewritingFilter> T configure(T filter, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         filter.baseURI = baseURI
         filter.requestURI = requestURI

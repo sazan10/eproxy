@@ -7,6 +7,9 @@ import groovy.util.logging.Slf4j
 import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
 import com.eaio.eproxy.rewriting.URIManipulation
 
@@ -17,6 +20,8 @@ import com.eaio.eproxy.rewriting.URIManipulation
  * @version $Id$
  */
 @CompileStatic
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 class SrcsetFilter extends RewritingFilter implements URIManipulation {
 
