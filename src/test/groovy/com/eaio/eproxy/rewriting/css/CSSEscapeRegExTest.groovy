@@ -33,5 +33,10 @@ class CSSEscapeRegExTest {
         errorCollector.checkThat(Pattern.compile(regexp).matcher('\\000e9').matches(), is(true))
         errorCollector.checkThat(Pattern.compile(regexp).matcher('\\0000e9').matches(), is(true))
     }
+    
+    @Test
+    void 'appendRegEx should work with characters'() {
+        errorCollector.checkThat(CSSEscapeRegEx.appendRegEx(null, 'é'.charAt(0I)).toString(), is("(?:\\\\0{0,4}e9[ \\t\\n]?|é)"))
+    }
 
 }
