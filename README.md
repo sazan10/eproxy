@@ -28,7 +28,7 @@ Still, it is not tested enough yet. Do not use eproxy yet if you rely on securit
 
 ## Installation
 
-### 1. Prerequisites
+### 0. Prerequisites
 
 You'll need
 
@@ -36,23 +36,23 @@ You'll need
 * [Maven](https://maven.apache.org)
 * [Git](http://www.git-scm.com/)
 
-### 2. Clone
+### 1. Get the Code
 
 ``git clone https://github.com/johannburkard/eproxy.git``
 
-### 3. Build
+### 2. Build
 
 ``cd eproxy && mvn package``
 
-### 4. Run or Deploy
+### 3. Run or Deploy
 
 #### Stand-alone
 
-If you want to try out eproxy, simply start the ``.war`` file in the ``target`` directory:
+If you simply want to try out eproxy, start the ``.war`` file in the ``target`` directory:
 
 ``java -jar target/*##*.war``
 
-Go to http://127.0.0.1:8080/index.html and press Ctrl-C when you're done.
+Next, go to http://127.0.0.1:8080/index.html. Press Ctrl-C in the console when you're done.
 
 #### Tomcat or Jetty
 
