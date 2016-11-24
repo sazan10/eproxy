@@ -7,8 +7,6 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.http.HeaderElement
 import org.apache.http.NameValuePair
 import org.apache.http.message.BasicHeaderValueParser
-import org.apache.http.message.ParserCursor
-import org.apache.http.util.CharArrayBuffer
 import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
@@ -79,10 +77,7 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
      * @param dataURI the data: URI without the leading "data:" scheme
      */
     String rewriteDataURI(String dataURI) {
-        CharArrayBuffer buf = new CharArrayBuffer(dataURI.length())
-        buf.append(dataURI)
-        ParserCursor cursor = new ParserCursor(0I, dataURI.length())
-        HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
+        HeaderElement[] elements = BasicHeaderValueParser.parseElements(dataURI, null)
 
         if (elements.size() == 1I || elements[0I].name?.equalsIgnoreCase('base64')) { // Only data in data URI or no MIME type (defaulting to text/plain according to Wikipedia)
             return null
@@ -96,11 +91,7 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
         boolean isBase64 = isBase64(elements)
         String fullData =  elements[elements.size() - 1I].value ?  elements[elements.size() - 1I].name + '=' +  elements[elements.size() - 1I].value :  elements[elements.size() - 1I].name
             
-        println "data: URI with mime Type ${mimeType} base64 ${isBase64} value ${fullData}"
-        String data = URLDecoder.decode(isBase64 ? new String(base64.decode(fullData), 0I) : fullData)
-        println "actual data: ${data}"
-        
-        data
+        URLDecoder.decode(isBase64 ? new String(base64.decode(fullData), 0I) : fullData)
     }
     
     String getMIMEType(HeaderElement[] elements) {

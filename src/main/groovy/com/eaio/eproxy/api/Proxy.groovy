@@ -24,10 +24,8 @@ import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.InputStreamEntity
 import org.apache.http.message.BasicHeaderValueParser
-import org.apache.http.message.ParserCursor
 import org.apache.http.protocol.HttpContext
 import org.apache.http.protocol.HttpCoreContext
-import org.apache.http.util.CharArrayBuffer
 import org.apache.http.util.EntityUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -304,10 +302,7 @@ class Proxy implements URIManipulation {
 
     HeaderElement parseContentDispositionValue(String contentDisposition) {
         if (contentDisposition) {
-            CharArrayBuffer buf = new CharArrayBuffer(contentDisposition.length())
-            buf.append(contentDisposition)
-            ParserCursor cursor = new ParserCursor(0I, contentDisposition.length())
-            HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
+            HeaderElement[] elements = BasicHeaderValueParser.parseElements(contentDisposition, null)
             elements[0I]
         }
     }

@@ -6,8 +6,6 @@ import groovy.util.logging.Slf4j
 
 import org.apache.http.HeaderElement
 import org.apache.http.message.BasicHeaderValueParser
-import org.apache.http.message.ParserCursor
-import org.apache.http.util.CharArrayBuffer
 import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
@@ -64,10 +62,7 @@ class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
      * @see URIManipulation#encodeTargetURI(URI, URI, String, RewriteConfig)
      */
     String rewriteMetaRefresh(String metaRefresh) {
-        CharArrayBuffer buf = new CharArrayBuffer(metaRefresh.length())
-        buf.append(metaRefresh)
-        ParserCursor cursor = new ParserCursor(0I, metaRefresh.length())
-        HeaderElement[] elements = BasicHeaderValueParser.INSTANCE.parseElements(buf, cursor)
+        HeaderElement[] elements = BasicHeaderValueParser.parseElements(metaRefresh, null)
         String url = elements[0I]?.getParameterByName('URL')?.value
         if (url) {
             url = removeStart(url, '"')

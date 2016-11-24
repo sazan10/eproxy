@@ -34,6 +34,7 @@ class DataURIFilterTest {
         [
             [ 'image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==', null ],
             [ 'text/html;charset=utf-8,%3Chtml%3E%3Cbody%3E%3Cimg%20src%3D%22%2F%2Fbla.com%2Ffoo.png%22%3E%3C%2Fbody%3E%3C%2Fhtml%3E', is('<html><body><img src="//bla.com/foo.png"></body></html>') ],
+            [ 'text/html;charset=utf-8;base64,PGh0bWw+PGJvZHk+PGltZyBzcmM9Ii8vYmxhLmNvbS9mb28ucG5nIj48L2JvZHk+PC9odG1sPg==', is('<html><body><img src="//bla.com/foo.png"></body></html>') ],
             [ 'base64,cmFoCg==', null ],
             [ ',bullshit', null ],
             [ "image/svg+xml,<svg%20xmlns='%68ttp:%2f/www.w3.org/2000/svg'%20xmlns:xlink='%68ttp:%2f/www.w3.org/1999/xlink'><image%20xlink:hr%65f='%68ttp:%2f/leaking.via/svg-via-data'></image></svg>", containsString('//leaking.via') ],
