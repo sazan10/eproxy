@@ -65,6 +65,9 @@ class Proxy implements URIManipulation {
 
     @Value('${http.userAgent}')
     String userAgent
+    
+    @Value('${referrer.enabled}')
+    boolean referrerEnabled
 
     @Autowired
     HttpClient httpClient
@@ -96,7 +99,10 @@ class Proxy implements URIManipulation {
         HttpResponse remoteResponse
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
+            
             addRequestHeaders(request, uriRequest)
+            addReferrer(request, uriRequest, request.contextPath)
+            
             cookieTranslator?.addToRequest(request.cookies, baseURI, requestURI, uriRequest)
             if (uriRequest instanceof HttpEntityEnclosingRequest) {
                 setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
@@ -105,7 +111,7 @@ class Proxy implements URIManipulation {
             if (totalTimeout) {
                 timer?.schedule(new AbortHttpUriRequestTask(uriRequest), totalTimeout)
             }
-
+            
             remoteResponse = httpClient.execute(uriRequest, context)
             requestURI = getTargetURI(context) ?: requestURI
 
@@ -280,6 +286,19 @@ class Proxy implements URIManipulation {
         }
         if (!userAgent) {
             uriRequest.setHeader('User-Agent', request.getHeader('User-Agent'))
+        }
+    }
+    
+    void addReferrer(HttpServletRequest request, HttpUriRequest uriRequest, String contextPath) {
+        if (referrerEnabled && request.getHeader('Referer')) {
+            try {
+                URI referrer = URI.create(request.getHeader('Referer'))
+                URI decodedReferrer = decodeTargetURI(referrer.scheme, stripContextPathFromRequestURI(contextPath, referrer.path), referrer.query)
+                if (decodedReferrer.host) {
+                    uriRequest.setHeader('Referer', decodedReferrer as String)
+                }
+            }
+            catch (emall) {}
         }
     }
 
