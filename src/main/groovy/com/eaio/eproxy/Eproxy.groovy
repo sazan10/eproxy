@@ -5,6 +5,7 @@ import java.net.Proxy
 
 import javax.net.ssl.SSLException
 
+import org.apache.commons.codec.binary.Base64
 import org.apache.http.HttpRequestInterceptor
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
@@ -253,6 +254,11 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Bean
     CookieSpec cookieSpec() {
         new RFC6265LaxSpec()
+    }
+    
+    @Bean
+    Base64 base64() {
+        new Base64(0I, null, true)
     }
 
     static main(args) {

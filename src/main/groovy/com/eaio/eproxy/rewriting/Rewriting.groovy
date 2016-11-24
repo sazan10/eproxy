@@ -24,6 +24,7 @@ import org.xml.sax.helpers.XMLReaderFactory
 
 import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.css.*
+import com.eaio.eproxy.rewriting.data_uri.DataURIFilter
 import com.eaio.eproxy.rewriting.html.*
 import com.eaio.eproxy.rewriting.svg.SVGFilter
 
@@ -103,22 +104,22 @@ class Rewriting implements BeanFactoryAware {
 
     void rewriteHTML(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
-        XMLReader xmlReader = newHTMLReader(outputWriter, charset, baseURI, requestURI, rewriteConfig)
         try {
-            xmlReader.parse(newSAXInputSource(inputStream, charset))
+            rewriteXML(newHTMLReader(outputWriter, charset, baseURI, requestURI, rewriteConfig), inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
         }
-        catch (SAXParseException ex) {
-            log.warn("While parsing {}@{}:{}: {}", requestURI, ex.lineNumber, ex.columnNumber, (ExceptionUtils.getRootCause(ex) ?: ex).message)
-        }
-        catch (SAXException ex) {
-            if (ExceptionUtils.getRootCause(ex) instanceof IOException) {
-                throw ExceptionUtils.getRootCause(ex)
+        finally {
+            try {
+                outputWriter.flush()
             }
-            else {
-                log.warn("While parsing {}: {}", requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
-            }
+            catch (emall) {}
         }
-        catch (NullPointerException ignored) {}
+    }
+
+    void rewriteHTMLFragment(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+        Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
+        try {
+            rewriteXML(newHTMLFragmentReader(outputWriter, charset, baseURI, requestURI, rewriteConfig), inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
+        }
         finally {
             try {
                 outputWriter.flush()
@@ -127,9 +128,7 @@ class Rewriting implements BeanFactoryAware {
         }
     }
     
-    void rewriteHTMLFragment(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
-        Writer outputWriter = new OutputStreamWriter(outputStream, (Charset) charset ?: defaultCharset)
-        XMLReader xmlReader = newHTMLFragmentReader(outputWriter, charset, baseURI, requestURI, rewriteConfig)
+    void rewriteXML(XMLReader xmlReader, InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
@@ -145,12 +144,6 @@ class Rewriting implements BeanFactoryAware {
             }
         }
         catch (NullPointerException ignored) {}
-        finally {
-            try {
-                outputWriter.flush()
-            }
-            catch (emall) {}
-        }
     }
 
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
@@ -214,7 +207,8 @@ class Rewriting implements BeanFactoryAware {
                 configure(beanFactory.getBean(MetaRewritingFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(SrcsetFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(URIRewritingFilter), baseURI, requestURI, rewriteConfig),
-                configure(beanFactory.getBean(RecursiveInlineHTMLRewritingFilter), baseURI, requestURI, rewriteConfig)
+                configure(beanFactory.getBean(RecursiveInlineHTMLRewritingFilter), baseURI, requestURI, rewriteConfig),
+//                configure(beanFactory.getBean(DataURIFilter), baseURI, requestURI, rewriteConfig),
             ])
 
             if (proxyJavaScriptFilter) {
