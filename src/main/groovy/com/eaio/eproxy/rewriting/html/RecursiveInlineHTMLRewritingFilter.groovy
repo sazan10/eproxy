@@ -53,7 +53,7 @@ class RecursiveInlineHTMLRewritingFilter extends RewritingFilter implements Bean
 
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         int srcDocIndex = atts.getIndex('srcdoc')
-        if (srcDocIndex >= 0) {
+        if (srcDocIndex >= 0I) {
             ByteArrayOutputStream bOut = new ByteArrayOutputStream()
             rewriting.rewriteHTMLFragment(new ByteArrayInputStream(atts.getValue(srcDocIndex).getBytes(defaultCharset)), bOut, defaultCharset, baseURI, requestURI, rewriteConfig)
             String rewrittenFragment = bOut.toString(defaultCharset.name())
