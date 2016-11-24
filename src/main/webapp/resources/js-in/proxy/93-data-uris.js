@@ -14,7 +14,7 @@
                     i, r0, currentURL = decodeTargetURI(location.href)
                 for (i = 0; i < resourceEntries.length; ++i) {
                     r0 = resourceEntries[i]
-                    if (/^data:/i.test(r0.name) && !/^data:image\//i.test(r0.name)) {
+                    if (/data:/i.test(r0.name) && /data:(text\/html|text\/x-server-parsed-html|application\/xml+xhtml|image\/svg+xml)'/i.test(r0.name)) {
                         eaio.track.event('data-uris', currentURL, r0.name)
                         break
                     }
