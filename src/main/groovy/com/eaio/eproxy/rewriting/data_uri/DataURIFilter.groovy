@@ -22,10 +22,12 @@ import com.eaio.eproxy.rewriting.html.RewritingFilter
 import com.eaio.stringsearch.BNDMCI
 
 /**
- * For data: URIs
+ * Rewrites data: URIs where the MIME type is either an HTML or an SVG MIME type.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
+ * @see Rewriting#isHTML(String)
+ * @see Rewriting#isSVG(String)
  */
 @CompileStatic
 @Component
@@ -75,6 +77,7 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
      * Rewrites the data: URI value. The leading "data:" scheme must be removed.
      * 
      * @param dataURI the data: URI without the leading "data:" scheme
+     * @return <code>null</code> if <code>dataURI</code> doesn't need to be rewritten
      */
     String rewriteDataURI(String dataURI) {
         HeaderElement[] elements = BasicHeaderValueParser.parseElements(dataURI, null)
@@ -84,14 +87,16 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
         }
 
         String mimeType = getMIMEType(elements)
-        if (!rewriting.isHTML(mimeType) && !rewriting.isSVG(mimeType)) {
+        boolean isHTML = rewriting.isHTML(mimeType), isSVG = rewriting.isSVG(mimeType)
+        if (!isHTML && !isSVG) {
             return
         }
         
         boolean isBase64 = isBase64(elements)
         String fullData =  elements[elements.size() - 1I].value ?  elements[elements.size() - 1I].name + '=' +  elements[elements.size() - 1I].value :  elements[elements.size() - 1I].name
-            
-        URLDecoder.decode(isBase64 ? new String(base64.decode(fullData), 0I) : fullData)
+        String data = URLDecoder.decode(isBase64 ? new String(base64.decode(fullData), 0I) : fullData)
+        
+        data
     }
     
     String getMIMEType(HeaderElement[] elements) {
