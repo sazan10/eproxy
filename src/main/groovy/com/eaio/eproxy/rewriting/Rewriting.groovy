@@ -213,7 +213,7 @@ class Rewriting implements BeanFactoryAware {
         XMLReader out = newHTMLReader()
         Collection<DefaultFilter> filters = []
         if (rewriteConfig.removeActiveContent) {
-            filters << beanFactory.getBean(RemoveActiveContentFilter)
+            filters << beanFactory.getBean(RemoveActiveContentFilter) << beanFactory.getBean(RemoveJavaScriptURIFilter)
         }
         if (rewriteConfig.removeNoScriptElements) {
             filters << beanFactory.getBean(RemoveNoScriptElementsFilter)
