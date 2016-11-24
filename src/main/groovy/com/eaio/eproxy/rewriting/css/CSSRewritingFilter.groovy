@@ -48,7 +48,6 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         use (CSSEscapeRegEx) {
             StringBuilder builder = new StringBuilder()
             builder.appendRegEx('@import').append('\\s*(.*?)\\s*(').appendRegEx(';').append('|$)')
-
             Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
         }
     }()
@@ -60,7 +59,6 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
             StringBuilder builder = new StringBuilder()
             builder.append('\\W(?:').appendRegEx('src').append('|').appendRegEx('colorSpace')
                     .append(')\\s*=\\s*(.*?)\\s*(').appendRegEx(',').append('|').appendRegEx(';').append('|$)')
-
             Pattern.compile(builder as String, Pattern.CASE_INSENSITIVE)
         }
     }()

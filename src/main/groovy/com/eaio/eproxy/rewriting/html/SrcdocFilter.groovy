@@ -21,7 +21,7 @@ import com.eaio.eproxy.rewriting.Rewriting
 /**
  * Transforms HTML as follows:
  * <ul>
- * <li>Any inline HTML is run through {@link Rewriting}
+ * <li>Any srcdoc attributes are run through {@link Rewriting}
  * </ul>
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
@@ -31,34 +31,40 @@ import com.eaio.eproxy.rewriting.Rewriting
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
-class RecursiveInlineHTMLRewritingFilter extends RewritingFilter implements BeanFactoryAware {
-    
+class SrcdocFilter extends RewritingFilter implements BeanFactoryAware {
+
     @Lazy
     private Charset defaultCharset = Charset.forName('UTF-8')
-    
+
     // For some reason, reusing the Rewriting instance doesn't work so this class needs its own Rewriting instance.
     @Lazy
     private Rewriting rewriting = new Rewriting(beanFactory: beanFactory)
 
     BeanFactory beanFactory
-    
+
     @Override
-    void startElement(QName element, XMLAttributes attributes,
-            Augmentations augs) throws XNIException {
-        if (nameIs(element, 'iframe')) {
-            rewriteElement(element, attributes, augs)
-        }
-        super.startElement(element, attributes, augs)
+    void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        rewriteElement(qName, atts, augs)
+        super.startElement(qName, atts, augs)
     }
 
+    @Override
+    void emptyElement(QName qName, XMLAttributes atts, Augmentations augs) {
+        rewriteElement(qName, atts, augs)
+        super.emptyElement(qName, atts, augs)
+    }     
+
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
-        int srcDocIndex = atts.getIndex('srcdoc')
-        if (srcDocIndex >= 0I) {
-            ByteArrayOutputStream bOut = new ByteArrayOutputStream()
-            rewriting.rewriteHTMLFragment(new ByteArrayInputStream(atts.getValue(srcDocIndex).getBytes(defaultCharset)), bOut, defaultCharset, baseURI, requestURI, rewriteConfig)
-            String rewrittenFragment = bOut.toString(defaultCharset.name())
-            log.trace('rewrote srcdoc attribute from\n{}\nto\n{}', atts.getValue(srcDocIndex), rewrittenFragment)
-            atts.setValue(srcDocIndex, rewrittenFragment)
+        if (nameIs(qName, 'iframe')) {
+            int srcDocIndex = atts.getIndex('srcdoc')
+            if (srcDocIndex >= 0I) {
+                String srcdocValue = atts.getValue(srcDocIndex)
+                ByteArrayOutputStream bOut = new ByteArrayOutputStream(srcdocValue.length())
+                rewriting.rewriteHTMLFragment(new ByteArrayInputStream(srcdocValue.getBytes(defaultCharset)), bOut, defaultCharset, baseURI, requestURI, rewriteConfig)
+                String rewrittenSrcdocValue = bOut.toString(defaultCharset.name())
+                log.trace('rewrote srcdoc attribute from\n{}\nto\n{}', atts.getValue(srcDocIndex), rewrittenSrcdocValue)
+                atts.setValue(srcDocIndex, rewrittenSrcdocValue)
+            }
         }
     }
 

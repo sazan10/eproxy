@@ -27,33 +27,33 @@ class SVGFilter extends BaseFilter {
     private boolean inSVGElement
 
     @Override
-    void startElement(QName element, XMLAttributes attributes,
+    void startElement(QName qName, XMLAttributes attributes,
                     Augmentations augs) throws XNIException {
-        if (nameIs(element, 'svg')) {
+        if (nameIs(qName, 'svg')) {
             inSVGElement = true
         }
-        super.startElement(element, attributes, augs)
+        super.startElement(qName, attributes, augs)
     }
 
     @Override
-    void emptyElement(QName element, XMLAttributes attributes,
+    void emptyElement(QName qName, XMLAttributes attributes,
                     Augmentations augs) throws XNIException {
         if (inSVGElement) {
-            super.startElement(element, attributes, augs)
-            super.endElement(element, augs)
+            super.startElement(qName, attributes, augs)
+            super.endElement(qName, augs)
         }
         else {
-            super.emptyElement(element, attributes, augs)
+            super.emptyElement(qName, attributes, augs)
         }
     }
 
     @Override
-    void endElement(QName element, Augmentations augs)
+    void endElement(QName qName, Augmentations augs)
                     throws XNIException {
-        if (nameIs(element, 'svg')) {
+        if (nameIs(qName, 'svg')) {
             inSVGElement = false
         }
-        super.endElement(element, augs)
+        super.endElement(qName, augs)
     }    
     
 }

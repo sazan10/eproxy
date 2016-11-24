@@ -39,7 +39,6 @@ import com.eaio.eproxy.rewriting.svg.SVGFilter
 @Slf4j
 class Rewriting implements BeanFactoryAware {
 
-    // ProxyJavaScriptFilter is the only stateless filter
     @Autowired(required = false)
     ProxyJavaScriptFilter proxyJavaScriptFilter
     
@@ -195,18 +194,6 @@ class Rewriting implements BeanFactoryAware {
     }
 
     /**
-     * Disables NekoHTML tag balancing and forces lower-case element names.
-     * 
-     * @return a barely configured NekoHTML parser
-     */
-    XMLReader newHTMLReader() {
-        SAXParser out = new SAXParser()
-        out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
-        out.setProperty('http://cyberneko.org/html/properties/names/elems', 'lower')
-        out
-    }
-    
-    /**
      * Prepares reading HTML and configures filters.
      */
     XMLReader newHTMLReader(Writer outputWriter, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
@@ -224,7 +211,7 @@ class Rewriting implements BeanFactoryAware {
                 configure(beanFactory.getBean(MetaRewritingFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(SrcsetFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(URIRewritingFilter), baseURI, requestURI, rewriteConfig),
-                configure(beanFactory.getBean(RecursiveInlineHTMLRewritingFilter), baseURI, requestURI, rewriteConfig),
+                configure(beanFactory.getBean(SrcdocFilter), baseURI, requestURI, rewriteConfig),
 //                configure(beanFactory.getBean(DataURIFilter), baseURI, requestURI, rewriteConfig),
             ])
 
@@ -246,6 +233,20 @@ class Rewriting implements BeanFactoryAware {
     XMLReader newHTMLFragmentReader(Writer outputWriter, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         XMLReader out = newHTMLReader(outputWriter, charset, baseURI, requestURI, rewriteConfig)
         out.setFeature('http://cyberneko.org/html/features/balance-tags/document-fragment', true)
+        out
+    }
+    
+    /**
+     * Disables NekoHTML tag balancing and forces lower-case element names.
+     * 
+     * @return a barely configured NekoHTML parser
+     */
+    XMLReader newHTMLReader() {
+        SAXParser out = new SAXParser()
+        out.with {
+            setFeature('http://cyberneko.org/html/features/balance-tags', false)
+            setProperty('http://cyberneko.org/html/properties/names/elems', 'lower')
+        }
         out
     }
     

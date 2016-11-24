@@ -58,7 +58,7 @@ class URIRewritingFilter extends RewritingFilter implements URIManipulation {
     
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         atts.length.times { int i ->
-            String attributeValue = atts.getValue(i)?.trim()
+            String attributeValue = trimToEmpty(atts.getValue(i))
             
             // Use local name
             if (!equalsIgnoreCase(atts.getLocalName(i), 'style') && !startsWithIgnoreCase(atts.getLocalName(i), 'on') &&

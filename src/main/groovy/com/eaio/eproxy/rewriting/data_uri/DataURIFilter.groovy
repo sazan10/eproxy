@@ -1,5 +1,6 @@
 package com.eaio.eproxy.rewriting.data_uri
 
+import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
@@ -68,7 +69,7 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
         if (srcIndex >= 0I) {
             int dataIndex = bndmci.searchString(atts.getValue(srcIndex) ?: '', 'data:', patternData)
             if (dataIndex >= 0I) {
-                rewriteDataURI(atts.getValue(srcIndex).substring(dataIndex + 5I))
+                rewriteDataURI(trimToEmpty(atts.getValue(srcIndex).substring(dataIndex + 5I)))
             }
         }
     }
@@ -82,8 +83,8 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
     String rewriteDataURI(String dataURI) {
         HeaderElement[] elements = BasicHeaderValueParser.parseElements(dataURI, null)
 
-        if (elements.size() == 1I || elements[0I].name?.equalsIgnoreCase('base64')) { // Only data in data URI or no MIME type (defaulting to text/plain according to Wikipedia)
-            return null
+        if (!needsRewriting(elements)) {
+            return
         }
 
         String mimeType = getMIMEType(elements)
@@ -93,10 +94,19 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
         }
         
         boolean isBase64 = isBase64(elements)
+        extractData(elements, isBase64)
+    }
+    
+    String extractData(HeaderElement[] elements, boolean isBase64) {
         String fullData =  elements[elements.size() - 1I].value ?  elements[elements.size() - 1I].name + '=' +  elements[elements.size() - 1I].value :  elements[elements.size() - 1I].name
-        String data = URLDecoder.decode(isBase64 ? new String(base64.decode(fullData), 0I) : fullData)
-        
-        data
+        URLDecoder.decode(isBase64 ? new String(base64.decode(fullData), 0I) : fullData)
+    }
+    
+    /**
+     * Returns if the data: URI contains only data or no MIME type (which defaults to text/plain according to Wikipedia)
+     */
+    boolean needsRewriting(HeaderElement[] elements) {
+        elements.size() == 1I || elements[0I].name?.equalsIgnoreCase('base64') ? false : true
     }
     
     String getMIMEType(HeaderElement[] elements) {

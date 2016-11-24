@@ -47,7 +47,7 @@ class RemoveJavaScriptURIFilter extends BaseFilter {
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         int srcIndex = atts.getIndex('src')
         if (srcIndex >= 0I) {
-            int javascriptIndex = bndmci.searchString(atts.getValue(srcIndex) ?: '', 'javascript:', patternJavaScript)
+            int javascriptIndex = bndmci.searchString(atts.getValue(srcIndex), 'javascript:', patternJavaScript)
             if (javascriptIndex >= 0I) {
                 atts.setValue(srcIndex, 'javascript:""')
             }
