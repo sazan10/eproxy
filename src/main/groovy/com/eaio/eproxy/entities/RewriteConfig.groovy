@@ -31,6 +31,8 @@ class RewriteConfig {
     
     /**
      * Remove <tt>&lt;noscript&gt;</tt> elements.
+     * 
+     * @see {@link RemoveNoScriptElementsFilter}
      */
     boolean removeNoScriptElements
     

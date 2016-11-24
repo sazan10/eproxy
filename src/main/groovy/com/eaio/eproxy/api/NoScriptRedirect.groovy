@@ -18,7 +18,7 @@ import com.eaio.eproxy.rewriting.URIManipulation
 import com.eaio.net.httpclient.ReEncoding
 
 /**
- * Redirects users who have JavaScript disabled to {@link Proxy}.
+ * Redirects users who have JavaScript disabled to {@link com.eaio.eproxy.api.Proxy}.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$

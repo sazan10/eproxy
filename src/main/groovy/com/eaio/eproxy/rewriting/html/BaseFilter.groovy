@@ -15,7 +15,10 @@ import org.cyberneko.html.filters.DefaultFilter
  */
 @CompileStatic
 class BaseFilter extends DefaultFilter {
-            
+
+    /**    
+     * @return if the tag is <code>expected</code>
+     */
     final boolean nameIs(QName qName, String expected) {
         equalsIgnoreCase(qName.localpart ?: qName.rawname, expected)
     }

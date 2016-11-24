@@ -86,10 +86,19 @@ class Rewriting implements BeanFactoryAware {
         mimeType?.equalsIgnoreCase('image/svg+xml')
     }
 
+    /**
+     * Returns if rewriting is enabled, the MIME type supported and the Content-Disposition header is not <code>attachment</code> (ignoring case).
+     */
     boolean canRewrite(HeaderElement contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
         rewriteConfig && !(contentDisposition?.name?.equalsIgnoreCase('attachment')) && (isHTML(mimeType) || isCSS(mimeType) || isSVG(mimeType))
     }
 
+    /**
+     * Convenience method that delegates to other rewriting methods based on the MIME type.
+     * Make sure to call {@link #canRewrite(HeaderElement, RewriteConfig, String)} before calling this.
+     * 
+     * @see #canRewrite(HeaderElement, RewriteConfig, String)
+     */
     void rewrite(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig, String mimeType) {
         if (isHTML(mimeType)) {
             rewriteHTML(inputStream, outputStream, charset, baseURI, requestURI, rewriteConfig)
@@ -128,7 +137,7 @@ class Rewriting implements BeanFactoryAware {
         }
     }
     
-    void rewriteXML(XMLReader xmlReader, InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+    private void rewriteXML(XMLReader xmlReader, InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
@@ -185,6 +194,11 @@ class Rewriting implements BeanFactoryAware {
         }
     }
 
+    /**
+     * Disables NekoHTML tag balancing and forces lower-case element names.
+     * 
+     * @return a barely configured NekoHTML parser
+     */
     XMLReader newHTMLReader() {
         SAXParser out = new SAXParser()
         out.setFeature('http://cyberneko.org/html/features/balance-tags', false)
@@ -192,6 +206,9 @@ class Rewriting implements BeanFactoryAware {
         out
     }
     
+    /**
+     * Prepares reading HTML and configures filters.
+     */
     XMLReader newHTMLReader(Writer outputWriter, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         XMLReader out = newHTMLReader()
         Collection<DefaultFilter> filters = []
@@ -221,12 +238,22 @@ class Rewriting implements BeanFactoryAware {
         out
     }
     
+    /**
+     * Same as {@link #newHTMLReader(Writer, Charset, URI, URI, RewriteConfig)} but configures NekoHTML for use with document fragments.
+     * 
+     * @see #newHTMLReader(Writer, Charset, URI, URI, RewriteConfig)
+     */
     XMLReader newHTMLFragmentReader(Writer outputWriter, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         XMLReader out = newHTMLReader(outputWriter, charset, baseURI, requestURI, rewriteConfig)
         out.setFeature('http://cyberneko.org/html/features/balance-tags/document-fragment', true)
         out
     }
     
+    /**
+     * Enables namespace support but disables all kinds of external entities.
+     * 
+     * @return a SAX 2 parser
+     */
     XMLReader newXMLReader() {
         XMLReader out = XMLReaderFactory.createXMLReader()
         out.with {

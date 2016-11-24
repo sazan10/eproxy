@@ -7,6 +7,8 @@ import org.apache.commons.lang3.text.translate.CharSequenceTranslator;
 
 /**
  * Removes escape sequences in CSS.
+ * <p>
+ * Example: <code>\\000075 \\00072\\006C</code> =&gt; <code>url</code>
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
