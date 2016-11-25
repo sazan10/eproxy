@@ -62,7 +62,7 @@ class SrcdocFilter extends RewritingFilter implements BeanFactoryAware {
                 ByteArrayOutputStream bOut = new ByteArrayOutputStream(srcdocValue.length())
                 rewriting.rewriteHTMLFragment(new ByteArrayInputStream(srcdocValue.getBytes(defaultCharset)), bOut, defaultCharset, baseURI, requestURI, rewriteConfig)
                 String rewrittenSrcdocValue = bOut.toString(defaultCharset.name())
-                log.trace('rewrote srcdoc attribute from\n{}\nto\n{}', atts.getValue(srcDocIndex), rewrittenSrcdocValue)
+                log.debug('rewrote srcdoc attribute from\n{}\nto\n{}', atts.getValue(srcDocIndex), rewrittenSrcdocValue)
                 atts.setValue(srcDocIndex, rewrittenSrcdocValue)
             }
         }
