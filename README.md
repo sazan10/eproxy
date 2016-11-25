@@ -2,7 +2,7 @@
 
 # eproxy
 
-eproxy is a proxy that
+eproxy is a web proxy that
 
 * rewrites HTML, CSS, SVG and JavaScript``*``
 * supports cookies
@@ -11,7 +11,7 @@ eproxy is a proxy that
 * supports HTTP Byte Serving independent of the origin server using the ``Range`` header (unless rewriting)
 * supports cache validation using ``If-Modified-Since`` and ``If-None-Match``
 * supports SOCKS proxies for your hardcore tunneling needs
-* supports users who have JavaScript disabled
+* supports disabled JavaScript
 * supports data: URIs``*``
 * caches content in-memory, using Memcache (on Google App Engine) or Infinispan``*``
 * lets you customize the TCP/IP setup
