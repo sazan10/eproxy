@@ -6,13 +6,13 @@ import static org.hamcrest.Matchers.*
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 
-import org.apache.commons.codec.binary.Base64
 import org.hamcrest.Matcher
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.BeanFactory
 
 import com.eaio.eproxy.rewriting.Rewriting
+import com.google.appengine.repackaged.org.apache.commons.codec.binary.Base64
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
