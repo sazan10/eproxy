@@ -42,6 +42,7 @@ import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.TimingInterceptor
 import com.google.apphosting.api.DeadlineExceededException
 import com.google.apphosting.api.ApiProxy.CancelledException
+import com.j256.simplemagic.ContentInfo
 import com.j256.simplemagic.ContentInfoUtil
 
 /**
@@ -128,7 +129,9 @@ class Proxy implements URIManipulation {
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
             
             if (!contentType && remoteResponse.entity?.repeatable) {
-                log.info('detected data from {}: {}', requestURI, contentInfoUtil.findMatch(remoteResponse.entity.content))
+                ContentInfo contentInfo = contentInfoUtil.findMatch(remoteResponse.entity.content)
+                log.warn('no Content-Type header. Detected {}. Using MIME type {}', contentInfo, contentInfo?.mimeType ?: 'text/html')
+                contentType = ContentType.create(contentInfo?.mimeType ?: 'text/html') // Default to text/html for security reasons, all binary types should be detected even if text/html isn't
             }
 
             boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
