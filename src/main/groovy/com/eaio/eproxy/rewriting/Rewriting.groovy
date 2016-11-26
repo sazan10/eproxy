@@ -211,7 +211,7 @@ class Rewriting implements BeanFactoryAware {
                 configure(beanFactory.getBean(SrcsetFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(URIRewritingFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(SrcdocFilter), baseURI, requestURI, rewriteConfig),
-//                configure(beanFactory.getBean(DataURIFilter), baseURI, requestURI, rewriteConfig),
+                configure(beanFactory.getBean(DataURIFilter), baseURI, requestURI, rewriteConfig),
             ])
 
             if (proxyJavaScriptFilter) {

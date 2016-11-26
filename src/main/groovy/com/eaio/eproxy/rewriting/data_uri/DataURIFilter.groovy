@@ -1,6 +1,10 @@
 package com.eaio.eproxy.rewriting.data_uri
 
 import static org.apache.commons.lang3.StringUtils.*
+
+import java.nio.charset.Charset
+import java.nio.charset.IllegalCharsetNameException
+
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
@@ -19,7 +23,6 @@ import org.springframework.stereotype.Component
 
 import com.eaio.eproxy.rewriting.Rewriting
 import com.eaio.eproxy.rewriting.html.RewritingFilter
-
 import com.google.appengine.repackaged.org.apache.commons.codec.binary.Base64
 
 /**
@@ -61,61 +64,80 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         int srcIndex = atts.getIndex('src')
         if (srcIndex >= 0I) {
-            String value = trimToEmpty(atts.getValue(srcIndex))
-            if (startsWithIgnoreCase(value, 'data:')) {
-                rewriteDataURI(value.substring(5I))
-            }
+            rewriteAttributeValue(atts, srcIndex)
         }
+    }
+
+    private rewriteAttributeValue(XMLAttributes atts, int srcIndex) {
+        String value = trimToEmpty(atts.getValue(srcIndex))
+        if (startsWithIgnoreCase(value, 'data:')) {
+            String dataURIValue = trimToEmpty(value.substring(5I))
+            HeaderElement[] elements = BasicHeaderValueParser.parseElements(dataURIValue, null)
+
+            if (isMissingMIMEType(elements)) {
+                return
+            }
+
+            String mimeType = getMIMEType(elements)
+            boolean isHTML = rewriting.isHTML(mimeType), isSVG = rewriting.isSVG(mimeType)
+            if (!isHTML && !isSVG) {
+                return
+            }
+
+            Charset charset = getCharset(elements)
+            boolean base64 = isBase64(elements)
+            String data = extractData(elements, base64)
+
+            log.info('data: URI of type {}, charset {}, base64 {}: {}. Extracted data: {}', mimeType, charset, base64, dataURIValue, data)
+
+            String rewritten = rewriteData(data, mimeType, charset)
+            //atts.setValue(srcIndex, rewritten)
+        }
+    }
+
+    String rewriteData(String data, String mimeType, Charset charset) {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream(data.length())
+        rewriting.rewrite(new ByteArrayInputStream(data.getBytes(charset?.name() ?: 'UTF-8')), bOut, charset, baseURI, requestURI, rewriteConfig, mimeType)
+        bOut.toString(0I) // TODO
     }
 
     /**
-     * Rewrites the data: URI value. The leading "data:" scheme must be removed.
+     * Extracts the data: URI value.
      * 
-     * @param dataURI the data: URI without the leading "data:" scheme
-     * @return <code>null</code> if <code>dataURI</code> doesn't need to be rewritten
+     * @param isBase64 whether the data is Base64 encoded
      */
-    String rewriteDataURI(String dataURI) {
-        HeaderElement[] elements = BasicHeaderValueParser.parseElements(dataURI, null)
-
-        if (!needsRewriting(elements)) {
-            return
-        }
-
-        String mimeType = getMIMEType(elements)
-        boolean isHTML = rewriting.isHTML(mimeType), isSVG = rewriting.isSVG(mimeType)
-        if (!isHTML && !isSVG) {
-            return
-        }
-        
-        String charset = getCharset(elements)
-        boolean base64 = isBase64(elements)
-        
-        log.debug('data: URI of type {}, charset {}, base64 {}: {}', mimeType, charset, base64, dataURI)
-        extractData(elements, base64)
-    }
-    
     String extractData(HeaderElement[] elements, boolean isBase64) {
         String fullData =  elements[elements.size() - 1I].value ?  elements[elements.size() - 1I].name + '=' +  elements[elements.size() - 1I].value :  elements[elements.size() - 1I].name
         URLDecoder.decode(isBase64 ? new String(base64.decode(fullData), 0I) : fullData)
     }
-    
+
     /**
      * Returns if the data: URI contains only data or no MIME type (which defaults to text/plain according to Wikipedia)
      */
-    boolean needsRewriting(HeaderElement[] elements) {
-        elements.size() == 1I || elements[0I].name?.equalsIgnoreCase('base64') ? false : true
+    boolean isMissingMIMEType(HeaderElement[] elements) {
+        elements.size() == 1I || elements[0I].name?.equalsIgnoreCase('base64') ? true : false
     }
-    
+
     String getMIMEType(HeaderElement[] elements) {
         elements[0I].name
     }
-    
-    String getCharset(HeaderElement[] elements) {
-        elements[0I].parameters?.find { NameValuePair pair -> pair.name?.equalsIgnoreCase('charset') }?.value
+
+    Charset getCharset(HeaderElement[] elements) {
+        Charset out
+        String charsetName = elements[0I].parameters?.find { NameValuePair pair -> pair.name?.equalsIgnoreCase('charset') }?.value
+        if (charsetName) {
+            try {
+                out = Charset.forName(charsetName)
+            }
+            catch (IllegalCharsetNameException ex) {
+                log.warn('illegal charset name {}', charsetName)
+            }
+        }
+        out
     }
-    
+
     boolean isBase64(HeaderElement[] elements) {
-        elements[0I].parameters?.any { NameValuePair pair -> pair.name?.equalsIgnoreCase('base64') }
+        elements[0I].name?.equalsIgnoreCase('base64') || elements[0I].parameters?.any { NameValuePair pair -> pair.name?.equalsIgnoreCase('base64') }
     }
 
 }
