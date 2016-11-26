@@ -23,24 +23,20 @@ class RewritingFilter extends BaseFilter {
         // Exclude HTML attribute values and anchor links
         String value = trimToEmpty(attributeValue)
         if (value && !value.startsWith('<') && !value.startsWith('#')) {
-            int colonIndex = value.indexOf(':')
-            if (colonIndex == -1I) {
-                colonIndex = Integer.MAX_VALUE
-            }
-            value.startsWith('/') || startsWithHTTP(value, colonIndex) || startsWithHTTPS(value, colonIndex) || startsWithColonSlash(value, colonIndex) || startsWithViewSource(value)
+            value.startsWith('/') || startsWithHTTP(value) || startsWithHTTPS(value) || startsWithColonSlash(value) || startsWithViewSource(value)
         }
     }
 
-    private boolean startsWithHTTP(String value, int colonIndex) {
-        colonIndex == 4I && startsWithIgnoreCase(value, 'http')
+    private boolean startsWithHTTP(String value) {
+        startsWithIgnoreCase(value, 'http:')
     }
     
-    private boolean startsWithHTTPS(String value, int colonIndex) {
-        colonIndex == 5I && startsWithIgnoreCase(value, 'https')
+    private boolean startsWithHTTPS(String value) {
+        startsWithIgnoreCase(value, 'https:')
     }
     
-    private boolean startsWithColonSlash(String value, int colonIndex) {
-        colonIndex == 0I && value[1I] == '/'
+    private boolean startsWithColonSlash(String value) {
+        startsWith(value, ':/')
     }
     
     private boolean startsWithViewSource(String value) {
