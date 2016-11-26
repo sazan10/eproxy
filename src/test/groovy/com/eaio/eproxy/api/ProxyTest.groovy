@@ -10,6 +10,7 @@ import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 
 import org.apache.http.HeaderElement
+import org.apache.http.client.methods.HttpUriRequest
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -23,7 +24,7 @@ import com.eaio.eproxy.entities.*
 class ProxyTest {
     
     @Lazy
-    Proxy proxy
+    Proxy proxy = new Proxy(referrerEnabled: true)
 
     /**
      * Test method for {@link com.eaio.web.Proxy#buildRequestURI(java.lang.String, java.lang.String, java.lang.String)}.
@@ -119,6 +120,22 @@ class ProxyTest {
         
         proxy.proxy('http', request, response)
         assertThat(sendErrorCalled, is(true))
+    }
+    
+    /**
+     * Make sure to send the scheme from the eproxy URL, not the request scheme in the referrer header.
+     */
+    @Test
+    void 'should use the scheme from proxy URLs, not the request scheme'() {
+        assertThat(proxy.referrerEnabled, is(true))
+        HttpServletRequest request = [ getHeader: { 'https://foo.com/eproxy/rnw-http/rah.com/ui.html' } ] as HttpServletRequest
+        
+        boolean setHeaderCalled = false
+        HttpUriRequest uriRequest = [ setHeader: { String name, String value -> setHeaderCalled = true; assertThat(name, is('Referer')); assertThat(value, is('http://rah.com/ui.html')) } ] as HttpUriRequest
+        
+        proxy.addReferrer(request, uriRequest, 'http', '/eproxy')
+        
+        assertThat(setHeaderCalled, is(true))
     }
     
 }

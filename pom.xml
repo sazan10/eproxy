@@ -354,6 +354,12 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.2</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-codec</artifactId>
+                    <groupId>commons-codec</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -363,6 +369,10 @@
                 <exclusion>
                     <artifactId>commons-logging</artifactId>
                     <groupId>commons-logging</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-codec</artifactId>
+                    <groupId>commons-codec</groupId>
                 </exclusion>
                 <exclusion>
                     <artifactId>httpclient</artifactId>
@@ -417,9 +427,9 @@
             <version>1.9.22</version>
         </dependency>
         <dependency>
-            <groupId>com.eaio.stringsearch</groupId>
-            <artifactId>stringsearch</artifactId>
-            <version>2.2</version>
+            <groupId>com.j256.simplemagic</groupId>
+            <artifactId>simplemagic</artifactId>
+            <version>1.9</version>
         </dependency>
     </dependencies>
     <reporting>

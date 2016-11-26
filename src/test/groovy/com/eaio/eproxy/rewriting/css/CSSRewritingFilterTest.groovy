@@ -74,4 +74,10 @@ class CSSRewritingFilterTest {
         assertThat(out, containsString(", sizingMethod='scale'"))
     }
     
+    @Test
+    void 'should not remove @import rules'() {
+        String rewritten = cssRewritingFilter.rewriteCSS(new File('src/test/resources/com/eaio/eproxy/rewriting/css/www.google.com_intl_en_ads_css_default.v3.css').text)
+        assertThat(rewritten, containsString('base.css'))
+    }
+    
 }

@@ -5,7 +5,6 @@ import java.net.Proxy
 
 import javax.net.ssl.SSLException
 
-import org.apache.commons.codec.binary.Base64
 import org.apache.http.HttpRequestInterceptor
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
@@ -46,6 +45,8 @@ import com.eaio.util.googleappengine.NotOnGoogleAppEngineOrDevserver
 import com.eaio.util.googleappengine.OnGoogleAppEngineOrDevserver
 import com.google.appengine.api.memcache.AsyncMemcacheService
 import com.google.appengine.api.memcache.MemcacheServiceFactory
+import com.google.appengine.repackaged.org.apache.commons.codec.binary.Base64
+import com.j256.simplemagic.ContentInfoUtil
 
 /**
  * Eproxy configuration.
@@ -259,6 +260,11 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Bean
     Base64 base64() {
         new Base64(0I, null, true)
+    }
+    
+    @Bean
+    ContentInfoUtil contentInfoUtil() {
+        new ContentInfoUtil()
     }
 
     static main(args) {

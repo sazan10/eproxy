@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component
 
 import com.eaio.eproxy.rewriting.Rewriting
 import com.eaio.eproxy.rewriting.html.RewritingFilter
-import com.eaio.stringsearch.BNDMCI
 
 import com.google.appengine.repackaged.org.apache.commons.codec.binary.Base64
 
@@ -36,12 +35,6 @@ import com.google.appengine.repackaged.org.apache.commons.codec.binary.Base64
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
-
-    @Lazy
-    private BNDMCI bndmci = new BNDMCI()
-
-    @Lazy
-    private def patternData = bndmci.processString('data:')
 
     @Lazy
     private Rewriting rewriting = beanFactory.getBean(Rewriting)
@@ -68,9 +61,9 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
         int srcIndex = atts.getIndex('src')
         if (srcIndex >= 0I) {
-            int dataIndex = bndmci.searchString(atts.getValue(srcIndex) ?: '', 'data:', patternData)
-            if (dataIndex >= 0I) {
-                rewriteDataURI(trimToEmpty(atts.getValue(srcIndex).substring(dataIndex + 5I)))
+            String value = trimToEmpty(atts.getValue(srcIndex))
+            if (startsWithIgnoreCase(value, 'data:')) {
+                rewriteDataURI(value.substring(5I))
             }
         }
     }
@@ -94,8 +87,11 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
             return
         }
         
-        boolean isBase64 = isBase64(elements)
-        extractData(elements, isBase64)
+        String charset = getCharset(elements)
+        boolean base64 = isBase64(elements)
+        
+        log.debug('data: URI of type {}, charset {}, base64 {}: {}', mimeType, charset, base64, dataURI)
+        extractData(elements, base64)
     }
     
     String extractData(HeaderElement[] elements, boolean isBase64) {
@@ -112,6 +108,10 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
     
     String getMIMEType(HeaderElement[] elements) {
         elements[0I].name
+    }
+    
+    String getCharset(HeaderElement[] elements) {
+        elements[0I].parameters?.find { NameValuePair pair -> pair.name?.equalsIgnoreCase('charset') }?.value
     }
     
     boolean isBase64(HeaderElement[] elements) {

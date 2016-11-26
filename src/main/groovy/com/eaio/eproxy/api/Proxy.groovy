@@ -42,6 +42,7 @@ import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.TimingInterceptor
 import com.google.apphosting.api.DeadlineExceededException
 import com.google.apphosting.api.ApiProxy.CancelledException
+import com.j256.simplemagic.ContentInfoUtil
 
 /**
  * Proxies and optionally rewrites content.
@@ -78,6 +79,9 @@ class Proxy implements URIManipulation {
     
     @Autowired(required = false)
     CookieTranslator cookieTranslator
+    
+    @Autowired
+    ContentInfoUtil contentInfoUtil
 
     @RequestMapping('/{scheme:(?i)https?}/**')
     void proxy(@PathVariable String scheme, HttpServletRequest request, HttpServletResponse response) {
@@ -99,16 +103,11 @@ class Proxy implements URIManipulation {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
             
             addRequestHeaders(request, uriRequest)
-            addReferrer(request, uriRequest, request.contextPath)
-            
+            addReferrer(request, uriRequest, scheme, request.contextPath)
             cookieTranslator?.addToRequest(request.cookies, baseURI, requestURI, uriRequest)
-            if (uriRequest instanceof HttpEntityEnclosingRequest) {
-                setRequestEntity(uriRequest, request.getHeader('Content-Length'), request.inputStream)
-            }
+            setRequestEntity(request, uriRequest)
 
-            if (totalTimeout) {
-                timer?.schedule(new AbortHttpUriRequestTask(uriRequest), totalTimeout)
-            }
+            scheduleRequestTimeout(uriRequest)
             
             remoteResponse = httpClient.execute(uriRequest, context)
             requestURI = getTargetURI(context) ?: requestURI
@@ -118,12 +117,15 @@ class Proxy implements URIManipulation {
                     reset()
                 }
                 status = remoteResponse.statusLine.statusCode
-                setHeader('Vary', 'Accept-Encoding') // TODO: ?
             }
 
             HeaderElement contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
             RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
+            
+            if (!contentType && remoteResponse.entity?.repeatable) {
+                log.info('detected data from {}: {}', requestURI, contentInfoUtil.findMatch(remoteResponse.entity.content))
+            }
 
             boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
             
@@ -155,15 +157,7 @@ class Proxy implements URIManipulation {
                     }
                 }
                 else {
-                    response.setHeader('Accept-Ranges', 'bytes')
-                    if (range) {
-                        response.status = HttpServletResponse.SC_PARTIAL_CONTENT
-                        response.setHeader('Content-Range', "bytes ${range[0]}-${range[1] - 1}/${contentLength}")
-                        response.setContentLength((int) range[1I] - range[0I]) 
-                    }
-
-                    // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
-                    IOUtils.copyLarge(range ? new RangeInputStream(remoteResponse.entity.content, range.get(0), range.get(1)) : remoteResponse.entity.content, outputStream)
+                    copyBinaryData(response, range, contentLength, remoteResponse.entity.content, outputStream)
                 }
             }
 
@@ -232,9 +226,33 @@ class Proxy implements URIManipulation {
         }
     }
 
+    /**
+     * Copies <tt>inputStream</tt> into <tt>outputStream</tt> with Range request support.
+     */
+    private copyBinaryData(HttpServletResponse response, List<Long> range, long contentLength, InputStream inputStream, OutputStream outputStream) {
+        response.setHeader('Accept-Ranges', 'bytes')
+        if (range) {
+            response.status = HttpServletResponse.SC_PARTIAL_CONTENT
+            response.setHeader('Content-Range', "bytes ${range[0]}-${range[1] - 1}/${contentLength}")
+            response.setContentLength((int) range[1I] - range[0I])
+        }
+
+        // Do not use HttpEntity#writeTo(OutputStream) -- doesn't get counted in all instances.
+        IOUtils.copyLarge(range ? new RangeInputStream(inputStream, range.get(0), range.get(1)) : inputStream, outputStream)
+    }
+
+    private scheduleRequestTimeout(HttpUriRequest uriRequest) {
+        if (totalTimeout) {
+            timer?.schedule(new AbortHttpUriRequestTask(uriRequest), totalTimeout)
+        }
+    }
+
     private copyRemoteResponseHeadersToResponse(HeaderIterator headers, HttpServletResponse response, boolean canRewrite, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         while (headers.hasNext()) {
             Header header = headers.nextHeader()
+            if (header.value?.contains('//')) {
+                log.warn('header may contain URL: {}: {}', header.name, header.value)
+            }
             if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                 response.setHeader(header.name, encodeTargetURI(baseURI, requestURI, header.value, rewriteConfig))
             }
@@ -248,7 +266,7 @@ class Proxy implements URIManipulation {
         try {
             response.sendError(statusCode, message)
         }
-        catch (IllegalStateException ex) {}
+        catch (IllegalStateException ignored) {}
     }
 
     private HttpUriRequest newRequest(String method, URI uri) {
@@ -269,29 +287,48 @@ class Proxy implements URIManipulation {
      * Removes the context path prefix from <tt>requestURI</tt>.
      */
     String stripContextPathFromRequestURI(String contextPath, String requestURI) {
-        contextPath ? substringAfter(requestURI, contextPath) : requestURI
+        substringAfter(requestURI, contextPath)
     }
 
-    void setRequestEntity(HttpEntityEnclosingRequest uriRequest, String contentLength, InputStream inputStream) {
-        uriRequest.entity = new InputStreamEntity(inputStream, contentLength?.isLong() ? contentLength as long : -1L)
+    /**
+     * Sets the request body to <code>uriRequest</code>.
+     */
+    void setRequestEntity(HttpServletRequest request, HttpUriRequest uriRequest) {
+        if (uriRequest instanceof HttpEntityEnclosingRequest) {
+            String contentLength = request.getHeader('Content-Length') 
+            uriRequest.entity = new InputStreamEntity(request.inputStream, contentLength?.isLong() ? contentLength as long : -1L)
+        }
     }
 
+    /**
+     * Adds the following headers to the outgoing request:
+     * <ul>
+     * <li>Accept
+     * <li>Accept-Language
+     * <li>If-Modified-Since
+     * <li>If-None-Match
+     * </ul>
+     * Also adds the User-Agent header if {@link #userAgent} isn't set.
+     */
     void addRequestHeaders(HttpServletRequest request, HttpUriRequest uriRequest) {
         [ 'Accept', 'Accept-Language', 'If-Modified-Since', 'If-None-Match' ].each {
             if (request.getHeader(it)) {
                 uriRequest.setHeader(it, request.getHeader(it))
             }
         }
-        if (!userAgent) {
+        if (!userAgent && request.getHeader('User-Agent')) {
             uriRequest.setHeader('User-Agent', request.getHeader('User-Agent'))
         }
     }
     
-    void addReferrer(HttpServletRequest request, HttpUriRequest uriRequest, String contextPath) {
+    /**
+     * If the <code>Referer</code> header contains a URL in eproxy's scheme, decode the original URL and send it as the new <code>Referer</code> header.
+     */
+    void addReferrer(HttpServletRequest request, HttpUriRequest uriRequest, String scheme, String contextPath) {
         if (referrerEnabled && request.getHeader('Referer')) {
             try {
                 URI referrer = URI.create(request.getHeader('Referer'))
-                URI decodedReferrer = decodeTargetURI(referrer.scheme, stripContextPathFromRequestURI(contextPath, referrer.path), referrer.query)
+                URI decodedReferrer = decodeTargetURI(scheme, stripContextPathFromRequestURI(contextPath, referrer.path), referrer.query)
                 if (decodedReferrer.host) {
                     uriRequest.setHeader('Referer', decodedReferrer as String)
                 }
@@ -303,14 +340,16 @@ class Proxy implements URIManipulation {
     HeaderElement parseContentDispositionValue(String contentDisposition) {
         if (contentDisposition) {
             HeaderElement[] elements = BasicHeaderValueParser.parseElements(contentDisposition, null)
+            log.debug('extracted Content-Disposition {} from {}', elements[0I], contentDisposition)
             elements[0I]
         }
     }
 
     /**
-     * Returns whether a certain header (ignoring case) should be included. Also drops <tt>Content-Length</tt> if rewriting.
+     * Returns whether a certain server-side header (ignoring case) should be included. Also drops <tt>Content-Length</tt> if rewriting.
+     * <p>
+     * TODO: This should probably be a whitelist instead of a blacklist.
      */
-    // TODO Header whitelist
     boolean includeHeader(String name, boolean canRewrite) {
         switch (name?.toLowerCase()) {
             case 'vary':

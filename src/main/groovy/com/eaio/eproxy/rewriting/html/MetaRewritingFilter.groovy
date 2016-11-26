@@ -26,11 +26,7 @@ import com.eaio.eproxy.rewriting.URIManipulation
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
-
-    @Lazy
-    private Object patternRefresh = bndmci.processString('refresh'),
-        patternURL = bndmci.processString('url')
-
+    
     @Override
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         rewriteElement(qName, atts, augs)
@@ -48,7 +44,7 @@ class MetaRewritingFilter extends RewritingFilter implements URIManipulation {
             String httpEquiv = atts.getValue('http-equiv')
             if (httpEquiv) {
                 String content = atts.getValue('content')
-                if (content && bndmci.searchString(httpEquiv, 'refresh', patternRefresh) >= 0I && bndmci.searchString(content, 'url', patternURL) >= 0I) {
+                if (content && containsIgnoreCase(httpEquiv, 'refresh') && containsIgnoreCase(content, 'url')) {
                     String rewritten = rewriteMetaRefresh(content)
                     atts.setValue(atts.getIndex('content'), rewritten)
                 }

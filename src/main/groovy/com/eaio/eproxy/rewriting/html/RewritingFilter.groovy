@@ -1,9 +1,10 @@
 package com.eaio.eproxy.rewriting.html
 
+import static org.apache.commons.lang3.StringUtils.*
+
 import groovy.transform.CompileStatic
 
 import com.eaio.eproxy.entities.RewriteConfig
-import com.eaio.stringsearch.BNDMCI
 
 /**
  * {@link BaseFilter} that knows where the document is coming from and decides whether attribute values should be rewritten.
@@ -18,47 +19,32 @@ class RewritingFilter extends BaseFilter {
 
     RewriteConfig rewriteConfig
 
-    @Lazy
-    private BNDMCI bndmci = new BNDMCI()
-
-    @Lazy
-    private def patternHTTP = bndmci.processString('http:'),
-        patternHTTPS = bndmci.processString('https:'),
-        patternColonSlash = bndmci.processString(':/'),
-        patternViewSource = bndmci.processString('view-source:')
-
     boolean attributeValueNeedsRewriting(String attributeValue) {
         // Exclude HTML attribute values and anchor links
-        if (attributeValue && !attributeValue?.startsWith('<') && !attributeValue?.startsWith('#')) {
-            int colonIndex = attributeValue.indexOf(':')
+        String value = trimToEmpty(attributeValue)
+        if (value && !value.startsWith('<') && !value.startsWith('#')) {
+            int colonIndex = value.indexOf(':')
             if (colonIndex == -1I) {
                 colonIndex = Integer.MAX_VALUE
             }
-            attributeValue.startsWith('/') ||
-                containsHTTP(attributeValue, colonIndex) || 
-                containsHTTPS(attributeValue, colonIndex) ||
-                containsColonSlash(attributeValue, colonIndex) ||
-                startsWithViewSource(attributeValue)
+            value.startsWith('/') || startsWithHTTP(value, colonIndex) || startsWithHTTPS(value, colonIndex) || startsWithColonSlash(value, colonIndex) || startsWithViewSource(value)
         }
     }
 
-    private boolean containsHTTP(String attributeValue, int colonIndex) {
-        int index = bndmci.searchString(attributeValue, 'http:', patternHTTP)
-        index >= 0I && index < colonIndex
+    private boolean startsWithHTTP(String value, int colonIndex) {
+        colonIndex == 4I && startsWithIgnoreCase(value, 'http')
     }
     
-    private boolean containsHTTPS(String attributeValue, int colonIndex) {
-        int index = bndmci.searchString(attributeValue, 'https:', patternHTTPS)
-        index >= 0I && index < colonIndex
+    private boolean startsWithHTTPS(String value, int colonIndex) {
+        colonIndex == 5I && startsWithIgnoreCase(value, 'https')
     }
     
-    private boolean containsColonSlash(String attributeValue, int colonIndex) {
-        int index = bndmci.searchString(attributeValue, ':/', patternColonSlash)
-        index >= 0I && index < colonIndex
+    private boolean startsWithColonSlash(String value, int colonIndex) {
+        colonIndex == 0I && value[1I] == '/'
     }
     
-    private boolean startsWithViewSource(String attributeValue) {
-        bndmci.searchString(attributeValue, 'view-source:', patternViewSource) == 0I
+    private boolean startsWithViewSource(String value) {
+        startsWithIgnoreCase(value, 'view-source:')
     }
 
 }
