@@ -138,4 +138,28 @@ class ProxyTest {
         assertThat(setHeaderCalled, is(true))
     }
     
+    @Test
+    void 'weird HTTP methods shouldn\'t be supported'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/rnw-http/blorb.com' },
+            getContextPath: { '' },
+            getQueryString: { null },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            getMethod: { 'CONNECT' },
+            getHeader: { String name -> null },
+        ] as HttpServletRequest
+
+        boolean sendErrorCalled = false
+        HttpServletResponse response = [ sendError: { int status ->
+                sendErrorCalled = true
+                assertThat(status, is(405I))
+            } ] as HttpServletResponse
+
+        proxy.proxy('rnw', 'http', request, response)
+        
+        assertThat(sendErrorCalled, is(true))
+    }
+    
 }

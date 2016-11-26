@@ -101,6 +101,10 @@ class Proxy implements URIManipulation {
         HttpResponse remoteResponse
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
+            if (!uriRequest) {
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED)
+                return
+            }
             
             addRequestHeaders(request, uriRequest)
             addReferrer(request, uriRequest, scheme, request.contextPath)
