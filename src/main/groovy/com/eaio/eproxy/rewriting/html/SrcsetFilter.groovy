@@ -44,10 +44,10 @@ class SrcsetFilter extends RewritingFilter implements URIManipulation {
                 int i = atts.getIndex('srcset')
                 if (attributeValue.contains(',')) {
                     List<String> parts = attributeValue.tokenize(',').collect { it.trim() }
-                    parts.size().times { int index ->
-                        if (attributeValueNeedsRewriting(parts[index])) {
-                            String imageURI = getImageURI(parts[index])
-                            parts[index] = replace(parts[index], imageURI, encodeTargetURI(baseURI, requestURI, imageURI, rewriteConfig))
+                    for (int j = 0; j < parts.size(); ++j) {
+                        if (attributeValueNeedsRewriting(parts[j])) {
+                            String imageURI = getImageURI(parts[j])
+                            parts[j] = replace(parts[j], imageURI, encodeTargetURI(baseURI, requestURI, imageURI, rewriteConfig))
                         }
                     }
                     atts.setValue(i, parts.join(', '))
