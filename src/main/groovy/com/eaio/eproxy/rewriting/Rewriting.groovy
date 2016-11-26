@@ -7,7 +7,6 @@ import groovy.util.logging.Slf4j
 import java.nio.charset.Charset
 
 import org.apache.commons.lang3.exception.ExceptionUtils
-import org.apache.http.HeaderElement
 import org.apache.xerces.xni.parser.XMLDocumentFilter
 import org.apache.xml.serialize.*
 import org.cyberneko.html.filters.DefaultFilter
@@ -88,15 +87,15 @@ class Rewriting implements BeanFactoryAware {
     /**
      * Returns if rewriting is enabled, the MIME type supported and the Content-Disposition header is not <code>attachment</code> (ignoring case).
      */
-    boolean canRewrite(HeaderElement contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
-        rewriteConfig && !(contentDisposition?.name?.equalsIgnoreCase('attachment')) && (isHTML(mimeType) || isCSS(mimeType) || isSVG(mimeType))
+    boolean canRewrite(String contentDisposition, RewriteConfig rewriteConfig, String mimeType) {
+        rewriteConfig && !(contentDisposition?.equalsIgnoreCase('attachment')) && (isHTML(mimeType) || isCSS(mimeType) || isSVG(mimeType))
     }
 
     /**
      * Convenience method that delegates to other rewriting methods based on the MIME type.
-     * Make sure to call {@link #canRewrite(HeaderElement, RewriteConfig, String)} before calling this.
+     * Make sure to call {@link #canRewrite(String, RewriteConfig, String)} before calling this.
      * 
-     * @see #canRewrite(HeaderElement, RewriteConfig, String)
+     * @see #canRewrite(String, RewriteConfig, String)
      */
     void rewrite(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig, String mimeType) {
         if (isHTML(mimeType)) {

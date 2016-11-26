@@ -77,11 +77,26 @@ class ProxyTest {
     }
     
     @Test
-    void 'parseContentDispositionValue should find attachment'() {
+    void 'parseContentDispositionValue should return null'() {
         assertThat(proxy.parseContentDispositionValue(null), is(null))
-        
-        HeaderElement element = proxy.parseContentDispositionValue('ATTACHMENT;filename=bla.jpg')
-        assertThat(element.name.toLowerCase(), is('attachment'))
+    }
+    
+    @Test
+    void 'parseContentDispositionValue should return attachment'() {
+        String contentDisposition = proxy.parseContentDispositionValue('ATTACHMENT;filename=bla.jpg')
+        assertThat(contentDisposition?.toLowerCase(), is('attachment'))
+    }
+    
+    @Test
+    void 'parseContentDispositionValue should return inline 1'() {
+        String contentDisposition = proxy.parseContentDispositionValue('inline; filename="1%20%2857%29.jpg')
+        assertThat(contentDisposition.toLowerCase(), is('inline'))
+    }
+    
+    @Test
+    void 'parseContentDispositionValue should return inline 2'() {
+        String contentDisposition = proxy.parseContentDispositionValue('inline;filename=""')
+        assertThat(contentDisposition.toLowerCase(), is('inline'))
     }
     
     @Test

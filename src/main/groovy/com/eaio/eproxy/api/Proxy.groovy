@@ -123,7 +123,7 @@ class Proxy implements URIManipulation {
                 status = remoteResponse.statusLine.statusCode
             }
 
-            HeaderElement contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
+            String contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
             RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
             
@@ -341,11 +341,10 @@ class Proxy implements URIManipulation {
         }
     }
 
-    HeaderElement parseContentDispositionValue(String contentDisposition) {
+    String parseContentDispositionValue(String contentDisposition) {
         if (contentDisposition) {
             HeaderElement[] elements = BasicHeaderValueParser.parseElements(contentDisposition, null)
-            log.debug('extracted Content-Disposition {} from {}', elements[0I], contentDisposition)
-            elements[0I]
+            elements[0I]?.name
         }
     }
 
