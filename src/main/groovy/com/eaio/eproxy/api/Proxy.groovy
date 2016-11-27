@@ -358,6 +358,7 @@ class Proxy implements URIManipulation {
      */
     boolean includeHeader(String name, boolean canRewrite) {
         switch (name?.toLowerCase()) {
+            case 'via':
             case 'vary':
             case 'connection':
             case 'content-security-policy':
