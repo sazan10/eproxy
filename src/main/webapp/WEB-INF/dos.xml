@@ -1,19 +1,124 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <blacklistentries>
+
     <blacklist>
         <subnet>108.61.208.132/32</subnet>
         <description>archive.is</description>
     </blacklist>
     <blacklist>
-        <subnet>78.46.174.146/32</subnet>
+        <subnet>128.199.255.85/32</subnet>
         <description>archive.is</description>
     </blacklist>
     <blacklist>
-        <subnet>78.46.174.145/32</subnet>
+        <subnet>139.162.197.127/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>139.162.218.90/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>146.0.75.2/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>149.202.33.193/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>178.62.195.5/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>178.62.78.53/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>178.79.131.122/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2001:19f0:6800:8082::64/128</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2a00:1768:2001:13:ac:10:9:1/128</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2a00:1768:2001:13:ac:10:9:3/128</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2a00:1768:2001:13:ac:10:9:4/128</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2a00:1768:2001:13:ac:10:9:5/128</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2a00:1768:2001:13:ac:10:9:6/128</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2a00:1768:2001:13:ac:10:9:7/128</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2a00:1768:2001:13:ac:10:9:8/128</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2a01:4f8:190:538c::/64</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>2a01:4f8::/29</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>46.101.139.251/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>46.166.139.120/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>46.166.139.130/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>46.166.139.140/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>46.166.139.150/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>46.166.139.171/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>46.166.139.172/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>46.166.139.173/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>46.17.100.191/32</subnet>
         <description>archive.is</description>
     </blacklist>
     <blacklist>
         <subnet>5.101.97.187/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>78.108.190.21/32</subnet>
         <description>archive.is</description>
     </blacklist>
     <blacklist>
@@ -81,6 +186,14 @@
         <description>archive.is</description>
     </blacklist>
     <blacklist>
+        <subnet>78.46.174.145/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
+        <subnet>78.46.174.146/32</subnet>
+        <description>archive.is</description>
+    </blacklist>
+    <blacklist>
         <subnet>78.46.174.146/32</subnet>
         <description>archive.is</description>
     </blacklist>
@@ -97,15 +210,15 @@
         <description>archive.is</description>
     </blacklist>
     <blacklist>
-        <subnet>178.62.78.53/32</subnet>
+        <subnet>78.47.86.130/32</subnet>
         <description>archive.is</description>
     </blacklist>
     <blacklist>
-        <subnet>46.101.139.251/32</subnet>
+        <subnet>78.47.86.131/32</subnet>
         <description>archive.is</description>
     </blacklist>
     <blacklist>
-        <subnet>178.79.131.122/32</subnet>
+        <subnet>78.47.86.133/32</subnet>
         <description>archive.is</description>
     </blacklist>
     <blacklist>
@@ -148,75 +261,6 @@
         <subnet>94.198.240.90/32</subnet>
         <description>archive.is</description>
     </blacklist>
-    <blacklist>
-        <subnet>149.202.33.193/32</subnet>
-        <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>139.162.197.127/32</subnet>
-        <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>78.108.190.21/32</subnet>
-        <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>128.199.255.85/32</subnet>
-        <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>46.17.100.191/32</subnet>
-         <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>46.166.139.171/32</subnet>
-         <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>46.166.139.130/32</subnet>
-         <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>46.166.139.172/32</subnet>
-         <description>archive.is</description>
-    </blacklist>
-
-    <blacklist>
-        <subnet>2a01:4f8::/29</subnet>
-        <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>2a01:4f8:190:538c::/64</subnet>
-        <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>2001:19f0:6800:8082::64/128</subnet>
-        <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>2a00:1768:2001:13:ac:10:9:5/128</subnet>
-         <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>2a00:1768:2001:13:ac:10:9:3/128</subnet>
-         <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>2a00:1768:2001:13:ac:10:9:1/128</subnet>
-         <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>2a00:1768:2001:13:ac:10:9:6/128</subnet>
-         <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>2a00:1768:2001:13:ac:10:9:8/128</subnet>
-         <description>archive.is</description>
-    </blacklist>
-    <blacklist>
-        <subnet>2a00:1768:2001:13:ac:10:9:7/128</subnet>
-         <description>archive.is</description>
-    </blacklist>
     
     <blacklist>
         <subnet>204.15.64.0/21</subnet>
@@ -226,6 +270,7 @@
         <subnet>208.80.192.0/21</subnet>
         <description>Websense</description>
     </blacklist>
+    
     <blacklist>
         <subnet>103.246.36.0/22</subnet>
         <description>BlueCoat</description>
