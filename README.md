@@ -6,17 +6,16 @@ eproxy is a web proxy that
 
 * rewrites HTML, CSS, SVG and JavaScript``*``
 * supports cookies
-* supports all HTTP methods 
 * supports HTTPS
 * supports HTTP Byte Serving independent of the origin server using the ``Range`` header (unless rewriting)
 * supports cache validation using ``If-Modified-Since`` and ``If-None-Match``
 * supports SOCKS proxies for your hardcore tunneling needs
-* supports disabled JavaScript
+* supports browsers with JavaScript disabled
 * supports data: URIs``*``
-* caches content in-memory, using Memcache (on Google App Engine) or Infinispan``*``
-* lets you customize the TCP/IP setup
+* caches content in-memory and using Memcache (on Google App Engine)
+* lets you customize the HTTP and TCP/IP setup
 * uses robust, parser-based rewriting for HTML (using [NekoHTML](http://nekohtml.sourceforge.net/)) and SVG (using SAX)
-* uses regex-based rewriting for CSS because there are no robust Java CSS parsers
+* uses regular expression-based rewriting for CSS (sorry, but there are no robust Java CSS parsers)
 * attempts to be as secure as possible
 * runs stand-alone, in a JEE container (Tomcat or Jetty) and on Google App Engine
 * has really good HTTP support

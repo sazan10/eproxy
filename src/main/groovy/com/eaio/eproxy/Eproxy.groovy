@@ -14,6 +14,7 @@ import org.apache.http.client.protocol.RequestExpectContinue
 import org.apache.http.client.protocol.ResponseContentEncoding
 import org.apache.http.config.Registry
 import org.apache.http.config.RegistryBuilder
+import org.apache.http.config.SocketConfig
 import org.apache.http.conn.socket.ConnectionSocketFactory
 import org.apache.http.conn.socket.PlainConnectionSocketFactory
 import org.apache.http.conn.ssl.NoopHostnameVerifier
@@ -49,7 +50,7 @@ import com.google.appengine.repackaged.org.apache.commons.codec.binary.Base64
 import com.j256.simplemagic.ContentInfoUtil
 
 /**
- * Eproxy configuration.
+ * eproxy configuration.
  *
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id: EaioWeb.groovy 7254 2015-05-19 10:15:33Z johann $
@@ -99,14 +100,39 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
 
     @Value('${proxy.socks.port}')
     Integer proxySOCKSPort // Character not supported
-
-    // Cache
+    
+    // Socket Settings
+    
+    @Value('${socket.backlog}')
+    int socketBacklog
+    
+    @Value('${socket.receiveBuffer}')
+    int socketReceiveBuffer
+    
+    @Value('${socket.sendBuffer}')
+    int socketSendBuffer
+    
+    @Value('${socket.keepAlive}')
+    boolean socketKeepAlive
+    
+    @Value('${socket.linger}')
+    int socketLinger
+    
+    @Value('${socket.noDelay}')
+    boolean socketNoDelay 
+    
+    // Caching
 
     @Value('${cache.maxCacheEntries}')
     Integer maxEntries
 
     @Value('${cache.maxObjectSize}')
     Integer maxObjectSize
+    
+    @Value('${cache.shared}')
+    boolean cacheIsShared
+    
+    // Socket settings
     
     @Autowired(required = false)
     AsyncMemcacheServiceHttpCacheStorage asyncMemcacheServiceHttpCacheStorage
@@ -145,11 +171,12 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         // TODO: CachingExec - Via-Header-Erzeugung :(
             
         CachingHttpClientBuilder builder = CachingHttpClients.custom()
-            .setCacheConfig(cacheConfig())
             .setConnectionManager(connectionManager)
             // Retries. InterruptedIOException is allowed to be retried.
             .setRetryHandler(new DefaultHttpRequestRetryHandler(retryCount ?: 0I, true, [ UnknownHostException, ConnectException, SSLException ]))
             .setDefaultRequestConfig(requestConfig())
+            .setCacheConfig(cacheConfig())
+            .setDefaultSocketConfig(socketConfig())
             .setHttpProcessor(httpProcessor())
             .disableRedirectHandling()
             
@@ -186,7 +213,6 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
     @Bean
     RequestConfig requestConfig() {
         RequestConfig.custom()
-            .setCircularRedirectsAllowed(false)
             .setConnectTimeout(connectionTimeout ?: 10000I)
             .setConnectionRequestTimeout(connectionRequestTimeout ?: 0I)
             .setSocketTimeout(readTimeout ?: 10000I)
@@ -200,8 +226,20 @@ class Eproxy extends WebMvcAutoConfigurationAdapter {
         CacheConfig.custom()
             .setMaxCacheEntries(maxEntries ?: 1000I)
             .setMaxObjectSize(maxObjectSize ?: 1I << 20I)
-            .setSharedCache(true)
+            .setSharedCache(OnGoogleAppEngineOrDevserver.CONDITION ? true : cacheIsShared)
             .setAsynchronousWorkersMax(0I)
+            .build()
+    }
+    
+    // Socket Settings
+    SocketConfig socketConfig() {
+        SocketConfig.custom()
+            .setBacklogSize(socketBacklog)
+            .setRcvBufSize(socketReceiveBuffer)
+            .setSndBufSize(socketSendBuffer)
+            .setSoKeepAlive(socketKeepAlive)
+            .setSoLinger(socketLinger)
+            .setTcpNoDelay(socketNoDelay)
             .build()
     }
     
