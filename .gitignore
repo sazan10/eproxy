@@ -1,1 +1,4 @@
 /target/
+coveralls
+deploy
+get-logs
