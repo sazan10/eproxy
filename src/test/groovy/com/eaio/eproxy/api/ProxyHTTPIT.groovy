@@ -177,5 +177,18 @@ class ProxyHTTPIT {
         proxy.proxy('HTTP', request, response)
         assertThat(bOut.toString(0I), containsString('Nachrichten'))
     }
+    
+    @Test
+    void 'domain name should be lower cased'() {
+        HttpServletRequest request = buildHttpServletRequest('http://M.pornhub.com/')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(301)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('http', request, response)
+    }
 
 }

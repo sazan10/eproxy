@@ -41,7 +41,7 @@ trait URIManipulation {
             host = substringBefore(hostAndPort, ':')
             port = substringAfter(hostAndPort, ':')
         }
-        UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(host).path(path)
+        UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(host?.toLowerCase()).path(path)
         if (port) {
             builder.port(port)
         }
