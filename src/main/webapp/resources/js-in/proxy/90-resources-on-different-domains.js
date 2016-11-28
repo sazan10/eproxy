@@ -19,7 +19,7 @@
                     if (!/^data:/i.test(r0.name) && !/https?:\/\/(localhost|127.0.0.1)(:\d+)?\//i.test(r0.name)
                     		&& !new RegExp("^" + location.origin).test(r0.name)
                     		&& !/^https:\/\/www\.google-analytics\.com\/collect/.test(r0.name)) {
-                        eaio.track.event('resources-on-different-domains', currentURL, decodeTargetURI(r0.name))
+                        eaio.track.event('resources-on-different-domains', currentURL, r0.name)
                         break
                     }
                 }
