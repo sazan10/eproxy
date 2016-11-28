@@ -225,6 +225,14 @@ class Proxy implements URIManipulation {
                 throw ex
             }
         }
+        catch (OutOfMemoryError err) {
+            StringBuffer requestURL = request.requestURL
+            if (request.queryString) {
+                requestURL.append('?').append(request.queryString)
+            }
+            response.setHeader('Refresh', "10; url=${requestURL}")
+            sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, err)
+        }
         finally {
             try {
                 EntityUtils.consumeQuietly(remoteResponse?.entity)
@@ -357,6 +365,7 @@ class Proxy implements URIManipulation {
      * TODO: This should probably be a whitelist instead of a blacklist.
      */
     boolean includeHeader(String name, boolean canRewrite) {
+        // Whitelist: Last-Modified, Content-Type
         switch (name?.toLowerCase()) {
             case 'via':
             case 'vary':
