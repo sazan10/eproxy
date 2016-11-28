@@ -1,6 +1,5 @@
 package com.eaio.eproxy.rewriting.html
 
-import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
 
 import org.apache.xerces.xni.QName
@@ -20,7 +19,7 @@ class BaseFilter extends DefaultFilter {
      * @return if the tag is <code>expected</code>
      */
     final boolean nameIs(QName qName, String expected) {
-        equalsIgnoreCase(qName.localpart ?: qName.rawname, expected)
+        (qName.localpart ?: qName.rawname)?.equalsIgnoreCase(expected)
     }
 
 }
