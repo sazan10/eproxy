@@ -23,12 +23,12 @@ public class CSSEscapeUtils {
     private static CharSequenceTranslator UNESCAPE_HTML = new LookupTranslator(HTML_UNESCAPE);
 
     /**
-     * Unescapes HTML that NekoHTML doesn't.
+     * Unescapes <code>&lt;lpar;</code> and <code>&lt;rpar;</code> because NekoHTML doesn't.
      * 
      * @param input may be <code>null</code>
      */
     public static CharSequence unescapeHTML(CharSequence input) {
-        return UNESCAPE_HTML.translate(input);
+        return UNESCAPE_HTML.translate(input); // TODO: Performance, test for patterns.
     }
 
 }
