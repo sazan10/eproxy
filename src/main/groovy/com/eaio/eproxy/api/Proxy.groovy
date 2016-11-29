@@ -170,7 +170,7 @@ class Proxy implements URIManipulation {
 
             TimingInterceptor.log(context, log)
         }
-        catch (IllegalStateException ex) {}
+        catch (IllegalStateException ignored) {}
         catch (SocketException ex) {
             if (ex instanceof HttpHostConnectException) {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)

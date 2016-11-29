@@ -3,6 +3,7 @@
 
     <Match>
         <Bug pattern="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS"/>
+        <Bug pattern="EQ_UNUSUAL"/>
     </Match>
 
 </FindBugsFilter>

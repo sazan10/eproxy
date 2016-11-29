@@ -148,7 +148,7 @@ public class AsyncMemcacheServiceHttpCacheStorage implements HttpCacheStorage {
      * Encapsulates the result of a {@link AsyncMemcacheServiceHttpCacheStorage#getEntry(String)} call.
      * Used to prevent repeat <tt>getEntry</tt> calls from going to Memcache every time.
      */
-    private class MemcacheStatus {
+    private static class MemcacheStatus {
         
         private final String key;
         

@@ -8,10 +8,8 @@ import java.nio.charset.Charset
 import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
-import org.apache.xerces.xni.XNIException
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.BeanFactoryAware
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
