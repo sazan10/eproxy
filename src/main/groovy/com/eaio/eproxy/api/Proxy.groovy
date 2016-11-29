@@ -128,7 +128,7 @@ class Proxy implements URIManipulation {
             RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
             
-            if (!contentType && remoteResponse.statusLine.statusCode < 300I && remoteResponse.entity?.repeatable) {
+            if (shouldDetectMIMEType(contentType, remoteResponse.statusLine.statusCode, remoteResponse.entity?.repeatable)) {
                 ContentInfo contentInfo = contentInfoUtil.findMatch(remoteResponse.entity.content)
                 log.warn('no Content-Type header. Detected {}. Using MIME type {}', contentInfo, contentInfo?.mimeType ?: 'text/html')
                 contentType = ContentType.create(contentInfo?.mimeType ?: 'text/html') // Default to text/html for security reasons, all binary types should be detected even if text/html isn't
@@ -139,7 +139,7 @@ class Proxy implements URIManipulation {
             copyRemoteResponseHeadersToResponse(remoteResponse.headerIterator(), response, canRewrite, baseURI, requestURI, rewriteConfig)
             cookieTranslator?.addToResponse(remoteResponse.allHeaders, baseURI, requestURI, response)
 
-            if (remoteResponse.entity) {
+            if (remoteResponse.entity && remoteResponse.statusLine.statusCode < 300I) {
                 long contentLength = remoteResponse.entity.contentLength
                 List<Long> range
                 if (contentLength >= 0L) {
@@ -240,6 +240,10 @@ class Proxy implements URIManipulation {
             catch (emall) {}
         }
     }
+    
+    private boolean shouldDetectMIMEType(ContentType contentType, int statusCode, boolean entityIsRepeatable) {
+        !contentType && statusCode < 300I && entityIsRepeatable
+    }
 
     /**
      * Copies <tt>inputStream</tt> into <tt>outputStream</tt> with Range request support.
@@ -271,7 +275,7 @@ class Proxy implements URIManipulation {
             if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                 response.setHeader(header.name, encodeTargetURI(baseURI, requestURI, header.value, rewriteConfig))
             }
-            else if (includeHeader(header.name, canRewrite)) {
+            else if (shouldIncludeHeader(header.name, canRewrite)) {
                 response.setHeader(header.name, header.value)
             }
         }
@@ -364,7 +368,7 @@ class Proxy implements URIManipulation {
      * <p>
      * TODO: This should probably be a whitelist instead of a blacklist.
      */
-    boolean includeHeader(String name, boolean canRewrite) {
+    boolean shouldIncludeHeader(String name, boolean canRewrite) {
         // Whitelist: Last-Modified, Content-Type
         switch (name?.toLowerCase()) {
             case 'via':

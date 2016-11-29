@@ -190,5 +190,18 @@ class ProxyHTTPIT {
         ] as HttpServletResponse
         proxy.proxy('http', request, response)
     }
+    
+    @Test
+    void 'redirects should not copy data'() {
+        HttpServletRequest request = buildHttpServletRequest('http://readcomics.net/images/site/front/bghead2.jpg')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(301)) },
+            setHeader: { String name, String value -> assertThat(name, not(is('Accept-Ranges'))) },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('http', request, response)
+    }
 
 }
