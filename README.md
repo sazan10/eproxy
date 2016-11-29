@@ -34,6 +34,7 @@ You'll need
 * [Java](http://www.oracle.com/technetwork/java/javase/downloads/index-jsp-138363.html) (version 7 or greater)
 * [Maven](https://maven.apache.org)
 * [Git](http://www.git-scm.com/)
+* [App Engine SDK for Java](https://cloud.google.com/appengine/docs/java/download) (if you want to run eproxy on Google App Engine)
 
 ### 1. Get the Code
 
@@ -41,7 +42,7 @@ You'll need
 
 ### 2. Build
 
-``cd eproxy && mvn package``
+``cd eproxy && mvn clean package``
 
 ### 3. Run or Deploy
 
@@ -61,7 +62,7 @@ Deploy the ``target/eproxy##....war`` file.
 
 1. Create a project in Google Cloud
 2. Change ``<application>`` to the name of your project in ``src/main/webapp/WEB-INF/appengine-web.xml``
-3. ``mvn appengine:update``
+3. ``appcfg.sh update target/*##*/``
 
 ## Configuration
 
