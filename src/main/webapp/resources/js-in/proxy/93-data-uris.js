@@ -22,7 +22,7 @@
             }
         }
         catch (e) {
-            eaio.track.exception('javascript-uris', e)
+            eaio.track.exception('data-uris', e)
         }
     }
 
