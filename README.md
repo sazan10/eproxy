@@ -59,7 +59,9 @@ Deploy the ``target/eproxy##....war`` file.
 
 #### Google App Engine
 
-``mvn appengine:update``
+# Create a project in Google Cloud
+# Change ``<application>`` to the name of your project in ``src/main/webapp/WEB-INF/appengine-web.xml``
+# ``mvn appengine:update``
 
 ## Configuration
 
