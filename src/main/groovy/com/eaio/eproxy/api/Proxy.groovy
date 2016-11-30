@@ -181,8 +181,11 @@ class Proxy implements URIManipulation {
             else if (ex.message?.contains('Resource temporarily unavailable')) { // Google App Engine
                 sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
             }
-            else if (ex.message?.contains('connection reset by peer')) { // Google App Engine+
+            else if (ex.message?.contains('connection reset by peer')) { // Google App Engine
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else if (ex.message?.contains('no route to host ')) { // Google App Engine
+                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
             }
             else {
                 throw ex
