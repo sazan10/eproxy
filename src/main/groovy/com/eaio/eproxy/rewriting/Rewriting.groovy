@@ -38,8 +38,8 @@ import com.eaio.eproxy.rewriting.svg.SVGFilter
 @Slf4j
 class Rewriting implements BeanFactoryAware {
 
-    @Autowired(required = false)
-    ProxyJavaScriptFilter proxyJavaScriptFilter
+    @Autowired
+    ScriptFilter scriptFilter
     
     BeanFactory beanFactory
     
@@ -212,11 +212,11 @@ class Rewriting implements BeanFactoryAware {
                 configure(beanFactory.getBean(URIRewritingFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(SrcdocFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(DataURIFilter), baseURI, requestURI, rewriteConfig),
-            ])
+                ])
 
-            if (proxyJavaScriptFilter) {
-                filters << proxyJavaScriptFilter
-            }
+                if (scriptFilter) { // Needs to have an if block, don't ask me why. Re-evaluate after a Groovy update.
+                    filters << scriptFilter
+                }
         }
         filters << beanFactory.getBean(SVGFilter) << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
         out.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())

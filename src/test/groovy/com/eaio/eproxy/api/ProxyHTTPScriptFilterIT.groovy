@@ -7,9 +7,7 @@ import static org.hamcrest.Matchers.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.ErrorCollector
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.SpringApplicationConfiguration
@@ -20,18 +18,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import com.eaio.eproxy.Eproxy
 
 /**
- * Simulates enabled proxy JavaScript.
+ * Simulates enabled scripts.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
+ * @see ScriptFilter
  */
 @RunWith(SpringJUnit4ClassRunner)
 @SpringApplicationConfiguration(classes = Eproxy)
-@WebIntegrationTest(value = [ 'proxy.javaScript.enabled=true', 'proxy.javaScript.trackingID=UA-7427410-88', 'proxy.javaScript.hostName=milch-basiertes-vegi-schnitzel.com', 'cookies.enabled=false' ], randomPort = true)
-class ProxyHTTPProxyJavaScriptIT {
-    
-    @Rule
-    public ErrorCollector errorCollector = new ErrorCollector()
+@WebIntegrationTest(value = [ 'script.redirect=https://www.googletagmanager.com/gtm.js?id=GTM-M9CML7L', 'cookies.enabled=false' ], randomPort = true)
+class ProxyHTTPScriptFilterIT {
 
     @Autowired
     Proxy proxy
@@ -47,10 +43,7 @@ class ProxyHTTPProxyJavaScriptIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
-        assertThat(bOut.toString(0I), allOf(
-            containsString('UA-7427410-88'),
-            containsString('proxy.js'),
-            containsString('milch-basiertes-vegi-schnitzel.com')))
+        assertThat(bOut.toString(0I), containsString(' src="/script"></script>'))
     }
 
 }

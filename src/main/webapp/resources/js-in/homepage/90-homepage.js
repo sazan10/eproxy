@@ -4,20 +4,8 @@ document.getElementById('submit').onclick = function() {
         var uri = parseUri(url), encodedHost = punycode.ToASCII(uri['host'])
         uri['authority'] = uri['authority'].replace(uri.host, encodedHost)
         uri['host'] = encodedHost
-        try {
-            ga('send', 'pageview', '/proxy')
-        }
-        catch (e) {}
         var encodedURI = (uri['protocol'] || 'http') + '/' + uri['authority'] + (uri['relative'] ? uri['relative'] : '/')
         location.href = parseUri(location.href)['directory'] + 'rwn-' + encodedURI
     }
     return false
-}
-
-document.getElementById('url').onkeydown = function() {
-    try {
-        ga('send', 'event', 'URL', 'keydown', { 'nonInteraction': 1 })
-    }
-    catch (e) {}
-    this.onkeydown = function() {}
 }

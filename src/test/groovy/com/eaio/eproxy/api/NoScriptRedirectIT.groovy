@@ -33,7 +33,7 @@ class NoScriptRedirectIT {
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
             assertThat(location, is('http://fnuh.com/rnw-http/www.n-tv.de/politik/Trump-und-Clinton-setzen-sich-durch-article17045231.html?ah#rah'))
-        } ] as HttpServletResponse
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('http://www.n-tv.de/politik/Trump-und-Clinton-setzen-sich-durch-article17045231.html?ah#rah', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
@@ -44,7 +44,7 @@ class NoScriptRedirectIT {
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
             assertThat(location, is('http://fnuh.com/rnw-http/www.n-tv.de/politik/Trump-und-Clinton-setzen-sich-durch-article17045231.html?ah#rah'))
-        } ] as HttpServletResponse
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('   http://www.n-tv.de/politik/Trump-und-Clinton-setzen-sich-durch-article17045231.html?ah#rah\t ', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
@@ -55,7 +55,7 @@ class NoScriptRedirectIT {
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
             assertThat(location, is('http://fnuh.com/rnw-http/www.n-tv.de/politik/Trump-und-Clinton-setzen-sich-durch-article17045231.html?ah#rah'))
-        } ] as HttpServletResponse
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('www.n-tv.de/politik/Trump-und-Clinton-setzen-sich-durch-article17045231.html?ah#rah', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
@@ -66,7 +66,7 @@ class NoScriptRedirectIT {
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
             assertThat(location, is('http://fnuh.com/rnw-http/Secret.xn--oogle-wmc.com'))
-        } ] as HttpServletResponse
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('Secret.ɢoogle.com', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
@@ -77,7 +77,7 @@ class NoScriptRedirectIT {
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
             assertThat(location, is('http://fnuh.com/rnw-https/Secret.xn--oogle-wmc.com'))
-        } ] as HttpServletResponse
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('https://Secret.ɢoogle.com', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
@@ -88,7 +88,7 @@ class NoScriptRedirectIT {
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
             assertThat(location, is('http://fnuh.com/rnw-http/Secret.xn--oogle-wmc.com/ah'))
-        } ] as HttpServletResponse
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('Secret.ɢoogle.com/ah', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
@@ -99,7 +99,7 @@ class NoScriptRedirectIT {
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
             assertThat(location, is('http://fnuh.com/rnw-https/Secret.xn--oogle-wmc.com/ah'))
-        } ] as HttpServletResponse
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('https://Secret.ɢoogle.com/ah', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
@@ -110,7 +110,7 @@ class NoScriptRedirectIT {
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
             assertThat(location, is('http://fnuh.com/rnw-http/Secret.xn--oogle-wmc.com/ah?fuh#guh'))
-        } ] as HttpServletResponse
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('Secret.ɢoogle.com/ah?fuh#guh', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
@@ -121,7 +121,7 @@ class NoScriptRedirectIT {
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
             assertThat(location, is('http://fnuh.com/rnw-https/Secret.xn--oogle-wmc.com/ah?fuh#guh'))
-        } ] as HttpServletResponse
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('https://Secret.ɢoogle.com/ah?fuh#guh', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }

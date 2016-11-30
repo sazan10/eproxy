@@ -3,7 +3,4 @@
     <group name="homepage">
         <js>/resources/js-in/homepage/*.js</js>
     </group>
-    <group name="proxy">
-        <js>/resources/js-in/proxy/*.js</js>
-    </group>
 </groups>
