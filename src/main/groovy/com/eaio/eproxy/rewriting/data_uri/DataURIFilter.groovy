@@ -91,14 +91,14 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
             log.info('data: URI of type {}, charset {}, base64 {}: {}. Extracted data: {}', mimeType, charset, base64, dataURIValue, data)
 
             String rewritten = rewriteData(data, mimeType, charset)
-            //atts.setValue(srcIndex, rewritten)
+            atts.setValue(srcIndex, 'data:' + mimeType + ',' + URLEncoder.encode(rewritten))
         }
     }
 
     String rewriteData(String data, String mimeType, Charset charset) {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream(data.length())
         rewriting.rewrite(new ByteArrayInputStream(data.getBytes(charset?.name() ?: 'UTF-8')), bOut, charset, baseURI, requestURI, rewriteConfig, mimeType)
-        bOut.toString(0I) // TODO
+        bOut.toString(0I)
     }
 
     /**
