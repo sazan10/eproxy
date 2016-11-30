@@ -8,8 +8,9 @@ import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
 import org.apache.xerces.xni.XMLString
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 
 /**
  * Adds a script pointing to {@link com.eaio.eproxy.api.ScriptRedirect} to the page (if enabled).
@@ -48,7 +49,7 @@ class ScriptFilter extends BaseFilter {
     private writeProxyJavaScript() {
         XMLAttributes atts = new XMLAttributesImpl(2I)
         atts.addAttribute(asyncAttribute, null, 'async')
-        atts.addAttribute(srcAttribute, null, '/script')
+        atts.addAttribute(srcAttribute, null, (((ServletRequestAttributes) RequestContextHolder.requestAttributes)?.request?.contextPath ?: '') +  '/script')
         super.startElement(scriptElement, atts, null)
         super.endElement(scriptElement, null)
     }
