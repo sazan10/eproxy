@@ -44,6 +44,7 @@ class NoScriptRedirect implements URIManipulation {
         }
 
         String targetURI = encodeTargetURI(baseURI, resolvedURI, reEncodedURL, RewriteConfig.fromString(rewriteConfigString))
+        response.setHeader('Cache-Control', 'max-age=31536000')
         response.sendRedirect(targetURI)
     }
 
