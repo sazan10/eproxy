@@ -364,4 +364,19 @@ class ProxyHTTPRewritingIT {
         xmlns:xlink="http://www.w3.org/1999/xlink">'''))
     }
     
+    @Test
+    void 'links in SVG should be rewritten'() {
+        HttpServletRequest request = buildHttpServletRequest('https://www.w3.org/TR/SVG/images/linking/link01.svg')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'http', request, response)
+        assertThat(bOut.toString(0I), containsString('xlink:href="http://fnuh.com/rnw-http/www.w3.org'))
+        
+    }
+    
 }
