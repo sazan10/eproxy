@@ -11,7 +11,7 @@ eproxy is a web proxy that
 * supports cache validation using ``If-Modified-Since`` and ``If-None-Match``
 * supports SOCKS proxies for your hardcore tunneling needs
 * supports browsers with JavaScript disabled
-* supports data: URIs``*``
+* supports data: URIs
 * caches content in-memory and using Memcache (on Google App Engine)
 * lets you customize the HTTP and TCP/IP setup
 * uses robust, parser-based rewriting for HTML (using [NekoHTML](http://nekohtml.sourceforge.net/)) and SVG (using SAX)
