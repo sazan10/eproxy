@@ -272,13 +272,13 @@ class Proxy implements URIManipulation {
     private copyRemoteResponseHeadersToResponse(HeaderIterator headers, HttpServletResponse response, boolean canRewrite, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
         while (headers.hasNext()) {
             Header header = headers.nextHeader()
-            if (header.value?.contains('//')) {
-                log.warn('header may contain URL: {}: {}', header.name, header.value)
-            }
             if (header.name?.equalsIgnoreCase('Location')) { // TODO: Link and Refresh:, CORS headers ...
                 response.setHeader(header.name, encodeTargetURI(baseURI, requestURI, header.value, rewriteConfig))
             }
             else if (shouldIncludeHeader(header.name, canRewrite)) {
+                if (header.value?.contains('//')) {
+                    log.warn('header may contain URL: {}: {}', header.name, header.value)
+                }
                 response.setHeader(header.name, header.value)
             }
         }
@@ -374,6 +374,12 @@ class Proxy implements URIManipulation {
     boolean shouldIncludeHeader(String name, boolean canRewrite) {
         // Whitelist: Last-Modified, Content-Type
         switch (name?.toLowerCase()) {
+            // TODO: Pass through if not filtering active content
+            case 'access-control-allow-origin':
+            case 'content-security-policy':
+            case 'x-xss-protection': 
+            case 'timing-allow-origin':
+            // end
             case 'via':
             case 'vary':
             case 'connection':
