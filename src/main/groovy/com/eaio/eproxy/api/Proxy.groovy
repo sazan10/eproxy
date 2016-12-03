@@ -40,6 +40,7 @@ import com.eaio.eproxy.rewriting.html.*
 import com.eaio.io.RangeInputStream
 import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.TimingInterceptor
+import com.google.apphosting.api.ApiProxy.OverQuotaException
 import com.google.apphosting.api.DeadlineExceededException
 import com.google.apphosting.api.ApiProxy.CancelledException
 import com.j256.simplemagic.ContentInfo
@@ -207,10 +208,10 @@ class Proxy implements URIManipulation {
                 ex instanceof UnknownHostException || ex instanceof ClientProtocolException) {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
-            else if (ex.message == 'Connection reset by peer') {
+            else if (ex.message == 'Connection reset by peer' || ex.message == 'Broken pipe') {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
-            else if (ex.message != 'Broken pipe') {
+            else {
                 throw ex
             }
         }
@@ -227,6 +228,9 @@ class Proxy implements URIManipulation {
             else {
                 throw ex
             }
+        }
+        catch (OverQuotaException ex) {
+            sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
         }
         catch (OutOfMemoryError err) {
             StringBuffer requestURL = request.requestURL
@@ -285,6 +289,7 @@ class Proxy implements URIManipulation {
     }
 
     private void sendError(URI requestURI, HttpServletResponse response, int statusCode, Throwable thrw, String message = (ExceptionUtils.getRootCause(thrw) ?: thrw).message) {
+        log.warn('for {}: {}. Returning a {} response', requestURI, message, statusCode)
         try {
             response.sendError(statusCode, message)
         }
