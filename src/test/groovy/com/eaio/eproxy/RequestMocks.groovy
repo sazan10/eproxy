@@ -13,14 +13,20 @@ import com.eaio.eproxy.entities.RewriteConfig
 class RequestMocks {
 
     static HttpServletRequest buildHttpServletRequest(String uriString, String method = 'GET', Closure getHeaderClosure = { String name -> null },
-        InputStream stream = null, RewriteConfig rewriteConfig = RewriteConfig.fromString('rnw')) {
-        
+            InputStream stream = null, RewriteConfig rewriteConfig = RewriteConfig.fromString('rnw')) {
+
         URI uri = URI.create(uriString)
-        
+        String encodedURI = (rewriteConfig ? '/rnw-' : '/' ) + uri.scheme + '/' + (uri.host + (uri.port == -1I ? '' : ':' + uri.port)) + uri.rawPath
+        buildHttpServletRequestFromRawURI(encodedURI, uri.rawQuery, method, getHeaderClosure, stream, rewriteConfig)
+    }
+
+
+    static HttpServletRequest buildHttpServletRequestFromRawURI(String uriString, String queryString = null, String method = 'GET', Closure getHeaderClosure = { String name -> null },
+            InputStream stream = null, RewriteConfig rewriteConfig = RewriteConfig.fromString('rnw')) {
         HttpServletRequest request = [
-            getRequestURI: { (rewriteConfig ? '/rnw-' : '/' ) + uri.scheme + '/' + (uri.host + (uri.port == -1I ? '' : ':' + uri.port)) + uri.rawPath },
+            getRequestURI: { uriString },
             getContextPath: { '' },
-            getQueryString: { uri.rawQuery },
+            getQueryString: { queryString },
             getMethod: { method },
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },

@@ -203,5 +203,21 @@ class ProxyHTTPIT {
         ] as HttpServletResponse
         proxy.proxy('http', request, response)
     }
+    
+    @Test
+    void 'broken port values should return a 400 bad request response'() {
+        HttpServletRequest request = buildHttpServletRequestFromRawURI('/rnw-https/business.us:a.gov/')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            sendError: { int status, String sc -> assertThat(status, is(400I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('http', request, response)
+    }
+    
+    // TODO: http://tour.desipapa.com/fonts/glyphicons-halflings-regular.woff2 rewritten as text/html
+    // TODO: attachment; filename="y7bw1528(http://maalud.wapka.mobi).mp4" korrekt?
 
 }
