@@ -118,5 +118,12 @@ trait URIManipulation {
             }
         }
     }
+    
+    /**
+     * Removes the context path prefix from <tt>requestURI</tt>.
+     */
+    String stripContextPathFromRequestURI(String contextPath, String requestURI) {
+        substringAfter(requestURI, contextPath)
+    }
 
 }

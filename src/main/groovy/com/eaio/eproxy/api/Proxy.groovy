@@ -9,6 +9,7 @@ import java.util.regex.Pattern
 
 import javax.net.ssl.SSLException
 import javax.net.ssl.SSLHandshakeException
+import javax.net.ssl.SSLProtocolException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -93,7 +94,14 @@ class Proxy implements URIManipulation {
     @RequestMapping('/{rewriteConfig:[a-z]+}-{scheme:(?i)https?}/**')
     void proxy(@PathVariable('rewriteConfig') String rewriteConfigString, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
-        URI requestURI = decodeTargetURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
+        URI requestURI
+        try {
+            requestURI = decodeTargetURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
+        }
+        catch (NumberFormatException | URISyntaxException ex) {
+            sendError(null, response, HttpServletResponse.SC_BAD_REQUEST, ex)
+            return
+        }
         if (!requestURI.host) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST)
             return
@@ -185,7 +193,7 @@ class Proxy implements URIManipulation {
             else if (ex.message?.contains('connection reset by peer')) { // Google App Engine
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
-            else if (ex.message?.contains('no route to host ')) { // Google App Engine
+            else if (ex.message?.contains('no route to host')) { // Google App Engine
                 sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
             }
             else {
@@ -193,7 +201,7 @@ class Proxy implements URIManipulation {
             }
         }
         catch (SSLException ex) {
-            if (ex instanceof SSLHandshakeException) {
+            if (ex instanceof SSLHandshakeException || ex instanceof SSLProtocolException) {
                 sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
             }
             else if ((ExceptionUtils.getRootCause(ex) ?: ex).message == 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
@@ -289,7 +297,7 @@ class Proxy implements URIManipulation {
     }
 
     private void sendError(URI requestURI, HttpServletResponse response, int statusCode, Throwable thrw, String message = (ExceptionUtils.getRootCause(thrw) ?: thrw).message) {
-        log.warn('for {}: {}. Returning a {} response', requestURI, message, statusCode)
+        log.warn('for external URL {}: {}', requestURI, message)
         try {
             response.sendError(statusCode, message)
         }
@@ -308,13 +316,6 @@ class Proxy implements URIManipulation {
             case 'TRACE': return new HttpTrace(uri)
         }
         log.warn('unsupported HTTP method {}', method)
-    }
-
-    /**
-     * Removes the context path prefix from <tt>requestURI</tt>.
-     */
-    String stripContextPathFromRequestURI(String contextPath, String requestURI) {
-        substringAfter(requestURI, contextPath)
     }
 
     /**

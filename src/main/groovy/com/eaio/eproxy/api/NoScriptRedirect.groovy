@@ -31,21 +31,25 @@ class NoScriptRedirect implements URIManipulation {
     void redirect(@RequestParam String url, @RequestParam('rewriteconfig') String rewriteConfigString,
             HttpServletRequest request, HttpServletResponse response) {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
+        String targetURI
 
-        String reEncodedURL
-        URI resolvedURI = URI.create(trimToEmpty(url))
-        if (resolvedURI.scheme) {
-            reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(substringAfter(url, resolvedURI.rawAuthority)))
-            resolvedURI = new URI(resolvedURI.scheme, IDN.toASCII(resolvedURI.rawAuthority), null, null)
+        if (url) {
+            String reEncodedURL
+            URI resolvedURI = URI.create(trimToEmpty(url))
+            if (resolvedURI.scheme) {
+                reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(substringAfter(url, resolvedURI.rawAuthority)))
+                        resolvedURI = new URI(resolvedURI.scheme, IDN.toASCII(resolvedURI.rawAuthority), null, null)
+            }
+            else {
+                reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(substringAfter(url, '/')))
+                        resolvedURI = new URI(request.scheme, IDN.toASCII(substringBefore(resolvedURI.rawPath, '/')), null, null)
+            }
+            
+            targetURI = encodeTargetURI(baseURI, resolvedURI, reEncodedURL, RewriteConfig.fromString(rewriteConfigString))
         }
-        else {
-            reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(substringAfter(url, '/')))
-            resolvedURI = new URI(request.scheme, IDN.toASCII(substringBefore(resolvedURI.rawPath, '/')), null, null)
-        }
-
-        String targetURI = encodeTargetURI(baseURI, resolvedURI, reEncodedURL, RewriteConfig.fromString(rewriteConfigString))
+        
         response.setHeader('Cache-Control', 'max-age=31536000')
-        response.sendRedirect(targetURI)
+        response.sendRedirect(targetURI ?: baseURI.toString())
     }
 
 }

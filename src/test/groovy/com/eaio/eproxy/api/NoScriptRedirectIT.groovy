@@ -126,4 +126,15 @@ class NoScriptRedirectIT {
         assertThat(sendRedirectCalled, is(true))
     }
     
+    @Test
+    void 'should redirect back to referrer if an empty URL is used'() {
+        boolean sendRedirectCalled = false
+                HttpServletResponse response = [ sendRedirect: { String location ->
+                sendRedirectCalled = true
+                assertThat(location, is('http://fnuh.com'))
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
+        redirect.redirect('', 'rnw', buildHttpServletRequest('uiuiui'), response)
+        assertThat(sendRedirectCalled, is(true))
+    }
+    
 }
