@@ -169,6 +169,7 @@ class Rewriting implements BeanFactoryAware {
     }
     
     void rewriteSVG(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
+        log.info('rewriteSVG') // TODO
         Writer outputWriter = new OutputStreamWriter(outputStream, charset ?: defaultCharset)
         XMLReader xmlReader = newXMLReader()
         // 1st in chain
