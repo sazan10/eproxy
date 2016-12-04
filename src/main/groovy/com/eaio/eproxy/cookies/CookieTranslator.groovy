@@ -37,7 +37,7 @@ class CookieTranslator {
             CookieOrigin cookieOrigin = createCookieOrigin(requestURI)
             long now = System.currentTimeMillis()
             List<HCCookie> httpClientCookies = (List<HCCookie>) cookies.collect { Cookie cookie ->
-                decodeHttpClientCookie(toHttpClientCookie(cookie, now))
+                decodeHttpClientCookie(toHttpClientCookie(cookie, now), baseURI)
             }.findAll { HCCookie cookie ->
                 cookieSpec.match(cookie, cookieOrigin)
             }
@@ -75,13 +75,12 @@ class CookieTranslator {
                 requestURI.rawPath, requestURI.scheme?.equalsIgnoreCase('https'))
     }
 
-    private HCCookie decodeHttpClientCookie(HCCookie cookie) {
+    private HCCookie decodeHttpClientCookie(HCCookie cookie, URI baseURI) {
         BasicClientCookie out = new BasicClientCookie(substringAfter(cookie.name, '_'), cookie.value)
         out.with {
             comment = cookie.comment
             domain = substringBefore(cookie.name, '_')
             path = cookie.path // TODO
-            secure = cookie.secure // TODO: Allow for non-HTTPs proxies
             version = cookie.version
         }
         out.setAttribute(ClientCookie.DOMAIN_ATTR, out.domain)
@@ -93,7 +92,7 @@ class CookieTranslator {
         out.with {
             comment = cookie.comment
             path = substringBeforeLast(baseURI.rawPath, '/') + cookie.path
-            secure = cookie.secure // TODO: Allow for non-HTTPs proxies
+            secure = cookie.secure && baseURI.scheme == 'https'
             version = cookie.version
             expiryDate = cookie.expiryDate
         }
