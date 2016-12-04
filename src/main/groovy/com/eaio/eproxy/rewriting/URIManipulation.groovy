@@ -43,9 +43,6 @@ trait URIManipulation {
         }
         UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(host?.toLowerCase()).path(path)
         if (port) {
-            if (!port.isInteger()) {
-                throw new NumberFormatException("Not a number: ${port}")
-            }
             builder.port(port)
         }
         if (queryString) {

@@ -30,13 +30,9 @@ import org.apache.http.protocol.HttpCoreContext
 import org.apache.http.util.EntityUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.servlet.ModelAndView
 
 import com.eaio.eproxy.cookies.CookieTranslator
 import com.eaio.eproxy.entities.RewriteConfig
@@ -98,12 +94,17 @@ class Proxy implements URIManipulation {
     @RequestMapping('/{rewriteConfig:[a-z]+}-{scheme:(?i)https?}/**')
     void proxy(@PathVariable('rewriteConfig') String rewriteConfigString, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
-        request.setAttribute('baseURI', baseURI)
-        URI requestURI = decodeTargetURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
-        request.setAttribute('requestURI', requestURI)
-        
+        URI requestURI
+        try {
+            requestURI = decodeTargetURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
+        }
+        catch (NumberFormatException | URISyntaxException ex) {
+            sendError(null, response, HttpServletResponse.SC_BAD_REQUEST, ex)
+            return
+        }
         if (!requestURI.host) {
-            throw new URISyntaxException(requestURI as String, 'Invalid request URI')
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST)
+            return
         }
 
         HttpCacheContext context = HttpCacheContext.create()
@@ -111,7 +112,8 @@ class Proxy implements URIManipulation {
         try {
             HttpUriRequest uriRequest = newRequest(request.method, requestURI)
             if (!uriRequest) {
-                throw new MethodNotSupportedException(request.method)
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED)
+                return
             }
             
             addRequestHeaders(request, uriRequest)
@@ -177,39 +179,75 @@ class Proxy implements URIManipulation {
 
             TimingInterceptor.log(context, log)
         }
-//        catch (SocketException ex) {
-//            if (ex.message?.startsWith('Permission denied')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex)
-//            }
-//            else if (ex.message?.contains('Resource temporarily unavailable')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
-//            }
-//            else if (ex.message?.contains('connection reset by peer')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
-//            }
-//            else if (ex.message?.contains('no route to host')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
-//            }
-//            else {
-//                throw ex
-//            }
-//        }
-//        catch (IOException ex) {
-//            if (ex.message == 'Connection reset by peer' || ex.message == 'Broken pipe') {
-//                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
-//            }
-//            else {
-//                throw ex
-//            }
-//        }
-//        catch (RuntimeException ex) {
-//            if (ex.message?.endsWith('Resolver failure.')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
-//            }
-//            else {
-//                throw ex
-//            }
-//        }
+        catch (IllegalStateException ignored) {}
+        catch (SocketException ex) {
+            if (ex instanceof HttpHostConnectException) {
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else if (ex.message?.startsWith('Permission denied')) { // Google App Engine
+                sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex)
+            }
+            else if (ex.message?.contains('Resource temporarily unavailable')) { // Google App Engine
+                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
+            }
+            else if (ex.message?.contains('connection reset by peer')) { // Google App Engine
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else if (ex.message?.contains('no route to host')) { // Google App Engine
+                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
+            }
+            else {
+                throw ex
+            }
+        }
+        catch (SSLException ex) {
+            if (ex instanceof SSLHandshakeException || ex instanceof SSLProtocolException) {
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else if ((ExceptionUtils.getRootCause(ex) ?: ex).message == 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
+                sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
+            }
+            else {
+                throw ex
+            }
+        }
+        catch (IOException ex) {
+            if (ex instanceof NoHttpResponseException || ex instanceof SocketTimeoutException || ex instanceof ConnectTimeoutException ||
+                ex instanceof UnknownHostException || ex instanceof ClientProtocolException) {
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else if (ex.message == 'Connection reset by peer' || ex.message == 'Broken pipe') {
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else {
+                throw ex
+            }
+        }
+        catch (DeadlineExceededException ex) {
+            sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
+        }
+        catch (RuntimeException ex) {
+            if (ex.message?.endsWith('Resolver failure.')) { // Google App Engine
+                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
+            }
+            else if (ex instanceof CancelledException) {
+                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
+            }
+            else {
+                throw ex
+            }
+        }
+        catch (OverQuotaException ex) {
+            sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
+        }
+        catch (OutOfMemoryError err) {
+            StringBuffer requestURL = request.requestURL
+            if (request.queryString) {
+                requestURL.append('?').append(request.queryString)
+            }
+            response.setHeader('Refresh', "10; url=${requestURL}")
+            sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, err)
+        }
         finally {
             try {
                 EntityUtils.consumeQuietly(remoteResponse?.entity)
@@ -256,6 +294,14 @@ class Proxy implements URIManipulation {
                 response.setHeader(header.name, header.value)
             }
         }
+    }
+
+    private void sendError(URI requestURI, HttpServletResponse response, int statusCode, Throwable thrw, String message = (ExceptionUtils.getRootCause(thrw) ?: thrw).message) {
+        log.warn('{}: {}', requestURI, thrw)
+        try {
+            response.sendError(statusCode, message)
+        }
+        catch (IllegalStateException ignored) {}
     }
 
     private HttpUriRequest newRequest(String method, URI uri) {
@@ -405,63 +451,6 @@ class Proxy implements URIManipulation {
         HttpUriRequest currentReq = (HttpUriRequest) context.getAttribute(HttpCoreContext.HTTP_REQUEST)
         HttpHost currentHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST)
         currentReq.URI.absolute ? currentReq.URI : (currentHost.toURI() + currentReq.URI).toURI()
-    }
-    
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler([ NumberFormatException, URISyntaxException, ClientProtocolException ])
-    ModelAndView badRequest(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
-        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-        ModelAndView out = new ModelAndView('ouch', [ status: 400I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
-        copyRequestAttributesToModelAndView(request, out)
-    }
-    
-    @ExceptionHandler(IllegalStateException)
-    void ignoredException(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
-        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-    }
-    
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler([ HttpHostConnectException, SSLException, SSLHandshakeException, SSLProtocolException, NoHttpResponseException, SocketTimeoutException,  ConnectTimeoutException, UnknownHostException ])
-    ModelAndView notFound(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
-        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-        
-//      if ((ExceptionUtils.getRootCause(ex) ?: ex).message == 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
-//      sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
-//  }
-        
-        ModelAndView out = new ModelAndView('ouch', [ status: 404I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
-        copyRequestAttributesToModelAndView(request, out)
-    }
-    
-    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    @ExceptionHandler([ DeadlineExceededException, CancelledException, OverQuotaException /*, OutOfMemoryError */ ])
-    ModelAndView serviceUnavailable(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
-        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-        
-//        StringBuffer requestURL = request.requestURL
-//        if (request.queryString) {
-//            requestURL.append('?').append(request.queryString)
-//        }
-//        response.setHeader('Refresh', "10; url=${requestURL}")
-        ModelAndView out = new ModelAndView('ouch', [ status: 503I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
-        copyRequestAttributesToModelAndView(request, out)
-    }
-    
-    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    @ExceptionHandler([ MethodNotSupportedException ])
-    ModelAndView methodNotSupported(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
-        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-        ModelAndView out = new ModelAndView('ouch', [ status: 405I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
-        copyRequestAttributesToModelAndView(request, out)
-    }
-    
-    private ModelAndView copyRequestAttributesToModelAndView(HttpServletRequest request, ModelAndView out) {
-        Enumeration<String> e = request.attributeNames
-        while (e.hasMoreElements()) {
-            String s = e.nextElement()
-            out.addObject(s, request.getAttribute(s))
-        }
-        out
     }
     
 }

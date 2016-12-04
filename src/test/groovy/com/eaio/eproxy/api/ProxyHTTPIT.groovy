@@ -123,10 +123,17 @@ class ProxyHTTPIT {
         proxy.proxy('http', request, response)
     }
     
-    @Test(expected = UnknownHostException)
+    @Test
     void 'non-existing domains should return a 404'() {
         HttpServletRequest request = buildHttpServletRequest('http://das-ist-absolut-cla.com')
-        proxy.proxy('http', request, null)
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            sendError: { int status, String sc -> assertThat(status, is(404I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('http', request, response)
     }
     
     @Test
@@ -197,13 +204,20 @@ class ProxyHTTPIT {
         proxy.proxy('http', request, response)
     }
     
-    @Test(expected = NumberFormatException)
+    @Test
     void 'broken port values should return a 400 bad request response'() {
         HttpServletRequest request = buildHttpServletRequestFromRawURI('/rnw-https/business.us:a.gov/')
-        proxy.proxy('http', request, null)
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            sendError: { int status, String sc -> assertThat(status, is(400I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('http', request, response)
     }
     
-    // TODO: https://static.tutsplus.com/assets/fontawesome-webfont-3cd310e486271a9d3d86b56ce2706de5.woff2?v=4.3.0 rewritten as text/html
     // TODO: http://tour.desipapa.com/fonts/glyphicons-halflings-regular.woff2 rewritten as text/html
+    // TODO: attachment; filename="y7bw1528(http://maalud.wapka.mobi).mp4" korrekt?
 
 }
