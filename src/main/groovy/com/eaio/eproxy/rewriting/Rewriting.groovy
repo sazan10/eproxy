@@ -150,7 +150,6 @@ class Rewriting implements BeanFactoryAware {
                 log.warn("While parsing {}: {}", requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
-        catch (NullPointerException ignored) {}
     }
 
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
@@ -159,7 +158,6 @@ class Rewriting implements BeanFactoryAware {
         try {
             outputWriter.write(handler.rewriteCSS(toString(inputStream, charset ?: defaultCharset)))
         }
-        catch (NullPointerException ignored) {}
         finally {
             try {
                 outputWriter.flush()
@@ -184,7 +182,6 @@ class Rewriting implements BeanFactoryAware {
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
-        catch (NullPointerException ignored) {}
         finally {
             try {
                 outputWriter.flush()
