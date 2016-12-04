@@ -38,13 +38,12 @@ class NoScriptRedirect implements URIManipulation {
             URI resolvedURI = URI.create(trimToEmpty(url))
             if (resolvedURI.scheme) {
                 reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(substringAfter(url, resolvedURI.rawAuthority)))
-                        resolvedURI = new URI(resolvedURI.scheme, IDN.toASCII(resolvedURI.rawAuthority), null, null)
+                resolvedURI = new URI(resolvedURI.scheme, IDN.toASCII(resolvedURI.rawAuthority), null, null)
             }
             else {
                 reEncodedURL = ReEncoding.INSTANCE.reEncode(trimToEmpty(substringAfter(url, '/')))
-                        resolvedURI = new URI(request.scheme, IDN.toASCII(substringBefore(resolvedURI.rawPath, '/')), null, null)
+                resolvedURI = new URI(request.scheme, IDN.toASCII(substringBefore(resolvedURI.rawPath, '/')), null, null)
             }
-            
             targetURI = encodeTargetURI(baseURI, resolvedURI, reEncodedURL, RewriteConfig.fromString(rewriteConfigString))
         }
         
