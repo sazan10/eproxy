@@ -297,7 +297,7 @@ class Proxy implements URIManipulation {
     }
 
     private void sendError(URI requestURI, HttpServletResponse response, int statusCode, Throwable thrw, String message = (ExceptionUtils.getRootCause(thrw) ?: thrw).message) {
-        log.warn('for external URL {}: {}', requestURI, message)
+        log.warn('{}: {}', requestURI, thrw)
         try {
             response.sendError(statusCode, message)
         }
@@ -365,10 +365,14 @@ class Proxy implements URIManipulation {
         }
     }
 
+    /**
+     * Returns the lower-cased name of the Content-Disposition header value.
+     * @return <code>null</code> if <code>contentDisposition</code> is <code>null</code>
+     */
     String parseContentDispositionValue(String contentDisposition) {
         if (contentDisposition) {
             HeaderElement[] elements = BasicHeaderValueParser.parseElements(contentDisposition, null)
-            elements[0I]?.name
+            elements[0I]?.name?.toLowerCase()
         }
     }
 

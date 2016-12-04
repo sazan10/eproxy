@@ -11,6 +11,7 @@ import junitparams.Parameters
 
 import org.apache.http.HeaderElement
 import org.apache.http.client.methods.HttpUriRequest
+import org.hamcrest.Matcher
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -77,26 +78,20 @@ class ProxyTest {
     }
     
     @Test
-    void 'parseContentDispositionValue should return null'() {
-        assertThat(proxy.parseContentDispositionValue(null), is(null))
+    @Parameters(method = 'contentDispositionValues')
+    void 'parseContentDispositionValue should return expected value'(String contentDispositionValue, Matcher<String> expectedValue) {
+        assertThat(proxy.parseContentDispositionValue(contentDispositionValue), expectedValue)
     }
     
-    @Test
-    void 'parseContentDispositionValue should return attachment'() {
-        String contentDisposition = proxy.parseContentDispositionValue('ATTACHMENT;filename=bla.jpg')
-        assertThat(contentDisposition?.toLowerCase(), is('attachment'))
-    }
-    
-    @Test
-    void 'parseContentDispositionValue should return inline 1'() {
-        String contentDisposition = proxy.parseContentDispositionValue('inline; filename="1%20%2857%29.jpg')
-        assertThat(contentDisposition.toLowerCase(), is('inline'))
-    }
-    
-    @Test
-    void 'parseContentDispositionValue should return inline 2'() {
-        String contentDisposition = proxy.parseContentDispositionValue('inline;filename=""')
-        assertThat(contentDisposition.toLowerCase(), is('inline'))
+    Collection<Object[]> contentDispositionValues() {
+        [
+            [ null, nullValue() ],
+            [ 'ATTACHMENT;filename=bla.jpg', is('attachment') ],
+            [ 'inline; filename="1%20%2857%29.jpg', is('inline') ],
+            [ 'inline;filename=""', is('inline') ],
+            [ 'attachment; filename="y7bw1528(http://maalud.wapka.mobi).mp4"', is('attachment') ],
+            [ 'inline; filename="1%20%2857%29.jpg"', is('inline') ],
+        ].collect { it as Object[] }
     }
     
     @Test
