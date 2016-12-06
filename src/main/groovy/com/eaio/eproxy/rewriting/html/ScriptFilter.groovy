@@ -40,12 +40,6 @@ class ScriptFilter extends BaseFilter {
         super.endElement(element, augs)
     }
     
-    private void writeJavaScript(XMLString xmlString) {
-        super.startElement(scriptElement, null, null)
-        super.characters(xmlString, null)
-        super.endElement(scriptElement, null)
-    }
-    
     private writeProxyJavaScript() {
         XMLAttributes atts = new XMLAttributesImpl(2I)
         atts.addAttribute(asyncAttribute, null, 'async')
