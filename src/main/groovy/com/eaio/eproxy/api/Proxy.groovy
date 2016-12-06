@@ -2,6 +2,7 @@ package com.eaio.eproxy.api
 
 import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
+import groovy.transform.InheritConstructors
 import groovy.util.logging.Slf4j
 
 import java.util.regex.Matcher
@@ -45,9 +46,9 @@ import com.eaio.eproxy.rewriting.html.*
 import com.eaio.io.RangeInputStream
 import com.eaio.net.httpclient.AbortHttpUriRequestTask
 import com.eaio.net.httpclient.TimingInterceptor
-import com.google.apphosting.api.ApiProxy.OverQuotaException
 import com.google.apphosting.api.DeadlineExceededException
 import com.google.apphosting.api.ApiProxy.CancelledException
+import com.google.apphosting.api.ApiProxy.OverQuotaException
 import com.j256.simplemagic.ContentInfo
 import com.j256.simplemagic.ContentInfoUtil
 
@@ -183,10 +184,10 @@ class Proxy implements URIManipulation {
 
             TimingInterceptor.log(context, log)
         }
-//        catch (SocketException ex) {
-//            if (ex.message?.startsWith('Permission denied')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex)
-//            }
+        catch (SocketException ex) {
+            if (ex.message?.startsWith('Permission denied')) { // Google App Engine
+                throw new PermissionDeniedException(ex)
+            }
 //            else if (ex.message?.contains('Resource temporarily unavailable')) { // Google App Engine
 //                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
 //            }
@@ -199,7 +200,7 @@ class Proxy implements URIManipulation {
 //            else {
 //                throw ex
 //            }
-//        }
+        }
 //        catch (IOException ex) {
 //            if (ex.message == 'Connection reset by peer' || ex.message == 'Broken pipe') {
 //                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
@@ -350,6 +351,7 @@ class Proxy implements URIManipulation {
             case 'x-xss-protection': 
             case 'timing-allow-origin':
             // end
+            case 'link':
             case 'via':
             case 'vary':
             case 'connection':
@@ -413,6 +415,8 @@ class Proxy implements URIManipulation {
         currentReq.URI.absolute ? currentReq.URI : (currentHost.toURI() + currentReq.URI).toURI()
     }
     
+    // Exception handling
+    
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler([ NumberFormatException, URISyntaxException, ClientProtocolException ])
     ModelAndView badRequest(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
@@ -427,11 +431,11 @@ class Proxy implements URIManipulation {
     }
     
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler([ HttpHostConnectException, SSLException, SSLHandshakeException, SSLProtocolException, NoHttpResponseException, SocketTimeoutException,  ConnectTimeoutException, UnknownHostException ])
+    @ExceptionHandler([ HttpHostConnectException, SSLException, SSLHandshakeException, SSLProtocolException, NoHttpResponseException, SocketTimeoutException, ConnectTimeoutException, UnknownHostException ])
     ModelAndView notFound(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
         log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
         
-//      if ((ExceptionUtils.getRootCause(ex) ?: ex).message == 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
+//  if ((ExceptionUtils.getRootCause(ex) ?: ex).message == 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
 //      sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
 //  }
         
@@ -439,9 +443,12 @@ class Proxy implements URIManipulation {
         copyRequestAttributesToModelAndView(request, out)
     }
     
+    /**
+     * Catches "out of quota"-style exceptions on Google App Engine. Doesn't forward to the error JSP because if the request is over a quota already, that won't work.
+     */
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     @ExceptionHandler([ DeadlineExceededException, CancelledException, OverQuotaException /*, OutOfMemoryError */ ])
-    ModelAndView serviceUnavailable(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
+    void serviceUnavailable(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
         log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
         
 //        StringBuffer requestURL = request.requestURL
@@ -449,8 +456,6 @@ class Proxy implements URIManipulation {
 //            requestURL.append('?').append(request.queryString)
 //        }
 //        response.setHeader('Refresh', "10; url=${requestURL}")
-        ModelAndView out = new ModelAndView('ouch', [ status: 503I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
-        copyRequestAttributesToModelAndView(request, out)
     }
     
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
@@ -458,6 +463,14 @@ class Proxy implements URIManipulation {
     ModelAndView methodNotSupported(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
         log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
         ModelAndView out = new ModelAndView('ouch', [ status: 405I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
+        copyRequestAttributesToModelAndView(request, out)
+    }
+    
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler([ PermissionDeniedException ])
+    ModelAndView forbidden(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
+        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
+        ModelAndView out = new ModelAndView('ouch', [ status: 403I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
         copyRequestAttributesToModelAndView(request, out)
     }
     
@@ -469,5 +482,8 @@ class Proxy implements URIManipulation {
         }
         out
     }
+    
+    @InheritConstructors
+    class PermissionDeniedException extends RuntimeException {}
     
 }
