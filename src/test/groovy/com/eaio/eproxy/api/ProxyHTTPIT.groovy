@@ -125,7 +125,7 @@ class ProxyHTTPIT {
     
     @Test
     void 'non-existing domains should return a 404'() {
-        HttpServletRequest request = buildHttpServletRequest('http://das-ist-absolut-cla.com')
+        HttpServletRequest request = buildHttpServletRequest('http://das-ist-absolut-cla.com/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             sendError: { int status, String sc -> assertThat(status, is(404I)) },
@@ -153,7 +153,7 @@ class ProxyHTTPIT {
 
     @Test
     void 'trace requests should be supported'() {
-        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com', 'TRACE')
+        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/', 'TRACE')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(405I)) },
@@ -166,7 +166,7 @@ class ProxyHTTPIT {
     
     @Test
     void 'uppercase protocol should be supported'() {
-        HttpServletRequest request = buildHttpServletRequest('HTTP://www.n-tv.de')
+        HttpServletRequest request = buildHttpServletRequest('HTTP://www.n-tv.de/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },

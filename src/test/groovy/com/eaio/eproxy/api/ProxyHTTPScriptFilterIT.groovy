@@ -34,7 +34,7 @@ class ProxyHTTPScriptFilterIT {
     
     @Test
     void 'proxy JavaScript should be present on the page'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.n-tv.de')
+        HttpServletRequest request = buildHttpServletRequest('http://www.n-tv.de/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },

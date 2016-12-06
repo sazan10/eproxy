@@ -35,13 +35,19 @@ trait URIManipulation {
      * Make sure to remove the context path before calling this method.
      */
     URI decodeTargetURI(String scheme, String requestURI, String queryString) {
-        String uriFromHost = substringAfter(requestURI[1..-1], '/'), path = substringAfter(uriFromHost, '/') ?: '/',
-            hostAndPort = substringBefore(uriFromHost, '/'), host = hostAndPort, port
+        String uriFromHost = substringAfter(requestURI[1..-1], '/'),
+            hostAndPort = substringBefore(uriFromHost, '/'),
+            path = substringAfter(uriFromHost, hostAndPort),
+            host = hostAndPort,
+            port
         if (hostAndPort.contains(':')) {
             host = substringBefore(hostAndPort, ':')
             port = substringAfter(hostAndPort, ':')
         }
-        UriComponentsBuilder builder = UriComponentsBuilder.newInstance().scheme(scheme).host(host?.toLowerCase()).path(path)
+        UriComponentsBuilder builder = UriComponentsBuilder.newInstance()
+            .scheme(scheme)
+            .host(host?.toLowerCase())
+            .path(path)
         if (port) {
             builder.port(port)
         }
@@ -76,15 +82,12 @@ trait URIManipulation {
                     log.warn('couldn\'t resolve {}: {}', resolvedURI.schemeSpecificPart, (ExceptionUtils.getRootCause(ex) ?: ex).message)
                 }
             }
-            builder.pathSegment(rewriteConfig.asBoolean() ? rewriteConfig.toString() + resolvedURI.scheme : resolvedURI.scheme, resolvedURI.authority)
-            if (resolvedURI.rawPath) {
-                builder.path(resolvedURI.rawPath)
-            }
-            builder.query(resolvedURI.rawQuery)
-            if (resolvedURI.rawFragment) {
-                builder.fragment(resolvedURI.rawFragment)
-            }
-            builder.build().toString()
+            builder
+                .pathSegment(rewriteConfig.asBoolean() ? rewriteConfig.toString() + resolvedURI.scheme : resolvedURI.scheme, resolvedURI.authority)
+                .path(resolvedURI.rawPath ?: '/')
+                .query(resolvedURI.rawQuery).fragment(resolvedURI.rawFragment)
+                .build()
+                .toString()
         }
         else {
             uri

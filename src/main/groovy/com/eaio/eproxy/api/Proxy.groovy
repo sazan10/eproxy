@@ -93,6 +93,7 @@ class Proxy implements URIManipulation {
 
     @RequestMapping('/{rewriteConfig:[a-z]+}-{scheme:(?i)https?}/**')
     void proxy(@PathVariable('rewriteConfig') String rewriteConfigString, @PathVariable('scheme') String scheme, HttpServletRequest request, HttpServletResponse response) {
+        RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
         URI baseURI = buildBaseURI(request.scheme, request.serverName, request.serverPort, request.contextPath)
         URI requestURI
         try {
@@ -104,6 +105,12 @@ class Proxy implements URIManipulation {
         }
         if (!requestURI.host) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST)
+            return
+        }
+        if (!requestURI.rawPath) {
+            String redirectURL = encodeTargetURI(baseURI, requestURI, '/', rewriteConfig)
+            response.setHeader('Cache-Control', 'max-age=31536000')
+            response.sendRedirect(redirectURL)
             return
         }
 
@@ -134,7 +141,6 @@ class Proxy implements URIManipulation {
             }
 
             String contentDisposition = parseContentDispositionValue(remoteResponse.getFirstHeader('Content-Disposition')?.value)
-            RewriteConfig rewriteConfig = RewriteConfig.fromString(rewriteConfigString)
             ContentType contentType = ContentType.getLenient(remoteResponse.entity)
             
             if (shouldDetectMIMEType(contentType, remoteResponse.statusLine.statusCode, remoteResponse.entity?.repeatable)) {

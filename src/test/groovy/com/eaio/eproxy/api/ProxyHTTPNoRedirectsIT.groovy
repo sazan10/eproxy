@@ -34,7 +34,7 @@ class ProxyHTTPNoRedirectsIT {
     
     @Test
     void 'redirect URLs should be rewritten'() {
-        HttpServletRequest request = buildHttpServletRequest('http://n-tv.de', 'GET', { String name -> null }, null, null)
+        HttpServletRequest request = buildHttpServletRequest('http://n-tv.de/', 'GET', { String name -> null }, null, null)
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
@@ -49,7 +49,7 @@ class ProxyHTTPNoRedirectsIT {
     
     @Test
     void 'rewriteConfig should be kept when redirecting'() {
-        HttpServletRequest request = buildHttpServletRequest('http://n-tv.de')
+        HttpServletRequest request = buildHttpServletRequest('http://n-tv.de/')
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },

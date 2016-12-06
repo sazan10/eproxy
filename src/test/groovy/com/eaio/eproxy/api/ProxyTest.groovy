@@ -41,7 +41,7 @@ class ProxyTest {
             [ 'http', '/http/www.google-analytics.com/ga.js', null, 'http://www.google-analytics.com/ga.js' ],
             [ 'http', '/http/www.google-analytics.com/ga.js', '', 'http://www.google-analytics.com/ga.js' ],
             [ 'http', '/http/www.google-analytics.com/ga.js', 'pruh=guh', 'http://www.google-analytics.com/ga.js?pruh=guh' ],
-            [ 'http', '/http/www.google-analytics.com', null, 'http://www.google-analytics.com/' ],
+            [ 'http', '/http/www.google-analytics.com', null, 'http://www.google-analytics.com' ],
             [ 'https', '/https/www.google-analytics.com/bla/ga.js', null, 'https://www.google-analytics.com/bla/ga.js' ],
         ].collect { it as Object[] }
     }
@@ -123,7 +123,7 @@ class ProxyTest {
         ] as HttpServletRequest
     
         boolean sendErrorCalled = false
-        HttpServletResponse response = [ sendError: { int status ->
+        HttpServletResponse response = [ sendError: { int status, String message ->
             sendErrorCalled = true
             assertThat(status, is(400I))
         } ] as HttpServletResponse
@@ -151,7 +151,7 @@ class ProxyTest {
     @Test
     void 'weird HTTP methods shouldn\'t be supported'() {
         HttpServletRequest request = [
-            getRequestURI: { '/rnw-http/blorb.com' },
+            getRequestURI: { '/rnw-http/blorb.com/' },
             getContextPath: { '' },
             getQueryString: { null },
             getScheme: { 'http' },
