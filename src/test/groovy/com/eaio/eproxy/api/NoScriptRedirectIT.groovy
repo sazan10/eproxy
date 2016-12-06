@@ -65,7 +65,7 @@ class NoScriptRedirectIT {
         boolean sendRedirectCalled = false
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
-            assertThat(location, is('http://fnuh.com/rnw-http/Secret.xn--oogle-wmc.com'))
+            assertThat(location, is('http://fnuh.com/rnw-http/Secret.xn--oogle-wmc.com/'))
         }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('Secret.ɢoogle.com', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
@@ -76,7 +76,7 @@ class NoScriptRedirectIT {
         boolean sendRedirectCalled = false
         HttpServletResponse response = [ sendRedirect: { String location ->
             sendRedirectCalled = true
-            assertThat(location, is('http://fnuh.com/rnw-https/Secret.xn--oogle-wmc.com'))
+            assertThat(location, is('http://fnuh.com/rnw-https/Secret.xn--oogle-wmc.com/'))
         }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('https://Secret.ɢoogle.com', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
@@ -134,6 +134,17 @@ class NoScriptRedirectIT {
                 assertThat(location, is('http://fnuh.com'))
         }, setHeader: { String name, String value -> } ] as HttpServletResponse
         redirect.redirect('', 'rnw', buildHttpServletRequest('uiuiui'), response)
+        assertThat(sendRedirectCalled, is(true))
+    }
+    
+    @Test
+    void 'the path in a URL should always be set'() {
+        boolean sendRedirectCalled = false
+        HttpServletResponse response = [ sendRedirect: { String location ->
+            sendRedirectCalled = true
+            assertThat(location, is('http://fnuh.com/rnw-http/dilbert.com/'))
+        }, setHeader: { String name, String value -> } ] as HttpServletResponse
+        redirect.redirect('http://dilbert.com', 'rnw', buildHttpServletRequest('uiuiui'), response)
         assertThat(sendRedirectCalled, is(true))
     }
     

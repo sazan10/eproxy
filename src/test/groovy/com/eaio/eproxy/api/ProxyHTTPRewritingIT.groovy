@@ -39,7 +39,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'HTML should be rewritten'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.n-tv.de')
+        HttpServletRequest request = buildHttpServletRequest('http://www.n-tv.de/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -376,7 +376,21 @@ class ProxyHTTPRewritingIT {
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), containsString('xlink:href="http://fnuh.com/rnw-http/www.w3.org'))
-        
+    }
+    
+    @Test
+    void 'the path in a URL should always be set'() {
+        HttpServletRequest request = buildHttpServletRequest('http://dilbert.com/')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'http', request, response)
+        errorCollector.checkThat(bOut.toString(0I), not(containsString('http/blog.dilbert.com?')))
+        errorCollector.checkThat(bOut.toString(0I), containsString('http/blog.dilbert.com/?'))
     }
     
 }

@@ -34,7 +34,7 @@ class ProxyHTTPCookiesIT {
     
     @Test
     void 'should support cookies'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.bing.com')
+        HttpServletRequest request = buildHttpServletRequest('http://www.bing.com/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         boolean cookieSet = false
         String cookieName, cookieValue
@@ -54,7 +54,7 @@ class ProxyHTTPCookiesIT {
         assertThat(bOut.toString(0I), containsString('meta content'))
         assertThat(cookieSet, is(true))
         bOut.reset()
-        request = buildHttpServletRequest('http://www.bing.com')
+        request = buildHttpServletRequest('http://www.bing.com/')
         (java.lang.reflect.Proxy.getInvocationHandler(request).delegate)['getCookies'] = {
             [ new Cookie(cookieName, cookieValue) ].toArray(new Cookie[1I])
         }
@@ -73,7 +73,7 @@ class ProxyHTTPCookiesIT {
     
     @Test
     void 'should support cookie expiration'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.bing.com')
+        HttpServletRequest request = buildHttpServletRequest('http://www.bing.com/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         boolean cookieSet = false
         HttpServletResponse response = [
