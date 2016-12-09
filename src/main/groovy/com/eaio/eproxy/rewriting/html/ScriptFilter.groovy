@@ -27,6 +27,8 @@ class ScriptFilter extends BaseFilter {
     @Value('${script.redirect}')
     String scriptRedirect
     
+    private boolean scriptWritten
+    
     @Lazy
     private QName scriptElement = new QName(null, 'script', 'script', null),
         asyncAttribute = new QName(null, 'async', 'async', null),
@@ -34,19 +36,14 @@ class ScriptFilter extends BaseFilter {
     
     @Override
     void endElement(QName element, Augmentations augs) {
-        if (scriptRedirect && nameIs(element, 'body')) {
-            writeProxyJavaScript()
+        if (scriptRedirect && !scriptWritten && nameIs(element, 'body')) {
+            writeScriptElement()
+            scriptWritten = true
         }
         super.endElement(element, augs)
     }
     
-    private void writeJavaScript(XMLString xmlString) {
-        super.startElement(scriptElement, null, null)
-        super.characters(xmlString, null)
-        super.endElement(scriptElement, null)
-    }
-    
-    private writeProxyJavaScript() {
+    private writeScriptElement() {
         XMLAttributes atts = new XMLAttributesImpl(2I)
         atts.addAttribute(asyncAttribute, null, 'async')
         atts.addAttribute(srcAttribute, null, (((ServletRequestAttributes) RequestContextHolder.requestAttributes)?.request?.contextPath ?: '') +  '/script')
