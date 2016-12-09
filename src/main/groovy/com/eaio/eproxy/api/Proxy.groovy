@@ -217,6 +217,9 @@ class Proxy implements URIManipulation {
 //                throw ex
 //            }
 //        }
+        catch (OutOfMemoryError err) {
+            throw new OutOfMemoryException(err) // Thrown on Google App Engine when trying to allocate the buffer in IOUtils#copyLarge.
+        }
         finally {
             try {
                 EntityUtils.consumeQuietly(remoteResponse?.entity)
@@ -417,61 +420,56 @@ class Proxy implements URIManipulation {
     
     // Exception handling
     
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler([ NumberFormatException, URISyntaxException, ClientProtocolException ])
-    ModelAndView badRequest(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
-        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-        ModelAndView out = new ModelAndView('ouch', [ status: 400I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
-        copyRequestAttributesToModelAndView(request, out)
-    }
-    
+    /**
+     * This roughly means that the client has closed the connection.
+     */
     @ExceptionHandler(IllegalStateException)
     void ignoredException(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
         log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-    }
-    
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler([ HttpHostConnectException, SSLException, SSLHandshakeException, SSLProtocolException, NoHttpResponseException, SocketTimeoutException, ConnectTimeoutException, UnknownHostException ])
-    ModelAndView notFound(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
-        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-        
-//  if ((ExceptionUtils.getRootCause(ex) ?: ex).message == 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
-//      sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
-//  }
-        
-        ModelAndView out = new ModelAndView('ouch', [ status: 404I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
-        copyRequestAttributesToModelAndView(request, out)
     }
     
     /**
      * Catches "out of quota"-style exceptions on Google App Engine. Doesn't forward to the error JSP because if the request is over a quota already, that won't work.
      */
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    @ExceptionHandler([ DeadlineExceededException, CancelledException, OverQuotaException /*, OutOfMemoryError */ ])
+    @ExceptionHandler([ DeadlineExceededException, CancelledException, OverQuotaException, OutOfMemoryException ])
     void serviceUnavailable(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
         log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-        
-//        StringBuffer requestURL = request.requestURL
-//        if (request.queryString) {
-//            requestURL.append('?').append(request.queryString)
-//        }
-//        response.setHeader('Refresh', "10; url=${requestURL}")
+    }
+    
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler([ NumberFormatException, URISyntaxException, ClientProtocolException ])
+    ModelAndView badRequest(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
+        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
+        copyRequestAttributesToModelAndView(request, newErrorModelAndView(thrw, 400I))
+    }
+    
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler([ HttpHostConnectException, SSLException, SSLHandshakeException, SSLProtocolException, NoHttpResponseException, SocketTimeoutException, ConnectTimeoutException, UnknownHostException ])
+    ModelAndView notFound(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
+        log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
+//  if ((ExceptionUtils.getRootCause(ex) ?: ex).message == 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
+//      sendError(requestURI, response, HttpServletResponse.SC_FORBIDDEN, ex, "Please upgrade to Java 8. ${requestURI.host} uses more than 1024 Bits in their public key.")
+//  }
+        copyRequestAttributesToModelAndView(request, newErrorModelAndView(thrw, 404I))
     }
     
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler([ MethodNotSupportedException ])
     ModelAndView methodNotSupported(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
         log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-        ModelAndView out = new ModelAndView('ouch', [ status: 405I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
-        copyRequestAttributesToModelAndView(request, out)
+        copyRequestAttributesToModelAndView(request, newErrorModelAndView(thrw, 405I))
     }
     
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler([ PermissionDeniedException ])
     ModelAndView forbidden(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
         log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
-        ModelAndView out = new ModelAndView('ouch', [ status: 403I, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
-        copyRequestAttributesToModelAndView(request, out)
+        copyRequestAttributesToModelAndView(request, newErrorModelAndView(thrw, 403I))
+    }
+    
+    private ModelAndView newErrorModelAndView(Throwable thrw, int status) {
+        new ModelAndView('ouch', [ status: status, message: (ExceptionUtils.getRootCause(thrw) ?: thrw).message ])
     }
     
     private ModelAndView copyRequestAttributesToModelAndView(HttpServletRequest request, ModelAndView out) {
@@ -484,6 +482,9 @@ class Proxy implements URIManipulation {
     }
     
     @InheritConstructors
-    class PermissionDeniedException extends RuntimeException {}
+    private class PermissionDeniedException extends RuntimeException {}
+    
+    @InheritConstructors
+    private class OutOfMemoryException extends RuntimeException {}
     
 }

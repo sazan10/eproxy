@@ -13,6 +13,7 @@ import org.hamcrest.Matcher
 import org.junit.Test
 import org.junit.runner.RunWith
 
+import com.eaio.eproxy.api.Proxy.OutOfMemoryException;
 import com.eaio.eproxy.api.Proxy.PermissionDeniedException
 
 /**
@@ -41,7 +42,8 @@ class ProxyExceptionsTest {
     
     Collection<Object[]> throwables() {
         [
-            [ new SocketException('Permission denied'), is(PermissionDeniedException) ]
+            [ new SocketException('Permission denied'), is(PermissionDeniedException) ],
+            [ new OutOfMemoryError(), is(OutOfMemoryException) ],
         ].collect { it as Object[] }
     }
 
