@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.*
 
 import org.apache.xerces.xni.parser.XMLDocumentFilter
 import org.junit.Test
+import org.springframework.context.annotation.Scope
 import org.xml.sax.InputSource
 import org.xml.sax.XMLReader
 
@@ -16,6 +17,11 @@ import com.eaio.eproxy.rewriting.Rewriting
  * @version $Id$
  */
 class ScriptFilterTest {
+    
+    @Test
+    void 'class should have @Scope annotation'() {
+        assertThat("${ScriptFilter.name} is stateful!", ScriptFilter.getAnnotation(Scope)?.value(), is('prototype'))
+    }
     
     @Test
     void 'script should only be appended once'() {
