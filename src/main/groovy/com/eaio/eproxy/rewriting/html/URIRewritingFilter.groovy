@@ -61,11 +61,11 @@ class URIRewritingFilter extends RewritingFilter implements URIManipulation {
             String attributeValue = trimToEmpty(atts.getValue(i))
             
             // Use local name
-            if (!equalsIgnoreCase(atts.getLocalName(i), 'style') && !startsWithIgnoreCase(atts.getLocalName(i), 'on') &&
-                !equalsIgnoreCase(atts.getLocalName(i), 'srcset') && !equalsIgnoreCase(atts.getLocalName(i), 'http-equiv') &&
-                !equalsIgnoreCase(atts.getLocalName(i), 'content') &&
-                !equalsIgnoreCase(atts.getPrefix(i), 'xmlns') && !equalsIgnoreCase(atts.getQName(i), 'xmlns') && // Don't rewrite xmlns namespaced attributes.
-                !equalsIgnoreCase(atts.getLocalName(i), 'srcdoc') && // See RecursiveInlineHTMLRewritingFilter
+            if (!atts.getLocalName(i)?.equalsIgnoreCase('style') && !startsWithIgnoreCase(atts.getLocalName(i), 'on') &&
+                !atts.getLocalName(i)?.equalsIgnoreCase('srcset') && !atts.getLocalName(i)?.equalsIgnoreCase('http-equiv') &&
+                !atts.getLocalName(i)?.equalsIgnoreCase('content') &&
+                !atts.getPrefix(i)?.equalsIgnoreCase('xmlns') && !atts.getQName(i)?.equalsIgnoreCase('xmlns') && // Don't rewrite xmlns namespaced attributes.
+                !atts.getLocalName(i)?.equalsIgnoreCase('srcdoc') && // See RecursiveInlineHTMLRewritingFilter
                 attributeValueNeedsRewriting(attributeValue)) {
                 atts.setValue(i, encodeTargetURI(baseURI, requestURI, attributeValue, rewriteConfig))
             }

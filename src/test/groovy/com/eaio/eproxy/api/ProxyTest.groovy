@@ -4,12 +4,11 @@ import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
 
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 
-import org.apache.http.HeaderElement
+import org.apache.http.MethodNotSupportedException
 import org.apache.http.client.methods.HttpUriRequest
 import org.hamcrest.Matcher
 import org.junit.Test
@@ -111,7 +110,7 @@ class ProxyTest {
             RewriteConfig.fromString('rnw')), is('http://127.0.0.1:8080/rnw-http/money.get.away.get.a.good.job.with.more.pay.and.you.are.okay.money.it.is.a.gas.grab.that.cash.with.both.hands.and.make.a.stash.new.car.caviar.four.star.daydream.think.i.ll.buy.me.a.football.team.money.get.back.i.am.alright.jack.ilovevitaly.com/#.keep.off.my.stack.money.it.is.a.hit.do.not.give.me.that.do.goody.good.bullshit.i.am.in.the.hi.fidelity.first.class.travelling.set.and.i.think.i.need.a.lear.jet.money.it.is.a.secret.%C9%A2oogle.com/'))
     }
     
-    @Test
+    @Test(expected = URISyntaxException)
     void 'should reject incomplete URLs'() {
         HttpServletRequest request = [
             getRequestURI: { '/rnw-http' },
@@ -120,16 +119,10 @@ class ProxyTest {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
+            setAttribute: { String name, Object value -> },
         ] as HttpServletRequest
     
-        boolean sendErrorCalled = false
-        HttpServletResponse response = [ sendError: { int status, String message ->
-            sendErrorCalled = true
-            assertThat(status, is(400I))
-        } ] as HttpServletResponse
-        
-        proxy.proxy('http', request, response)
-        assertThat(sendErrorCalled, is(true))
+        proxy.proxy('http', request, null)
     }
     
     /**
@@ -148,7 +141,7 @@ class ProxyTest {
         assertThat(setHeaderCalled, is(true))
     }
     
-    @Test
+    @Test(expected = MethodNotSupportedException)
     void 'weird HTTP methods shouldn\'t be supported'() {
         HttpServletRequest request = [
             getRequestURI: { '/rnw-http/blorb.com/' },
@@ -157,19 +150,12 @@ class ProxyTest {
             getScheme: { 'http' },
             getServerName: { 'fnuh.com' },
             getServerPort: { 80I },
+            setAttribute: { String name, Object value -> },
             getMethod: { 'CONNECT' },
             getHeader: { String name -> null },
         ] as HttpServletRequest
 
-        boolean sendErrorCalled = false
-        HttpServletResponse response = [ sendError: { int status ->
-                sendErrorCalled = true
-                assertThat(status, is(405I))
-            } ] as HttpServletResponse
-
-        proxy.proxy('rnw', 'http', request, response)
-        
-        assertThat(sendErrorCalled, is(true))
+        proxy.proxy('rnw', 'http', request, null)
     }
     
 }

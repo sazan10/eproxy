@@ -82,5 +82,13 @@ class RewritingIT {
         rewriting.rewriteHTML(new File('src/test/resources/com/eaio/eproxy/rewriting/html/iframe-srcdoc.html').newInputStream(), bOut, null, 'http://foo.com'.toURI(), 'http://repo.eaio.com/leak.html'.toURI(), RewriteConfig.fromString('rnw'))
         assertThat(bOut as String, containsString('http://foo.com/rnw-http/rah.com/fnuh.jpg'))
     }
-
+    
+    @Test
+    void 'should remove active content in SVG'() {
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        rewriting.rewriteSVG(new File('src/test/resources/com/eaio/eproxy/rewriting/svg/locky.svg').newInputStream(),
+            bOut, null, 'http://lol.lol'.toURI(), 'http://blorb.com'.toURI(), RewriteConfig.fromString('rnw'))
+        assertThat(bOut.toString(0I), not(containsString('<script')))
+    }
+    
 }

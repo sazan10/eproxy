@@ -6,8 +6,9 @@ import org.apache.xerces.util.XMLAttributesImpl
 import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
 import org.apache.xerces.xni.XMLAttributes
-import org.apache.xerces.xni.XMLString
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -20,12 +21,15 @@ import org.springframework.web.context.request.ServletRequestAttributes
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-@Component
 @CompileStatic
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 class ScriptFilter extends BaseFilter {
     
     @Value('${script.redirect}')
     String scriptRedirect
+    
+    private boolean scriptWritten
     
     @Lazy
     private QName scriptElement = new QName(null, 'script', 'script', null),
@@ -34,13 +38,14 @@ class ScriptFilter extends BaseFilter {
     
     @Override
     void endElement(QName element, Augmentations augs) {
-        if (scriptRedirect && nameIs(element, 'body')) {
-            writeProxyJavaScript()
+        if (scriptRedirect && !scriptWritten && nameIs(element, 'body')) {
+            writeScriptElement()
+            scriptWritten = true
         }
         super.endElement(element, augs)
     }
     
-    private writeProxyJavaScript() {
+    private writeScriptElement() {
         XMLAttributes atts = new XMLAttributesImpl(2I)
         atts.addAttribute(asyncAttribute, null, 'async')
         atts.addAttribute(srcAttribute, null, (((ServletRequestAttributes) RequestContextHolder.requestAttributes)?.request?.contextPath ?: '') +  '/script')

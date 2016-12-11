@@ -22,6 +22,7 @@ import org.xml.sax.XMLReader
 import org.xml.sax.helpers.XMLReaderFactory
 
 import com.eaio.eproxy.entities.RewriteConfig
+import com.eaio.eproxy.io.NonFlushPrintWriter
 import com.eaio.eproxy.rewriting.css.*
 import com.eaio.eproxy.rewriting.data_uri.DataURIFilter
 import com.eaio.eproxy.rewriting.html.*
@@ -38,9 +39,6 @@ import com.eaio.eproxy.rewriting.svg.SVGFilter
 @Slf4j
 class Rewriting implements BeanFactoryAware {
 
-    @Autowired
-    ScriptFilter scriptFilter
-    
     BeanFactory beanFactory
     
     @Lazy
@@ -150,7 +148,6 @@ class Rewriting implements BeanFactoryAware {
                 log.warn("While parsing {}: {}", requestURI, (ExceptionUtils.getRootCause(ex) ?: ex).message)
             }
         }
-        catch (NullPointerException ignored) {}
     }
 
     void rewriteCSS(InputStream inputStream, OutputStream outputStream, Charset charset, URI baseURI, URI requestURI, RewriteConfig rewriteConfig) {
@@ -159,7 +156,6 @@ class Rewriting implements BeanFactoryAware {
         try {
             outputWriter.write(handler.rewriteCSS(toString(inputStream, charset ?: defaultCharset)))
         }
-        catch (NullPointerException ignored) {}
         finally {
             try {
                 outputWriter.flush()
@@ -178,13 +174,24 @@ class Rewriting implements BeanFactoryAware {
         // 2nd in chain
         DefaultFilter uriRewritingFilter = configure(beanFactory.getBean(URIRewritingFilter), baseURI, requestURI, rewriteConfig)
         cssRewritingFilter.documentHandler = uriRewritingFilter
-        // 3rd in chain
-        XMLSerializer serializer = new XMLSerializer(outputWriter, new OutputFormat(Method.XML, (charset ?: defaultCharset).name(), true))
-        uriRewritingFilter.documentHandler = new XMLDocumentHandlerDocumentHandlerAdapter(serializer)
+        
+        DefaultFilter nextInChain = uriRewritingFilter
+        
+        if (rewriteConfig.removeActiveContent) {
+            DefaultFilter removeActiveContentFilter = beanFactory.getBean(RemoveActiveContentFilter)
+            uriRewritingFilter.documentHandler = removeActiveContentFilter
+            DefaultFilter removeJavaScriptURIFilter = beanFactory.getBean(RemoveJavaScriptURIFilter)
+            removeActiveContentFilter.documentHandler = removeJavaScriptURIFilter
+            nextInChain = removeJavaScriptURIFilter
+        }
+        // <noscript> doesn't exist in SVG.
+        
+        // Last in chain
+        XMLSerializer serializer = new XMLSerializer(new NonFlushPrintWriter(outputWriter), new OutputFormat(Method.XML, (charset ?: defaultCharset).name(), true))
+        nextInChain.documentHandler = new XMLDocumentHandlerDocumentHandlerAdapter(serializer)
         try {
             xmlReader.parse(newSAXInputSource(inputStream, charset))
         }
-        catch (NullPointerException ignored) {}
         finally {
             try {
                 outputWriter.flush()
@@ -213,13 +220,11 @@ class Rewriting implements BeanFactoryAware {
                 configure(beanFactory.getBean(URIRewritingFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(SrcdocFilter), baseURI, requestURI, rewriteConfig),
                 configure(beanFactory.getBean(DataURIFilter), baseURI, requestURI, rewriteConfig),
-                ])
+            ])
 
-                if (scriptFilter) { // Needs to have an if block, don't ask me why. Re-evaluate after a Groovy update.
-                    filters << scriptFilter
-                }
+            filters << beanFactory.getBean(ScriptFilter)
         }
-        filters << beanFactory.getBean(SVGFilter) << new org.cyberneko.html.filters.Writer(outputWriter, (charset ?: defaultCharset).name())
+        filters << beanFactory.getBean(SVGFilter) << new org.cyberneko.html.filters.Writer(new NonFlushPrintWriter(outputWriter), (charset ?: defaultCharset).name())
         out.setProperty('http://cyberneko.org/html/properties/filters', (XMLDocumentFilter[]) filters.toArray())
 
         out

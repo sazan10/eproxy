@@ -34,6 +34,7 @@ class RequestMocks {
             getHeader: getHeaderClosure,
             getInputStream: { stream },
             getCookies: { null },
+            setAttribute: { String name, Object value -> },
         ] as HttpServletRequest
     }
 
