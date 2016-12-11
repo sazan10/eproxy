@@ -203,6 +203,32 @@ class ProxyHTTPIT {
         proxy.proxy('http', request, null)
     }
     
+    @Test
+    void 'URLs with missing trailing slash should be redirected 1'() {
+        HttpServletRequest request = buildHttpServletRequest('http://rah.com')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            sendRedirect: { String location -> assertThat(location, is('http://fnuh.com/http/rah.com/')) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('http', request, response)
+    }
+    
+    @Test
+    void 'URLs with missing trailing slash should be redirected 2'() {
+        HttpServletRequest request = buildHttpServletRequest('http://rah.com?fnuh=guh')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            sendRedirect: { String location -> assertThat(location, is('http://fnuh.com/http/rah.com/?fnuh=guh')) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('http', request, response)
+    }
+    
     // TODO: https://static.tutsplus.com/assets/fontawesome-webfont-3cd310e486271a9d3d86b56ce2706de5.woff2?v=4.3.0 rewritten as text/html
     // TODO: http://tour.desipapa.com/fonts/glyphicons-halflings-regular.woff2 rewritten as text/html
 

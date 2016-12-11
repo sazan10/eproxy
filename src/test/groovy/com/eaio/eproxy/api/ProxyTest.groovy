@@ -111,9 +111,24 @@ class ProxyTest {
     }
     
     @Test(expected = URISyntaxException)
-    void 'should reject incomplete URLs'() {
+    void 'should reject incomplete URLs 1'() {
         HttpServletRequest request = [
             getRequestURI: { '/rnw-http' },
+            getContextPath: { '' },
+            getQueryString: { null },
+            getScheme: { 'http' },
+            getServerName: { 'fnuh.com' },
+            getServerPort: { 80I },
+            setAttribute: { String name, Object value -> },
+        ] as HttpServletRequest
+    
+        proxy.proxy('http', request, null)
+    }
+    
+    @Test(expected = URISyntaxException)
+    void 'should reject incomplete URLs 2'() {
+        HttpServletRequest request = [
+            getRequestURI: { '/rnw-http/' },
             getContextPath: { '' },
             getQueryString: { null },
             getScheme: { 'http' },

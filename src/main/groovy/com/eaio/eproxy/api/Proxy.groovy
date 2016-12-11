@@ -104,11 +104,8 @@ class Proxy implements URIManipulation {
         URI requestURI = decodeTargetURI(scheme, stripContextPathFromRequestURI(request.contextPath, request.requestURI), request.queryString)
         request.setAttribute('requestURI', requestURI)
         
-        if (!requestURI.host) { // http://
-            throw new URISyntaxException(requestURI as String, 'Invalid request URI')
-        }
         if (!requestURI.rawPath) { // http://foo.com instead of http://foo.com/ (note trailing slash)
-            String redirectURL = encodeTargetURI(baseURI, requestURI, '/', rewriteConfig)
+            String redirectURL = encodeTargetURI(baseURI, requestURI, requestURI.rawQuery ? '/?' + requestURI.rawQuery : '/', rewriteConfig)
             response.setHeader('Cache-Control', 'max-age=31536000')
             response.sendRedirect(redirectURL)
             return
