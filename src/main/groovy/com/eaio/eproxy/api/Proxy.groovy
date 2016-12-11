@@ -188,35 +188,7 @@ class Proxy implements URIManipulation {
             if (ex.message?.startsWith('Permission denied')) { // Google App Engine
                 throw new PermissionDeniedException(ex)
             }
-//            else if (ex.message?.contains('Resource temporarily unavailable')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
-//            }
-//            else if (ex.message?.contains('connection reset by peer')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
-//            }
-//            else if (ex.message?.contains('no route to host')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_SERVICE_UNAVAILABLE, ex)
-//            }
-//            else {
-//                throw ex
-//            }
         }
-//        catch (IOException ex) {
-//            if (ex.message == 'Connection reset by peer' || ex.message == 'Broken pipe') {
-//                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
-//            }
-//            else {
-//                throw ex
-//            }
-//        }
-//        catch (RuntimeException ex) {
-//            if (ex.message?.endsWith('Resolver failure.')) { // Google App Engine
-//                sendError(requestURI, response, HttpServletResponse.SC_NOT_FOUND, ex)
-//            }
-//            else {
-//                throw ex
-//            }
-//        }
         catch (OutOfMemoryError err) {
             throw new OutOfMemoryException(err) // Thrown on Google App Engine when trying to allocate the buffer in IOUtils#copyLarge.
         }
