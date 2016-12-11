@@ -5,13 +5,13 @@
 eproxy is a web proxy that
 
 * rewrites HTML, CSS, SVG and JavaScript``*``
+* rewrites data: URIs
 * supports cookies
 * supports HTTPS
 * supports HTTP Byte Serving independent of the origin server using the ``Range`` header (unless rewriting)
 * supports cache validation using ``If-Modified-Since`` and ``If-None-Match``
 * supports SOCKS proxies for your hardcore tunneling needs
 * supports browsers with JavaScript disabled
-* supports data: URIs
 * caches content in-memory and using Memcache (on Google App Engine)
 * lets you customize the HTTP and TCP/IP setup
 * uses robust, parser-based rewriting for HTML (using [NekoHTML](http://nekohtml.sourceforge.net/)) and SVG (using SAX)
