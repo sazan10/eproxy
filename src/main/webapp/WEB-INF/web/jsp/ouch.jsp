@@ -36,7 +36,7 @@
 <div class="row">
  <div class="column">
   <h1>Ouch!</h1>
-  <p>There was a problem with <code>${requestURI}</code>: ${message}</p>
+  <p>There was a problem with your request: ${message}</p>
   <p><a href="<%= request.getContextPath() %>/">Home page &raquo;</a></p>
   <script>(dataLayer = window.dataLayer || []).push({ statusCode: ${status} })</script>
   <p><small>Powered by <a href="https://github.com/johannburkard/eproxy">eproxy</a>.</small></p>
