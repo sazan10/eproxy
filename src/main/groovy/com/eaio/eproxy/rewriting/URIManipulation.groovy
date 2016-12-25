@@ -88,9 +88,11 @@ trait URIManipulation {
             builder
                 .pathSegment(rewriteConfig.asBoolean() ? rewriteConfig.toString() + resolvedURI.scheme : resolvedURI.scheme, resolvedURI.authority)
                 .path(resolvedURI.rawPath ?: '/')
-                .query(resolvedURI.rawQuery).fragment(resolvedURI.rawFragment)
-                .build()
-                .toString()
+                .query(resolvedURI.rawQuery)
+            if (resolvedURI.rawFragment) {
+                builder.fragment(resolvedURI.rawFragment)
+            }
+            builder.build().toString()
         }
         else {
             uri
