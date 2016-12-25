@@ -35,16 +35,18 @@ class CookieTranslator {
     void addToRequest(Cookie[] cookies, URI baseURI, URI requestURI, HttpUriRequest request) {
         if (cookies) {
             CookieOrigin cookieOrigin = createCookieOrigin(requestURI)
-            long now = System.currentTimeMillis()
-            List<HCCookie> httpClientCookies = (List<HCCookie>) cookies.collect { Cookie cookie ->
-                decodeHttpClientCookie(toHttpClientCookie(cookie, now), baseURI)
-            }.findAll { HCCookie cookie ->
-                cookieSpec.match(cookie, cookieOrigin)
-            }
-            if (httpClientCookies) {
-                cookieSpec.formatCookies(httpClientCookies).each {
-                    log.debug('adding client cookie {}', it)
-                    request.addHeader(it)
+            if (cookieOrigin) {
+                long now = System.currentTimeMillis()
+                List<HCCookie> httpClientCookies = (List<HCCookie>) cookies.collect { Cookie cookie ->
+                    decodeHttpClientCookie(toHttpClientCookie(cookie, now), baseURI)
+                }.findAll { HCCookie cookie ->
+                    cookieSpec.match(cookie, cookieOrigin)
+                }
+                if (httpClientCookies) {
+                    cookieSpec.formatCookies(httpClientCookies).each {
+                        log.debug('adding client cookie {}', it)
+                        request.addHeader(it)
+                    }
                 }
             }
         }
@@ -71,8 +73,8 @@ class CookieTranslator {
     }
 
     CookieOrigin createCookieOrigin(URI requestURI) {
-        new CookieOrigin(requestURI.host, requestURI.port < 0I && requestURI.scheme.equalsIgnoreCase('http') ? 80I : requestURI.port < 0I && requestURI.scheme.equalsIgnoreCase('https') ? 443I : requestURI.port,
-                requestURI.rawPath, requestURI.scheme?.equalsIgnoreCase('https'))
+        requestURI?.host ? new CookieOrigin(requestURI.host, requestURI.port < 0I && requestURI.scheme.equalsIgnoreCase('http') ? 80I : requestURI.port < 0I && requestURI.scheme.equalsIgnoreCase('https') ? 443I : requestURI.port,
+                requestURI.rawPath, requestURI.scheme?.equalsIgnoreCase('https')) : null
     }
 
     private HCCookie decodeHttpClientCookie(HCCookie cookie, URI baseURI) {

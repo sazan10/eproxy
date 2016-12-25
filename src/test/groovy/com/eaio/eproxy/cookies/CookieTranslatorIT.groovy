@@ -3,6 +3,8 @@ package com.eaio.eproxy.cookies
 import static org.hamcrest.MatcherAssert.*
 import static org.hamcrest.Matchers.*
 
+import javax.servlet.http.Cookie
+
 import org.apache.http.cookie.Cookie as HCCookie
 import org.apache.http.cookie.CookieOrigin
 import org.apache.http.message.BasicHeader
@@ -46,6 +48,12 @@ class CookieTranslatorIT {
         CookieOrigin origin = cookieTranslator.createCookieOrigin('https://www.paypal.com'.toURI())
         List<HCCookie> cookies = cookieTranslator.cookieSpec.parse(new BasicHeader('Set-Cookie', cookieValue), origin)
         assertThat(cookies, not(emptyIterable()))
-    } 
+    }
+    
+    @Test
+    void 'should skip broken IDN URIs'() {
+        cookieTranslator.addToRequest([ new Cookie('foo', 'bar') ] as Cookie[], 'http://bla.com'.toURI(),
+            'http://xn--abc%20abc%20abc%20abc%20abc-.xn--abc%20-.net'.toURI(), null)
+    }
 
 }
