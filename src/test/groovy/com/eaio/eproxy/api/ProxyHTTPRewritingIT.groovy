@@ -16,9 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.SpringApplicationConfiguration
 import org.springframework.boot.test.WebIntegrationTest
 import org.springframework.mock.web.DelegatingServletOutputStream
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.eaio.eproxy.Eproxy
+import com.eaio.eproxy.entities.RewriteConfig
+import com.eaio.eproxy.rewriting.Rewriting
 
 /**
  * Simulates enabled redirects.
@@ -207,7 +210,7 @@ class ProxyHTTPRewritingIT {
     }
     
     @Test
-    void 'encoding for should be correct'() {
+    void 'encoding should be correct'() {
         HttpServletRequest request = buildHttpServletRequest('https://www.bahn.de/p/view/index.shtml')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
@@ -391,6 +394,28 @@ class ProxyHTTPRewritingIT {
         proxy.proxy('rnw', 'http', request, response)
         errorCollector.checkThat(bOut.toString(0I), not(containsString('http/blog.dilbert.com?')))
         errorCollector.checkThat(bOut.toString(0I), containsString('http/blog.dilbert.com/?'))
+    }
+    
+    @Test
+    @DirtiesContext
+    void 'files without Content-Type should be handled as application octet-stream'() {
+        boolean canRewriteCalled = false
+        proxy.rewriting = [ canRewrite: { String contentDisposition, RewriteConfig rewriteConfig, String mimeType ->
+            assertThat(mimeType, is('application/octet-stream'))
+            canRewriteCalled = true
+            false
+        } ] as Rewriting
+        
+        HttpServletRequest request = buildHttpServletRequest('http://ui.crackedcdn.com/ui/shared/font/fontawesome-webfont.ttf?v=3.0.1')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'http', request, response)
+        assertThat(canRewriteCalled, is(true))
     }
     
 }

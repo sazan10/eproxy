@@ -141,8 +141,9 @@ class Proxy implements URIManipulation {
             
             if (shouldDetectMIMEType(contentType, remoteResponse.statusLine.statusCode, remoteResponse.entity?.repeatable)) {
                 ContentInfo contentInfo = contentInfoUtil.findMatch(remoteResponse.entity.content)
-                log.warn('no Content-Type header. Detected {}. Using MIME type {}', contentInfo, contentInfo?.mimeType ?: 'text/html')
-                contentType = ContentType.create(contentInfo?.mimeType ?: 'text/html') // Default to text/html for security reasons, all binary types should be detected even if text/html isn't
+                String detectedMIMEType = contentInfo?.mimeType ?: contentInfo?.contentType?.mimeType
+                log.warn('no Content-Type header. Detected {}. Using MIME type {}', contentInfo, detectedMIMEType)
+                contentType = ContentType.create(detectedMIMEType)
             }
 
             boolean canRewrite = rewriting.canRewrite(contentDisposition, rewriteConfig, contentType?.mimeType)
