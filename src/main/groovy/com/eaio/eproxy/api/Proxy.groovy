@@ -190,6 +190,12 @@ class Proxy implements URIManipulation {
         catch (OutOfMemoryError err) {
             throw new OutOfMemoryException(err) // Thrown on Google App Engine when trying to allocate the buffer in IOUtils#copyLarge.
         }
+        catch (RuntimeException ex) {
+            if (ex.message?.startsWith('Resolve failed')) { // Google App Engine
+                throw new UnknownHostException(requestURI.host)
+            }
+            throw ex
+        }
         finally {
             try {
                 EntityUtils.consumeQuietly(remoteResponse?.entity)

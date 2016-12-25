@@ -44,6 +44,7 @@ class ProxyExceptionsTest {
         [
             [ new SocketException('Permission denied'), is(PermissionDeniedException) ],
             [ new OutOfMemoryError(), is(OutOfMemoryException) ],
+            [ new RuntimeException('Resolve failed: Request=megaupload.com Exception=java.net.SocketException: Operation failure: Resolver failure.'), is(UnknownHostException) ],
         ].collect { it as Object[] }
     }
 
