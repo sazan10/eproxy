@@ -236,9 +236,6 @@ class Proxy implements URIManipulation {
                 response.setHeader(header.name, encodeTargetURI(baseURI, requestURI, header.value, rewriteConfig))
             }
             else if (shouldIncludeHeader(header.name, canRewrite)) {
-                if (header.value?.contains('//')) {
-                    log.warn('header may contain URL: {}: {}', header.name, header.value)
-                }
                 response.setHeader(header.name, header.value)
             }
         }
