@@ -398,7 +398,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     @DirtiesContext
-    void 'files without Content-Type should be handled as application octet-stream'() {
+    void 'files without Content-Type should be handled as application octet-stream 1'() {
         boolean canRewriteCalled = false
         proxy.rewriting = [ canRewrite: { String contentDisposition, RewriteConfig rewriteConfig, String mimeType ->
             assertThat(mimeType, is('application/octet-stream'))
@@ -415,6 +415,28 @@ class ProxyHTTPRewritingIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
+        assertThat(canRewriteCalled, is(true))
+    }
+    
+    @Test
+    @DirtiesContext
+    void 'files without Content-Type should be handled as application octet-stream 2'() {
+        boolean canRewriteCalled = false
+        proxy.rewriting = [ canRewrite: { String contentDisposition, RewriteConfig rewriteConfig, String mimeType ->
+            assertThat(mimeType, nullValue())
+            canRewriteCalled = true
+            false
+        } ] as Rewriting
+        
+        HttpServletRequest request = buildHttpServletRequest('https://www.proxysite.com/assets/fonts/raleway-semibold.woff2')
+        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
+        HttpServletResponse response = [
+            setStatus: { int status -> assertThat(status, is(200I)) },
+            setHeader: { String name, String value -> },
+            getOutputStream: { new DelegatingServletOutputStream(bOut) },
+            isCommitted: { true },
+        ] as HttpServletResponse
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(canRewriteCalled, is(true))
     }
     
