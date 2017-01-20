@@ -208,21 +208,7 @@ class ProxyHTTPRewritingIT {
         proxy.proxy('rnw', 'http', request, response)
         assertThat(bOut.toString(0I), not(containsString('Sorry! We can\'t get to that page')))
     }
-    
-    @Test
-    void 'encoding should be correct'() {
-        HttpServletRequest request = buildHttpServletRequest('https://www.bahn.de/p/view/index.shtml')
-        ByteArrayOutputStream bOut = new ByteArrayOutputStream()
-        HttpServletResponse response = [
-            setStatus: { int status -> assertThat(status, is(200I)) },
-            setHeader: { String name, String value -> },
-            getOutputStream: { new DelegatingServletOutputStream(bOut) },
-            isCommitted: { true },
-        ] as HttpServletResponse
-        proxy.proxy('rnw', 'https', request, response)
-        assertThat(bOut.toString(0I), containsString('Mobilit&auml;tsportal'))
-    }
-    
+     
     @Test
     void 'Transfer-Encoding header should not be sent'() {
         HttpServletRequest request = buildHttpServletRequest('http://www.ip.de/lp/datenschutzinfo_online-werbung.cfm')
