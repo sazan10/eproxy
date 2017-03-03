@@ -317,7 +317,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'CSS rewriting should keep quotes'() {
-        HttpServletRequest request = buildHttpServletRequest('https://www.google.com/about/products/default.css')
+        HttpServletRequest request = buildHttpServletRequest('https://web.archive.org/web/20170216232117/http://www.google.com/about/products/default.css')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
