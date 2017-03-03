@@ -57,13 +57,13 @@ class ProxyHTTPIT {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(200I), is(206I))) }, // setStatus(int) is called twice
-            setHeader: { String name, String value -> if (name == 'Content-Range') { assertThat(value, is('bytes 0-99/48015')) } },
+            setHeader: { String name, String value -> if (name == 'Content-Range') { assertThat(value, is('bytes 0-99/35168')) } },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
             setContentLength: { int length -> assertThat(length, is(100I)) },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'http', request, response)
-        assertThat(bOut.toByteArray().encodeBase64() as String, is('/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDA=='))
+        assertThat(bOut.toByteArray().encodeBase64() as String, is('/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAAsICAoIBwsKCQoNDAsNERwSEQ8PESIZGhQcKSQrKigkJyctMkA3LTA9MCcnOEw5PUNFSElIKzZPVU5GVEBHSEX/2wBDAQwNDREPEQ=='))
     }
     
     @Test
