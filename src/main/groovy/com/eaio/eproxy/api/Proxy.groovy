@@ -25,6 +25,7 @@ import org.apache.http.conn.ConnectTimeoutException
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.InputStreamEntity
+import org.apache.http.impl.execchain.RequestAbortedException
 import org.apache.http.message.BasicHeaderValueParser
 import org.apache.http.protocol.HttpContext
 import org.apache.http.protocol.HttpCoreContext
@@ -418,7 +419,8 @@ class Proxy implements URIManipulation {
     }
     
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler([ HttpHostConnectException, SSLException, SSLHandshakeException, SSLProtocolException, NoHttpResponseException, SocketTimeoutException, ConnectTimeoutException, UnknownHostException ])
+    @ExceptionHandler([ HttpHostConnectException, SSLException, SSLHandshakeException, SSLProtocolException, NoHttpResponseException, SocketTimeoutException,
+        ConnectTimeoutException, UnknownHostException, SocketTimeoutException, RequestAbortedException ])
     ModelAndView notFound(Throwable thrw, HttpServletRequest request, HttpServletResponse response) {
         log.warn('{}: {}', request.getAttribute('requestURI'), thrw)
 //  if ((ExceptionUtils.getRootCause(ex) ?: ex).message == 'Prime size must be multiple of 64, and can only range from 512 to 1024 (inclusive)') {
