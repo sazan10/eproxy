@@ -197,7 +197,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'query strings should be preserved'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.webpagefx.com/tools/read-able/check.php?uri=https%3A%2F%2Fgithub.com%2Fjohannburkard%2Feproxy')
+        HttpServletRequest request = buildHttpServletRequest('https://www.webpagefx.com/tools/read-able/check.php?uri=https%3A%2F%2Fgithub.com%2Fjohannburkard%2Feproxy')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -205,7 +205,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), not(containsString('Sorry! We can\'t get to that page')))
     }
      
