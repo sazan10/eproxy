@@ -88,7 +88,7 @@ class DataURIFilter extends RewritingFilter implements BeanFactoryAware {
             boolean base64 = isBase64(elements)
             String data = extractData(elements, base64)
 
-            log.info('data: URI of type {}, charset {}, base64 {}: {}. Extracted data: {}', mimeType, charset, base64, dataURIValue, data)
+            log.debug('data: URI of type {}, charset {}, base64 {}: {}. Extracted data: {}', mimeType, charset, base64, dataURIValue, data)
 
             String rewritten = rewriteData(data, mimeType, charset)
             atts.setValue(srcIndex, 'data:' + mimeType + ',' + URLEncoder.encode(rewritten))
