@@ -21,7 +21,7 @@ import com.eaio.eproxy.rewriting.html.RewritingFilter
 import com.steadystate.css.dom.*
 
 /**
- * Rewrites CSS using regular expressions because there are no robust Java CSS parsers.
+ * Rewrites CSS and SVG using regular expressions because there are no robust Java CSS parsers.
  * 
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
@@ -66,7 +66,8 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     @Lazy
     private CSSUnescaper cssUnescaper
 
-    private boolean inStyleElement
+    private boolean inStyleElement,
+        inSVGElement
 
     /**
      * Rewrites any style attributes, too.
@@ -78,6 +79,9 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
     void startElement(QName qName, XMLAttributes atts, Augmentations augs) {
         if (nameIs(qName, 'style')) {
             inStyleElement = true
+        }
+        else if (nameIs(qName, 'svg')) {
+            inSVGElement = true
         }
         rewriteElement(qName, atts, augs)
         super.startElement(qName, atts, augs)
@@ -96,16 +100,34 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
         if (nameIs(qName, 'style')) {
             inStyleElement = false
         }
+        else if (nameIs(qName, 'svg')) {
+            inSVGElement = false
+        }
         super.endElement(qName, augs)
     }
 
     @CompileStatic
     private void rewriteElement(QName qName, XMLAttributes atts, Augmentations augs) {
-        String css = atts.getValue('style') // TODO: SVG attributes (mask, fill and others?)
-        if (isNotBlank(css)) {
-            String rewritten = rewriteCSS(css)
-            atts.setValue(atts.getIndex('style'), rewritten)
-            log.debug('rewrote style attribute {} chars to {} chars', css.length(), rewritten.length())
+        if (inSVGElement) {
+            for (int i = 0; i < atts.length; ++i) {
+                if (!atts.getPrefix(i)?.equalsIgnoreCase('xmlns') && !atts.getQName(i)?.equalsIgnoreCase('xmlns')
+                && !atts.getLocalName(i)?.equalsIgnoreCase('href')) { // Don't rewrite xmlns namespaced attributes.
+                    String attributeValue = atts.getValue(i)
+                    if (isNotBlank(attributeValue)) {
+                        String rewritten = rewriteCSS(attributeValue)
+                        atts.setValue(i, rewritten)
+                        log.debug('rewrote {} attribute {} chars to {} chars', atts.getQName(i), attributeValue.length(), rewritten.length())
+                    }
+                }
+            }
+        }
+        else {
+            String css = atts.getValue('style')
+            if (isNotBlank(css)) {
+                String rewritten = rewriteCSS(css)
+                atts.setValue(atts.getIndex('style'), rewritten)
+                log.debug('rewrote style attribute {} chars to {} chars', css.length(), rewritten.length())
+            }
         }
     }
 
@@ -122,7 +144,7 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
             if (isNotBlank(css)) {
                 String rewritten = rewriteCSS(css)
                 super.characters(new XMLString(rewritten.toCharArray(), 0I, rewritten.length()), augs)
-                log.debug('rewrote CSS {} chars to {} chars', xmlString.length, rewritten.length())
+                log.debug('rewrote CSS {} chars to {} chars', xmlString/*.length*/, rewritten/*.length()*/)
             }
         }
         else {
@@ -139,8 +161,12 @@ class CSSRewritingFilter extends RewritingFilter implements URIManipulation {
      */
     @CompileStatic
     String rewriteCSS(String css) {
-        String unescapedCSS = unescapeHTML(css) ?: ''
-        replacePatterns(unescapedCSS)
+        String out = trimToEmpty(css)
+        if (out?.length() > 5I) { // Skip anything less than 6 characters.
+            String unescapedCSS = unescapeHTML(css) ?: ''
+            out = replacePatterns(unescapedCSS)
+        }
+        out
     }
 
     @CompileStatic
