@@ -68,7 +68,7 @@ class ProxyHTTPNoRedirectsIT {
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
-            setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/rnw-http/edition.cnn.com/specials/travel/guides')); redirected = true } },
+            setHeader: { String name, String value -> if (name == 'Location') { assertThat(value, is('http://fnuh.com/rnw-http/edition.cnn.com/travel/destinations')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
             isCommitted: { true },
         ] as HttpServletResponse
@@ -83,7 +83,7 @@ class ProxyHTTPNoRedirectsIT {
         boolean statusSet = false, redirected = false
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(301I), is(302I))); statusSet = true },
-            setHeader: { String name, String value -> if (name?.toLowerCase() == 'location') { assertThat(value, is('http://fnuh.com/rnw-http/www.npo3fm.nl/radio/uitzendingen/263127')); redirected = true } },
+            setHeader: { String name, String value -> if (name?.toLowerCase() == 'location') { assertThat(value, is('http://fnuh.com/rnw-https/www.npo3fm.nl/radio/uitzendingen/263127')); redirected = true } },
             getOutputStream: { new DelegatingServletOutputStream(NullOutputStream.NULL_OUTPUT_STREAM) },
             isCommitted: { true },
         ] as HttpServletResponse
