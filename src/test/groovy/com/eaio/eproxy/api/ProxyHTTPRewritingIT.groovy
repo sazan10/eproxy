@@ -239,7 +239,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'SVG should be rewritten 2'() {
-        HttpServletRequest request = buildHttpServletRequest('https://web.archive.org/web/20160401213553/https://en.wikipedia.org/static/1.27.0-wmf.13/skins/Vector/images/user-icon.svg?7b5d5')
+        HttpServletRequest request = buildHttpServletRequest('https://web.archive.org/web/20160401213553if_/https://en.wikipedia.org/static/1.27.0-wmf.13/skins/Vector/images/user-icon.svg?7b5d5')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -317,7 +317,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'CSS rewriting should keep quotes'() {
-        HttpServletRequest request = buildHttpServletRequest('https://web.archive.org/web/20170216232117/http://www.google.com/about/products/default.css')
+        HttpServletRequest request = buildHttpServletRequest('https://web.archive.org/web/20170216232117if_/http://www.google.com/about/products/default.css')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
