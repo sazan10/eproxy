@@ -34,9 +34,9 @@ class URIRewritingFilterTest {
         errorCollector.checkThat(output as String, containsString('view-source:http://rah.com/rnw-http/auer-ha.com'))
         errorCollector.checkThat(output as String, allOf(not(containsString('view-source:https://fonts.googleapis.com')),
             not(containsString('VIEW-SOURCE:https://fonts.googleapis.com'))))
-        errorCollector.checkThat(output as String, containsString("http://rah.com/rnw-HTTPS/blorb.com"))
+        errorCollector.checkThat(output as String, containsString("//rah.com/rnw-HTTPS/blorb.com"))
         errorCollector.checkThat(output as String, containsString('value="<input type=&quot;text&quot; value=&quot;http://rah.com&quot;>"'))
-        errorCollector.checkThat(output as String, containsString('script src="http://rah.com/rnw-https/creme.com/aha.js"'))
+        errorCollector.checkThat(output as String, containsString('script src="//rah.com/rnw-https/creme.com/aha.js"'))
     }
 
 }

@@ -33,7 +33,7 @@ class MetaRewritingFilterTest {
         XMLDocumentFilter[] filters = [ metaRewritingFilter, new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
-        errorCollector.checkThat(output as String, containsString('<meta http-equiv="refresh" content="50; url=http://rah.com/rnw-https/www.facebook.com/blorb.html"'))
+        errorCollector.checkThat(output as String, containsString('<meta http-equiv="refresh" content="50; url=//rah.com/rnw-https/www.facebook.com/blorb.html"'))
         errorCollector.checkThat(output as String, not(containsString('60;url=ratte.html')))
     }
     
@@ -44,7 +44,7 @@ class MetaRewritingFilterTest {
         XMLDocumentFilter[] filters = [ metaRewritingFilter, new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/baidu-redirect.html'))))
-        errorCollector.checkThat(output as String, containsString('<meta http-equiv="refresh" content="0;URL=\'http://rah.com/rnw-http/www.n-tv.de/\'"'))
+        errorCollector.checkThat(output as String, containsString('<meta http-equiv="refresh" content="0;URL=\'//rah.com/rnw-http/www.n-tv.de/\'"'))
     }
 
 }

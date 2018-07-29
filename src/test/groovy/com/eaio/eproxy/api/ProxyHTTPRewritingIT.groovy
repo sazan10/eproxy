@@ -42,7 +42,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'HTML should be rewritten'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.n-tv.de/')
+        HttpServletRequest request = buildHttpServletRequest('https://www.n-tv.de/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -50,13 +50,13 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), not(containsString('<script')))
     }
     
     @Test
     void 'Google Font API URLs should be rewritten'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.google.com/intl/en/policies/privacy/')
+        HttpServletRequest request = buildHttpServletRequest('https://instant-impact.com/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -64,8 +64,8 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('<link href="http://fnuh.com/rnw-http/fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,italic%7CProduct+Sans:400&lang=en"'))
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('<link rel="stylesheet" id="wpb-google-fonts-css" href="//fnuh.com/rnw-https/fonts.googleapis.com/css?family=Pacifico%7CBangers&ver=d0d1ef00c2a8287600706c913180b8b5" type="text/css" media="all">'))
     }
     
     @Test
@@ -79,7 +79,7 @@ class ProxyHTTPRewritingIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('http', request, response)
-        assertThat(bOut.toString(0I), containsString(' * See: https://www.google.com/fonts/license/productsans'))
+        assertThat(bOut.toString(0I), containsString(' * See: https://fonts.google.com/license/googlerestricted'))
     }
     
     @Test
@@ -92,8 +92,8 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('action="http://fnuh.com/rnw-http/www.bing.com/search"'))
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('action="//fnuh.com/rnw-https/www.bing.com/search"'))
     }
     
     @Test
@@ -126,7 +126,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'SVG should be rewritten 1'() {
-        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/Testing%20Cascade%20of%20SVG%20fill%20with%20external%20resource.html') // Originally from https://css-tricks.com/examples/svg-external-cascade/
+        HttpServletRequest request = buildHttpServletRequest('https://repo.eaio.com/Testing%20Cascade%20of%20SVG%20fill%20with%20external%20resource.html') // Originally from https://css-tricks.com/examples/svg-external-cascade/
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -134,14 +134,14 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         errorCollector.checkThat(bOut.toString(0I), containsString('<code>&lt;use xlink:href=&quot;sprite.svg#dog&quot;'))
         errorCollector.checkThat(bOut.toString(0I), containsString('<use xlink:href="'))
     }
     
     @Test
     void 'CSS should be rewritten 2'() {
-        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/https_www.facebook.com_rsrc.php_v3_yu_r_lZ86cv9aR90.css')
+        HttpServletRequest request = buildHttpServletRequest('https://repo.eaio.com/https_www.facebook.com_rsrc.php_v3_yu_r_lZ86cv9aR90.css')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -149,7 +149,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), containsString('src:url(data:font/opentype;base64,T1RUTwAJAIAAA'))
     }
     
@@ -280,8 +280,8 @@ class ProxyHTTPRewritingIT {
             containsString('<rect x="10" y="10" height="130" width="500" style="fill: #000000"/>'),
             containsString('<rect x="10" y="10" height="130" width="500" style="fill: #000000"></rect>')))
         errorCollector.checkThat(bOut.toString(0I), anyOf(
-            containsString('<image x="20" y="20" width="300" height="80" xlink:href="http://fnuh.com/rnw-http/jenkov.com/images/layout/top-bar-logo.png" />'),
-            containsString('<image x="20" y="20" width="300" height="80" xlink:href="http://fnuh.com/rnw-http/jenkov.com/images/layout/top-bar-logo.png"></image>')))
+            containsString('<image x="20" y="20" width="300" height="80" xlink:href="//fnuh.com/rnw-http/jenkov.com/images/layout/top-bar-logo.png" />'),
+            containsString('<image x="20" y="20" width="300" height="80" xlink:href="//fnuh.com/rnw-http/jenkov.com/images/layout/top-bar-logo.png"></image>')))
         errorCollector.checkThat(bOut.toString(0I), anyOf(
             containsString('<line x1="25" y1="80" x2="350" y2="80" style="stroke: #ffffff; stroke-width: 3;"/>'),
             containsString('<line x1="25" y1="80" x2="350" y2="80" style="stroke: #ffffff; stroke-width: 3;"></line>')))
@@ -289,7 +289,7 @@ class ProxyHTTPRewritingIT {
     
     @Test
     void 'CSS rewriting should unescape HTML'() {
-        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/leak.html')
+        HttpServletRequest request = buildHttpServletRequest('https://repo.eaio.com/leak.html')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -297,13 +297,13 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('url(http://fnuh.com/rnw-https/leaking.via/inline-css-background-image)'))
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('url(//fnuh.com/rnw-https/leaking.via/inline-css-background-image)'))
     }
     
     @Test
     void 'all style attributes should be rewritten'() {
-        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/%20Islam%20dan%20Kesimbangan%20Alam%20%E2%80%93%20Ustadz%20Riyadh%20bin%20Badr%20Bajrey.%20%E2%80%93%20Hidayah%20Sunnah%20Indonesia.html') // Saved from http://www.hidayahsunnah.com/blog/2014/10/01/ceramah-singkat-islam-dan-kesimbangan-alam-ustadz-riyadh-bin-badr-bajrey/
+        HttpServletRequest request = buildHttpServletRequest('https://repo.eaio.com/%20Islam%20dan%20Kesimbangan%20Alam%20%E2%80%93%20Ustadz%20Riyadh%20bin%20Badr%20Bajrey.%20%E2%80%93%20Hidayah%20Sunnah%20Indonesia.html') // Saved from http://www.hidayahsunnah.com/blog/2014/10/01/ceramah-singkat-islam-dan-kesimbangan-alam-ustadz-riyadh-bin-badr-bajrey/
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -311,7 +311,7 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), not(containsString('url(http://www.hidayahsunnah.com/wp-content/plugins/wp-socializer/public/social-icons/wp-socializer-sprite-32px.png?v1)')))
     }
     
@@ -326,9 +326,9 @@ class ProxyHTTPRewritingIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'https', request, response)
-        assertThat(bOut.toString(0I), allOf(containsString('@import"http://fnuh.com/rnw-https/www.google.com/css/maia.css"'),
-            containsString('@import"http://fnuh.com/rnw-https/www.google.com/about/css/default.css"'),
-            containsString('@import"http://fnuh.com/rnw-https/fonts.googleapis.com/css?family=Open+Sans:300,600,700"')))
+        assertThat(bOut.toString(0I), allOf(containsString('@import"//fnuh.com/rnw-https/www.google.com/css/maia.css"'),
+            containsString('@import"//fnuh.com/rnw-https/www.google.com/about/css/default.css"'),
+            containsString('@import"//fnuh.com/rnw-https/fonts.googleapis.com/css?family=Open+Sans:300,600,700"')))
     }
     
     @Test
@@ -363,8 +363,8 @@ class ProxyHTTPRewritingIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
-        assertThat(bOut.toString(0I), containsString('xlink:href="http://fnuh.com/rnw-http/www.w3.org'))
+        proxy.proxy('rnw', 'https', request, response)
+        assertThat(bOut.toString(0I), containsString('xlink:href="//fnuh.com/rnw-http/www.w3.org'))
     }
     
     @Test

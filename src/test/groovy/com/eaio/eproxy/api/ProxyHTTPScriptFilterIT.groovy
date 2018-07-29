@@ -34,7 +34,7 @@ class ProxyHTTPScriptFilterIT {
     
     @Test
     void 'proxy JavaScript should be present on the page'() {
-        HttpServletRequest request = buildHttpServletRequest('http://www.n-tv.de/')
+        HttpServletRequest request = buildHttpServletRequest('https://www.n-tv.de/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -42,7 +42,7 @@ class ProxyHTTPScriptFilterIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toString(0I), containsString(' src="/script"></script>'))
     }
 

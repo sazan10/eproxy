@@ -38,11 +38,12 @@ class CSSRewritingFilterTest {
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new org.xml.sax.InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
         // Either rewrite or drop the escaped rules.
-        errorCollector.checkThat(output as String, containsString('http://fnuh.com/rnw-https/www.google.com/keks.jpg'))
+        errorCollector.checkThat(output as String, not(containsString('http://fnuh.com/rnw-https/www.google.com/keks.jpg')))
+        errorCollector.checkThat(output as String, containsString('//fnuh.com/rnw-https/www.google.com/keks.jpg'))
         errorCollector.checkThat(output as String, anyOf(
-            containsString('background-image: image(http://fnuh.com/rnw-http/creme.com/aha.jpg)'),
-            containsString('background-image: image(\'http://fnuh.com/rnw-http/creme.com/aha.jpg\')')))
-        errorCollector.checkThat(output as String, containsString('background-image: \\75\\72\\6C\\28http://fnuh.com/rnw-https/www.google.com/bla.jpg\\29'))
+            containsString('background-image: image(//fnuh.com/rnw-http/creme.com/aha.jpg)'),
+            containsString('background-image: image(\'//fnuh.com/rnw-http/creme.com/aha.jpg\')')))
+        errorCollector.checkThat(output as String, containsString('background-image: \\75\\72\\6C\\28//fnuh.com/rnw-https/www.google.com/bla.jpg\\29'))
     }
 
     @Test
@@ -50,8 +51,8 @@ class CSSRewritingFilterTest {
         String style = 'height:110px;width:276px;background:url(/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png) no-repeat'
         String out = cssRewritingFilter.rewriteCSS(style)
         assertThat(out,
-            anyOf(containsString('background:url(http://fnuh.com/rnw-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png'),
-                containsString('background: url(http://fnuh.com/rnw-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png')))
+            anyOf(containsString('background:url(//fnuh.com/rnw-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png'),
+                containsString('background: url(//fnuh.com/rnw-https/www.google.com/images/branding/googlelogo/1x/googlelogo_white_background_color_272x92dp.png')))
     }
 
     @Test
@@ -59,7 +60,7 @@ class CSSRewritingFilterTest {
     void 'should rewrite CSS file'(File cssFile) {
         String rewritten = cssRewritingFilter.rewriteCSS(cssFile.text)
         errorCollector.checkThat(cssFile.name, trimToNull(rewritten), notNullValue())
-        errorCollector.checkThat(cssFile.name, rewritten, allOf(containsString('http://fnuh.com/rnw-'),
+        errorCollector.checkThat(cssFile.name, rewritten, allOf(containsString('//fnuh.com/rnw-'),
             not(containsString('/rnw-data:')), not(containsString('url(/rsrc.php')), not(containsString('//leaking.via'))))
     }
 

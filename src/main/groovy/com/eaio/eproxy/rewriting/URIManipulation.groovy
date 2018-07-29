@@ -71,11 +71,15 @@ trait URIManipulation {
 
     /**
      * Resolves <tt>uri</tt> relative to <tt>requestURI</tt>, then turns it all into eproxy's scheme.
+     * <p>
+     * Removes the scheme on generated URIs in situations where a HTTPS proxy is forwarding HTTP to an application server.
+     * This forces the generation of protocol-relative URIs.
      */
     String encodeTargetURI(URI baseURI, URI requestURI, String uri, RewriteConfig rewriteConfig = null) {
         URI resolvedURI = resolve(requestURI, uri)
         if (resolvedURI) {
             UriComponentsBuilder builder = UriComponentsBuilder.fromUri(baseURI)
+            builder.scheme(null) // Delete the scheme 
             if (!(resolvedURI.scheme?.equalsIgnoreCase('http')) && !(resolvedURI.scheme?.equalsIgnoreCase('https'))) {
                 builder.scheme(resolvedURI.scheme + ':' + baseURI.scheme)
                 try {

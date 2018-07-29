@@ -25,7 +25,7 @@ class RemoveActiveContentFilterTest {
     void 'active content and on* handlers should be removed'() {
         StringWriter output = new StringWriter()
         XMLReader xmlReader = new Rewriting().newHTMLReader()
-        XMLDocumentFilter[] filters = [ new RemoveActiveContentFilter(),
+        XMLDocumentFilter[] filters = [ new ConditionalCommentsFilter(), new RemoveActiveContentFilter(), // Remove conditional comments as well
             new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))

@@ -53,7 +53,7 @@ class ProxyHTTPIT {
     
     @Test
     void 'range requests should return only a part of the response'() {
-        HttpServletRequest request = buildHttpServletRequest('http://bilder1.n-tv.de/img/incoming/crop16474236/4269152083-cImg_17_6-w680/imago66342948h.jpg', 'GET', { String name -> name == 'Range' ? 'bytes=0-99' : null })
+        HttpServletRequest request = buildHttpServletRequest('https://bilder1.n-tv.de/img/incoming/crop16474236/4269152083-cImg_17_6-w680/imago66342948h.jpg', 'GET', { String name -> name == 'Range' ? 'bytes=0-99' : null })
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, anyOf(is(200I), is(206I))) }, // setStatus(int) is called twice
@@ -62,7 +62,7 @@ class ProxyHTTPIT {
             isCommitted: { true },
             setContentLength: { int length -> assertThat(length, is(100I)) },
         ] as HttpServletResponse
-        proxy.proxy('rnw', 'http', request, response)
+        proxy.proxy('rnw', 'https', request, response)
         assertThat(bOut.toByteArray().encodeBase64() as String, startsWith('/9j/4AAQSkZJRgABAgAAAQABAAD/2wBDAA'))
     }
     
@@ -77,10 +77,8 @@ class ProxyHTTPIT {
             isCommitted: { true },
         ] as HttpServletResponse
         proxy.proxy('rnw', 'https', request, response)
-        assertThat(bOut.toString(0I), containsString('action="http://fnuh.com/rnw-https/www.bing.com:443/search"'))
+        assertThat(bOut.toString(0I), containsString('action="//fnuh.com/rnw-https/www.bing.com:443/search"'))
     }
-    
-    // Test URLs from media.io, may still be broken or not
     
     @Test
     void 'broken HTTPS should be supported 1'() {
@@ -116,7 +114,7 @@ class ProxyHTTPIT {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(301I)) },
-            setHeader: { String name, String value -> if (name == 'Location') assertThat(value, is('http://fnuh.com/http/cprouvost.free.fr/fun/generiques/--%20Film%20--/Film%20-%20Star%20Wars%20(The%20Imperial%20March).mp3')) },
+            setHeader: { String name, String value -> if (name == 'Location') assertThat(value, is('//fnuh.com/http/cprouvost.free.fr/fun/generiques/--%20Film%20--/Film%20-%20Star%20Wars%20(The%20Imperial%20March).mp3')) },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
@@ -131,7 +129,7 @@ class ProxyHTTPIT {
     
     @Test
     void 'invalid range requests should return a 416'() {
-        HttpServletRequest request = buildHttpServletRequest('http://eaio.com/robots.txt', 'GET', { String name -> name == 'Range' ? 'bytes=5000-' : null })
+        HttpServletRequest request = buildHttpServletRequest('https://eaio.com/robots.txt', 'GET', { String name -> name == 'Range' ? 'bytes=5000-' : null })
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         int calls = 0I
         HttpServletResponse response = [
@@ -141,12 +139,12 @@ class ProxyHTTPIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('http', request, response)
+        proxy.proxy('https', request, response)
     }
 
     @Test
     void 'trace requests should be supported'() {
-        HttpServletRequest request = buildHttpServletRequest('http://repo.eaio.com/', 'TRACE')
+        HttpServletRequest request = buildHttpServletRequest('https://repo.eaio.com/', 'TRACE')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(405I)) },
@@ -154,12 +152,12 @@ class ProxyHTTPIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('http', request, response)
+        proxy.proxy('https', request, response)
     }
     
     @Test
     void 'uppercase protocol should be supported'() {
-        HttpServletRequest request = buildHttpServletRequest('HTTP://www.n-tv.de/')
+        HttpServletRequest request = buildHttpServletRequest('HTTPS://www.n-tv.de/')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
             setStatus: { int status -> assertThat(status, is(200I)) },
@@ -167,7 +165,7 @@ class ProxyHTTPIT {
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
         ] as HttpServletResponse
-        proxy.proxy('HTTP', request, response)
+        proxy.proxy('HTTPS', request, response)
         assertThat(bOut.toString(0I), containsString('Nachrichten'))
     }
     
@@ -208,7 +206,7 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('http://rah.com')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            sendRedirect: { String location -> assertThat(location, is('http://fnuh.com/http/rah.com/')) },
+            sendRedirect: { String location -> assertThat(location, is('//fnuh.com/http/rah.com/')) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },
@@ -221,7 +219,7 @@ class ProxyHTTPIT {
         HttpServletRequest request = buildHttpServletRequest('http://rah.com?fnuh=guh')
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         HttpServletResponse response = [
-            sendRedirect: { String location -> assertThat(location, is('http://fnuh.com/http/rah.com/?fnuh=guh')) },
+            sendRedirect: { String location -> assertThat(location, is('//fnuh.com/http/rah.com/?fnuh=guh')) },
             setHeader: { String name, String value -> },
             getOutputStream: { new DelegatingServletOutputStream(bOut) },
             isCommitted: { true },

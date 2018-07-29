@@ -5,13 +5,12 @@ import static org.hamcrest.Matchers.*
 import junitparams.JUnitParamsRunner
 import junitparams.Parameters
 
+import org.apache.commons.codec.binary.Base64
 import org.apache.http.HeaderElement
 import org.apache.http.message.BasicHeaderValueParser
 import org.hamcrest.Matcher
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import com.google.appengine.repackaged.org.apache.commons.codec.binary.Base64
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>

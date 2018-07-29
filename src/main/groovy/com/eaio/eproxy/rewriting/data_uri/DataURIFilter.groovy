@@ -1,13 +1,13 @@
 package com.eaio.eproxy.rewriting.data_uri
 
 import static org.apache.commons.lang3.StringUtils.*
+import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 
 import java.nio.charset.Charset
 import java.nio.charset.IllegalCharsetNameException
 
-import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
-
+import org.apache.commons.codec.binary.Base64
 import org.apache.http.HeaderElement
 import org.apache.http.NameValuePair
 import org.apache.http.message.BasicHeaderValueParser
@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component
 
 import com.eaio.eproxy.rewriting.Rewriting
 import com.eaio.eproxy.rewriting.html.RewritingFilter
-import com.google.appengine.repackaged.org.apache.commons.codec.binary.Base64
 
 /**
  * Rewrites data: URIs where the MIME type is either an HTML or an SVG MIME type.

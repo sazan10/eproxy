@@ -45,7 +45,7 @@ class DataURIFilterIT {
         HeaderElement[] elements = BasicHeaderValueParser.parseElements(dataURIValue, null)
         boolean base64 = dataURIFilter.isBase64(elements)
         String data = dataURIFilter.extractData(elements, base64)
-        assertThat(dataURIFilter.rewriteData(data, 'image/svg+xml', null), is('<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n    <image\n        xlink:href=\"http://bla.com/proxy/rnw-http/leaking.via/svg-via-data\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"/>\n</svg>\n'))
+        assertThat(dataURIFilter.rewriteData(data, 'image/svg+xml', null), is('<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n    <image\n        xlink:href=\"//bla.com/proxy/rnw-http/leaking.via/svg-via-data\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"/>\n</svg>\n'))
     }
 
 }

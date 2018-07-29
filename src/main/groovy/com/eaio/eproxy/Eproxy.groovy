@@ -5,6 +5,7 @@ import java.net.Proxy
 
 import javax.net.ssl.SSLException
 
+import org.apache.commons.codec.binary.Base64
 import org.apache.http.HttpRequestInterceptor
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
@@ -33,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter
 import org.springframework.context.annotation.*
 import org.springframework.web.servlet.DispatcherServlet
@@ -46,9 +47,7 @@ import com.eaio.util.googleappengine.NotOnGoogleAppEngineOrDevserver
 import com.eaio.util.googleappengine.OnGoogleAppEngineOrDevserver
 import com.google.appengine.api.memcache.AsyncMemcacheService
 import com.google.appengine.api.memcache.MemcacheServiceFactory
-import com.google.appengine.repackaged.org.apache.commons.codec.binary.Base64
 import com.j256.simplemagic.ContentInfoUtil
-
 /**
  * eproxy configuration.
  *

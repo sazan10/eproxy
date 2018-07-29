@@ -37,8 +37,8 @@ class RewritingIT {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         rewriting.rewriteSVG(new File('src/test/resources/com/eaio/eproxy/rewriting/svg/style.svg').newInputStream(),
             bOut, null, 'http://lol.lol'.toURI(), 'http://blorb.com'.toURI(), RewriteConfig.fromString('rnw'))
-        errorCollector.checkThat(bOut.toString(0I), containsString('url(http://lol.lol/rnw-http/blorb.com/fnuh.png)'))
-        errorCollector.checkThat(bOut.toString(0I), containsString('url(http://lol.lol/rnw-http/keks.org/plop.png)'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('url(//lol.lol/rnw-http/blorb.com/fnuh.png)'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('url(//lol.lol/rnw-http/keks.org/plop.png)'))
     }
     
     @Test
@@ -46,7 +46,7 @@ class RewritingIT {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         rewriting.rewriteSVG(new File('src/test/resources/com/eaio/eproxy/rewriting/svg/external-style-sheet.svg').newInputStream(),
             bOut, null, 'http://lol.lol'.toURI(), 'http://blorb.com'.toURI(), RewriteConfig.fromString('rnw'))
-        errorCollector.checkThat(bOut.toString(0I), containsString('href="http://lol.lol/rnw-http/blorb.com/svg-stylesheet.css"'))
+        errorCollector.checkThat(bOut.toString(0I), containsString('href="//lol.lol/rnw-http/blorb.com/svg-stylesheet.css"'))
     }
     
     @Test
@@ -72,15 +72,15 @@ class RewritingIT {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         rewriting.rewriteHTMLFragment(new ByteArrayInputStream('<a href="http://pruh.com">Mega-pruh!</a><b style="background-image: url(http://rah.com/ouch.png)">wah</b>'.bytes), bOut,
             Charset.forName('UTF-8'), URI.create('http://oha.com/ui/'), URI.create('http://fnuh.com/mm-logo.svg'), RewriteConfig.fromString('rnw'))
-        assertThat(bOut.toString(0I), containsString('http://oha.com/ui/rnw-http/pruh.com'))
-        assertThat(bOut.toString(0I), containsString('url(http://oha.com/ui/rnw-http/rah.com/ouch.png)'))
+        assertThat(bOut.toString(0I), containsString('//oha.com/ui/rnw-http/pruh.com'))
+        assertThat(bOut.toString(0I), containsString('url(//oha.com/ui/rnw-http/rah.com/ouch.png)'))
     }
     
     @Test
     void 'iframe srcdoc attributes should be rewritten'() {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream()
         rewriting.rewriteHTML(new File('src/test/resources/com/eaio/eproxy/rewriting/html/iframe-srcdoc.html').newInputStream(), bOut, null, 'http://foo.com'.toURI(), 'http://repo.eaio.com/leak.html'.toURI(), RewriteConfig.fromString('rnw'))
-        assertThat(bOut as String, containsString('http://foo.com/rnw-http/rah.com/fnuh.jpg'))
+        assertThat(bOut as String, containsString('//foo.com/rnw-http/rah.com/fnuh.jpg'))
     }
     
     @Test

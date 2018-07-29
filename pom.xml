@@ -30,21 +30,21 @@
             <id>johann</id>
             <name>Johann Burkard</name>
             <email>johann@johannburkard.de</email>
-            <url>http://johannburkard.de</url>
+            <url>https://johannburkard.de</url>
             <organization>Johann Burkard</organization>
-            <organizationUrl>http://johannburkard.de</organizationUrl>
+            <organizationUrl>https://johannburkard.de</organizationUrl>
         </developer>
     </developers>
     <organization>
         <name>Johann Burkard</name>
-        <url>http://johannburkard.de</url>
+        <url>https://johannburkard.de</url>
     </organization>
     <prerequisites>
         <maven>3.3.3</maven>
     </prerequisites>
     <properties>
         <appengine.app.version>1</appengine.app.version>
-        <appengine.target.version>1.9.48</appengine.target.version>
+        <appengine.target.version>1.9.64</appengine.target.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
         <build>${maven.build.timestamp}</build>
@@ -151,7 +151,7 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>[1.7,1.8)</version>
+                                    <version>[1.7,)</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
@@ -354,12 +354,6 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.2</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-codec</artifactId>
-                    <groupId>commons-codec</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -472,7 +466,7 @@
         </repository>
         <repository>
             <id>eaio.com</id>
-            <url>http://repo.eaio.com/maven2</url>
+            <url>https://repo.eaio.com/maven2</url>
         </repository>
         <repository>
             <id>spring-snapshots</id>

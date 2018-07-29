@@ -10,31 +10,28 @@ import org.junit.rules.ErrorCollector
 import org.xml.sax.InputSource
 import org.xml.sax.XMLReader
 
-import com.eaio.eproxy.entities.RewriteConfig
 import com.eaio.eproxy.rewriting.Rewriting
 
 /**
  * @author <a href="mailto:johann@johannburkard.de">Johann Burkard</a>
  * @version $Id$
  */
-class SrcsetFilterTest {
+class ConditionalCommentsFilterTest {
     
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector()
 
     @Test
-    void '<img srcset> should be rewritten'() {
+    void 'conditional comments should be removed'() {
         StringWriter output = new StringWriter()
         XMLReader xmlReader = new Rewriting().newHTMLReader()
-        XMLDocumentFilter[] filters = [ new SrcsetFilter(baseURI: 'http://rah.com'.toURI(),
-            requestURI: 'https://plop.com/ui.html?fnuh=guh'.toURI(), rewriteConfig: RewriteConfig.fromString('rnw')),
+        XMLDocumentFilter[] filters = [ new ConditionalCommentsFilter(),
             new org.cyberneko.html.filters.Writer(output, 'UTF-8') ].toArray()
         xmlReader.setProperty('http://cyberneko.org/html/properties/filters', filters)
         xmlReader.parse(new InputSource(characterStream: new FileReader(new File('src/test/resources/com/eaio/eproxy/rewriting/html/bla.html'))))
-        errorCollector.checkThat(output as String, containsString('view-source:http://rah.com/rnw-http/fnuh.com/creme.jpg'))
-        errorCollector.checkThat(output as String, containsString(', //rah.com/rnw-https/plop.com/fnord.jpg 640w, '))
-        errorCollector.checkThat(output as String, containsString('"//rah.com/rnw-https/plop.com/meetbefore.jpg"'))
-        errorCollector.checkThat(output as String, containsString('"//rah.com/rnw-http/creme.com/muh-kuh.jpg"'))
+        errorCollector.checkThat(output as String, not(containsString('css/sky-mega-menu-ie8.css')))
+        errorCollector.checkThat(output as String, not(containsString('ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js')))
+        errorCollector.checkThat(output as String, containsString('non-ie.css'))
     }
 
 }
