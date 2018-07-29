@@ -2,7 +2,6 @@ package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
 
 import org.apache.xerces.xni.*
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
@@ -21,7 +20,6 @@ import com.eaio.eproxy.rewriting.URIManipulation
 @CompileStatic
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Slf4j
 class URIRewritingFilter extends RewritingFilter implements URIManipulation {
 
     @Override

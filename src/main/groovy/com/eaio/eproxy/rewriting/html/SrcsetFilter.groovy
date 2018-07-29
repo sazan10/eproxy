@@ -2,7 +2,6 @@ package com.eaio.eproxy.rewriting.html
 
 import static org.apache.commons.lang3.StringUtils.*
 import groovy.transform.CompileStatic
-import groovy.util.logging.Slf4j
 
 import org.apache.xerces.xni.Augmentations
 import org.apache.xerces.xni.QName
@@ -22,7 +21,6 @@ import com.eaio.eproxy.rewriting.URIManipulation
 @CompileStatic
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Slf4j
 class SrcsetFilter extends RewritingFilter implements URIManipulation {
 
     @Override
