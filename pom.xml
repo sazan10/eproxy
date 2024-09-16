@@ -343,7 +343,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-legacy</artifactId>
-            <version>1.1.0.RELEASE-SNAPSHOT</version>
+            <version>1.1.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>com.eaio</groupId>
