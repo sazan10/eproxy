@@ -25,6 +25,7 @@ jobs:
       run: |
         for i in $(seq 1 25); do
           echo "Run #$i"
+          mvn clean install -U
           mvn clean test
           if [ -f target/jacoco.exec ]; then
             echo "JaCoCo coverage file exists for run #$i"
