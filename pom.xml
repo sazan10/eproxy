@@ -462,7 +462,7 @@
     <repositories>
         <repository>
             <id>java.net</id>
-            <url>http://download.java.net/maven/2</url>
+            <url>https://download.java.net/maven/2</url>
         </repository>
         <repository>
             <id>eaio.com</id>
@@ -471,7 +471,7 @@
         <repository>
             <id>spring-snapshots</id>
             <name>Spring Snapshots</name>
-            <url>http://repo.spring.io/snapshot</url>
+            <url>https://repo.spring.io/snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -479,7 +479,7 @@
         <repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
-            <url>http://repo.spring.io/milestone</url>
+            <url>https://repo.spring.io/milestone</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -488,12 +488,12 @@
     <pluginRepositories>
         <pluginRepository>
             <id>eaio.com</id>
-            <url>http://repo.eaio.com/maven2</url>
+            <url>https://repo.eaio.com/maven2</url>
         </pluginRepository>
         <pluginRepository>
             <id>spring-snapshots</id>
             <name>Spring Snapshots</name>
-            <url>http://repo.spring.io/snapshot</url>
+            <url>https://repo.spring.io/snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -501,7 +501,7 @@
         <pluginRepository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
-            <url>http://repo.spring.io/milestone</url>
+            <url>https://repo.spring.io/milestone</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
