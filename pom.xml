@@ -462,7 +462,7 @@
     <repositories>
         <repository>
             <id>java.net</id>
-            <url>https://maven.java.net/content/groups/public</url>
+            <url>https://maven.java.net/content/groups/public/</url>
         </repository>
 
         <repository>
