@@ -322,6 +322,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.eaio</groupId>
+            <artifactId>util-googleappengine</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
             <version>${appengine.target.version}</version>
