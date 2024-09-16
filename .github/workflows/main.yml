@@ -14,11 +14,15 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: '8'
-
-    - name: Run Maven tests multiple times
+    - name: Run tests multiple times to reproduce the issue
       run: |
-        for i in {1..25}; do
-          echo "Run $i"
-          mvn clean test | tee log$i.log >/dev/null
-          ls -l target/jacoco.exec
+        for i in $(seq 1 25); do
+          echo "Run #$i"
+          mvn clean test
+          if [ -f target/jacoco.exec ]; then
+            echo "JaCoCo coverage file exists for run #$i"
+            ls -lh target/jacoco.exec
+          else
+            echo "JaCoCo coverage file missing for run #$i"
+          fi
         done
