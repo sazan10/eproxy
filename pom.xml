@@ -343,12 +343,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-legacy</artifactId>
-            <version>1.1.0.RELEASE</version>
+            <version>1.1.0.BUILD-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.github.stephenc.eaio-grabbag</groupId>
+            <groupId>com.eaio</groupId>
             <artifactId>grabbag</artifactId>
-            <version>1.8.1</version>
+            <version>3.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -460,11 +460,18 @@
         </plugins>
     </reporting>
     <repositories>
-
+        <repository>
+            <id>java.net</id>
+            <url>https://maven.java.net/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>eaio.com</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
         <repository>
             <id>spring-snapshots</id>
             <name>Spring Snapshots</name>
-            <url>https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-legacy</url>
+            <url>https://repo.spring.io/snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -479,7 +486,10 @@
         </repository>
     </repositories>
     <pluginRepositories>
-
+        <pluginRepository>
+            <id>eaio.com</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </pluginRepository>
         <pluginRepository>
             <id>spring-snapshots</id>
             <name>Spring Snapshots</name>
