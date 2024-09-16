@@ -1,41 +1,43 @@
-name: Run JaCoCo
+name: JaCoCo Test Race Condition
 
-on:
-  push:
+on: [push, pull_request]
 
 jobs:
-  run-jacoco:
-    name: '${{ matrix.os }}'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04]
+  run-tests:
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-  
-    - name: Set up JDK 17 for project
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        cache: maven
-    - name: Run tests multiple times to reproduce the issue
-      run: |
-        for i in $(seq 1 25); do
-          echo "Run #$i"
-          mvn clean install -U
-          mvn clean test
-          if [ -f target/jacoco.exec ]; then
-            echo "JaCoCo coverage file exists for run #$i"
-            ls -lh target/jacoco.exec
-          else
-            echo "JaCoCo coverage file missing for run #$i"
-          fi
-        done
-    - name: Upload JaCoCo reports
-      uses: actions/upload-artifact@v3
-      with:
-        name: jacoco-report-${{ github.event.repository.name }}-on-${{ matrix.os }}
-        path: '**/target/site/jacoco/**/*.html'
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Install Maven
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Display Java version
+        run: java -version
+
+      - name: Display Maven version
+        run: mvn -version
+
+      - name: Run tests multiple times to reproduce the issue
+        run: |
+          for i in $(seq 1 25); do
+            echo "Run #$i"
+            mvn clean test
+            if [ -f target/jacoco.exec ]; then
+              echo "JaCoCo coverage file exists for run #$i"
+              ls -lh target/jacoco.exec
+            else
+              echo "JaCoCo coverage file missing for run #$i"
+            fi
+          done
