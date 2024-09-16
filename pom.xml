@@ -464,10 +464,7 @@
             <id>java.net</id>
             <url>https://download.java.net/maven/2</url>
         </repository>
-        <repository>
-            <id>eaio.com</id>
-            <url>http://repo.eaio.com/maven2</url>
-        </repository>
+
         <repository>
             <id>spring-snapshots</id>
             <name>Spring Snapshots</name>
@@ -486,10 +483,7 @@
         </repository>
     </repositories>
     <pluginRepositories>
-        <pluginRepository>
-            <id>eaio.com</id>
-            <url>http://repo.eaio.com/maven2</url>
-        </pluginRepository>
+
         <pluginRepository>
             <id>spring-snapshots</id>
             <name>Spring Snapshots</name>
