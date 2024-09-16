@@ -1,0 +1,42 @@
+name: Run JaCoCo
+
+on:
+  push:
+
+jobs:
+  run-jacoco:
+    name: '${{ matrix.os }}'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-latest]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        ref: 957bbab0e068a4cbe2707d85db08302ba1684a5e
+  
+    - name: Set up JDK 17 for project
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: maven
+    - name: Run tests multiple times to reproduce the issue
+      run: |
+        for i in $(seq 1 25); do
+          echo "Run #$i"
+          mvn clean test
+          if [ -f target/jacoco.exec ]; then
+            echo "JaCoCo coverage file exists for run #$i"
+            ls -lh target/jacoco.exec
+          else
+            echo "JaCoCo coverage file missing for run #$i"
+          fi
+        done
+    - name: Upload JaCoCo reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: jacoco-report-${{ github.event.repository.name }}-on-${{ matrix.os }}
+        path: '**/target/site/jacoco/**/*.html'
